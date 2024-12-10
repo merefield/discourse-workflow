@@ -2,7 +2,7 @@
 
 module ::DiscourseWorkflow
   class Workflow < ActiveRecord::Base
-    self.table_name = 'workflow'
+    self.table_name = 'workflows'
 
    # validates :post_id, presence: true, uniqueness: true
   end

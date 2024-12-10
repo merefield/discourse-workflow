@@ -1,0 +1,10 @@
+en:
+  site_settings:
+    workflow_enabled: "Enable the workflow plugin"
+  discourse_workflow:
+    errors:
+      no_midway_error: "You cannot create a Topic midway through a workflow and this Category is part of a workflow."
+    options:
+      start: "Start"
+
+      

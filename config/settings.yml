@@ -1,0 +1,4 @@
+plugins:
+  workflow_enabled:
+    client: true
+    default: true

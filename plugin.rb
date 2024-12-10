@@ -12,7 +12,7 @@ module ::Locations
   PLUGIN_NAME = "discourse-workflow"
 end
 
-require_relative "lib/locations/engine"
+# require_relative "lib/workflow/engine"
 
 # register_asset 'stylesheets/common/locations.scss'
 # register_asset 'stylesheets/desktop/locations.scss', :desktop
@@ -23,55 +23,98 @@ require_relative "lib/locations/engine"
 # register_asset 'lib/leaflet/MarkerCluster.css'
 # register_asset 'lib/leaflet/MarkerCluster.Default.css'
 
-Discourse.top_menu_items.push(:workflows)
-Discourse.filters.push(:workflows)
+# Discourse.top_menu_items.push(:workflows)
+# Discourse.filters.push(:workflows)
 
-if respond_to?(:register_svg_icon)
-  register_svg_icon "far-map"
-end
+# if respond_to?(:register_svg_icon)
+#   register_svg_icon "far-map"
+# end
 
 after_initialize do
 
   # /lib/locations is autoloaded
   %w(
-    ../app/models/location_country_default_site_setting.rb
-    ../app/models/location_geocoding_language_site_setting.rb
-    ../app/models/locations/user_location.rb
-    ../app/models/locations/topic_location.rb
-    ../app/serializers/locations/geo_location_serializer.rb
-    ../app/controllers/locations/geocode_controller.rb
-    ../app/controllers/locations/users_map_controller.rb
-    ../lib/users_map.rb
+    ../app/models/discourse_workflow/workflow.rb
+    ../app/models/discourse_workflow/workflow_step.rb
+    ../app/models/discourse_workflow/workflow_step_option.rb
+    ../app/models/discourse_workflow/workflow_state.rb
+    ../lib/discourse_workflow/topic_extension.rb
+    ../lib/discourse_workflow/not_midway_validator.rb
   ).each do |path|
     load File.expand_path(path, __FILE__)
   end
 
-  Category.register_custom_field_type('workflow_enabled', :boolean)
-  Category.register_custom_field_type('workflow_slug', :string)
+  reloadable_patch { Topic.prepend(DiscourseWorkflow::TopicExtension) }
+
+  # Category.register_custom_field_type('workflow_enabled', :boolean)
+  # Category.register_custom_field_type('workflow_slug', :string)
 
   add_to_class(:category, :workflow_enabled) do
-    self.custom_fields['workflow_enabled'] == "true" || false
+    WorkflowStep.find_by(category_id: self.id)&.step_id == 1 || false
   end
 
   add_to_class(:category, :workflow_slug) do
-    self.custom_fields['workflow_slug']
+    Workflow.joins(:workflow_steps).where(workflow_steps: { category_id: self.id }).first&.slug
   end
 
-  [
-    "workflow_enabled",
-    "workflow_slug",
-  ].each do |key|
-    Site.preloaded_category_custom_fields << key if Site.respond_to? :preloaded_category_custom_fields
-  end
+  
 
-  Topic.register_custom_field_type('workflow_slug', :string)
-  Topic.register_custom_field_type('workflow_name', :integer)
-  Topic.register_custom_field_type('workflow_step_slug', :string)
-  Topic.register_custom_field_type('workflow_step_name', :string)
-  add_to_class(:topic, :workflow_slug) { self.custom_fields['workflow_slug'] }
-  add_to_class(:topic, :workflow_name) { self.custom_fields['workflow_name'] }
-  add_to_class(:topic, :workflow_step_slug) { self.custom_fields['workflow_step_slug'] }
-  add_to_class(:topic, :workflow_step_name) { self.custom_fields['workflow_step_name'] }
+  # [
+  #   "workflow_enabled",
+  #   "workflow_slug",
+  # ].each do |key|
+  #   Site.preloaded_category_custom_fields << key if Site.respond_to? :preloaded_category_custom_fields
+  # end
+
+  # Topic.register_custom_field_type('workflow_slug', :string)
+  # Topic.register_custom_field_type('workflow_name', :integer)
+  # Topic.register_custom_field_type('workflow_step_slug', :string)
+  # Topic.register_custom_field_type('workflow_step_name', :string)
+  add_to_class(:topic, :workflow_slug) do
+    DiscourseWorkflow::WorkflowState
+      .joins(:workflow)
+      .where(topic_id: self.id)
+      .select('workflows.slug')
+      .first
+      &.slug
+  end
+  add_to_class(:topic, :workflow_name) do
+    DiscourseWorkflow::WorkflowState
+      .joins(:workflow)
+      .where(topic_id: self.id)
+      .select('workflows.name')
+      .first
+      &.name
+  end
+  add_to_class(:topic, :workflow_step_slug) do
+    DiscourseWorkflow::WorkflowState
+      .joins(:workflow_step)
+      .where(topic_id: self.id)
+      .select('workflow_steps.slug')
+      .first
+      &.slug
+  end
+  add_to_class(:topic, :workflow_step_name) do 
+    DiscourseWorkflow::WorkflowState
+      .joins(:workflow_step)
+      .where(topic_id: self.id)
+      .select('workflow_steps.name')
+      .first
+      &.name
+  end
+  add_to_class(:topic, :workflow_step_options) do 
+    DiscourseWorkflow::WorkflowState
+      .joins(workflow_step: :workflow_step_option)
+      .where(topic_id: self.id)
+      .select('workflow_step_options.slug')
+      .map(&:slug)
+  end
+      
+      
+  # add_to_class(:topic, :buttons) do |self|
+    
+    
+    # { WorkflowState.find_by(topic_id: self.id)&.workflow&.workflow_step_id }
 
   add_to_serializer(:topic_view, :workflow_slug, include_condition: -> { object.topic.workflow_slug.present? }) do
     object.topic.workflow_slug
@@ -89,44 +132,60 @@ after_initialize do
     object.topic.workflow_step_name
   end
 
-  TopicList.preloaded_custom_fields << 'workflow_name' if TopicList.respond_to? :preloaded_custom_fields
-  add_to_serializer(:topic_list_item, :workflow_name, include_condition: -> { object.workflow_name.present? }) do
-    object.workflow_name
+  add_to_serializer(:topic_view, :workflow_step_options, include_condition: -> { object.topic.workflow_step_options.present? }) do
+    object.topic.workflow_step_options
   end
 
-  TopicList.preloaded_custom_fields << 'workflow_step_name' if TopicList.respond_to? :preloaded_custom_fields
-  add_to_serializer(:topic_list_item, :workflow_step_name, include_condition: -> { object.workflow_step_name.present? }) do
-    object.workflow_step_name
-  end
+  DiscourseEvent.on(:topic_created) do |*params|
+    topic, opts = params
 
-  require_dependency 'topic_query'
-  class ::TopicQuery
-    def list_workflows
-      # @options[:per_page] = SiteSetting.location_map_max_topics
-      create_list(:workflows) do |topics|
-        topics = topics.joins("INNER JOIN workflows
-                               ON workflow.slug = topics.custom_fields->>'workflow_slug'")
-
-        Locations::Map.sorted_list_filters.each do |filter|
-          topics = filter[:block].call(topics, @options)
-        end
-
-        topics
+    if SiteSetting.workflow_enabled
+      workflow_step = DiscourseWorkflow::WorkflowStep.find_by(category_id: topic.category_id, workflow_step_id: 1)
+      if workflow_step
+        DiscourseWorkflow::WorkflowState.create!(topic_id: topic.id, workflow_id: workflow_step.workflow_id, workflow_step_id: workflow_step.id)
       end
     end
   end
 
-  Locations::Map.add_list_filter do |topics, options|
-    if options[:category_id]
-      category = Category.find(options[:category_id])
-    end
 
-    if SiteSetting.location_map_filter_closed || (options[:category_id] && category.custom_fields['location_map_filter_closed'])
-      topics = topics.where(closed: false)
-    end
 
-    topics
-  end
+  # #TopicList.preloaded_custom_fields << 'workflow_name' if TopicList.respond_to? :preloaded_custom_fields
+  # add_to_serializer(:topic_list_item, :workflow_name, include_condition: -> { object.workflow_name.present? }) do
+  #   object.workflow_name
+  # end
 
-  DiscourseEvent.trigger(:locations_ready)
+  # #TopicList.preloaded_custom_fields << 'workflow_step_name' if TopicList.respond_to? :preloaded_custom_fields
+  # add_to_serializer(:topic_list_item, :workflow_step_name, include_condition: -> { object.workflow_step_name.present? }) do
+  #   object.workflow_step_name
+  # end
+
+  # require_dependency 'topic_query'
+  # class ::TopicQuery
+  #   def list_workflows
+  #     # @options[:per_page] = SiteSetting.location_map_max_topics
+  #     create_list(:workflows) do |topics|
+  #       topics = topics.joins("INNER JOIN workflows
+  #                              ON workflow.slug = topics.custom_fields->>'workflow_slug'")
+
+  #       Locations::Map.sorted_list_filters.each do |filter|
+  #         topics = filter[:block].call(topics, @options)
+  #       end
+
+  #       topics
+  #     end
+  #   end
+  # end
+
+  # Locations::Map.add_list_filter do |topics, options|
+  #   if options[:category_id]
+  #     category = Category.find(options[:category_id])
+  #   end
+
+  #   if SiteSetting.location_map_filter_closed || (options[:category_id] && category.custom_fields['location_map_filter_closed'])
+  #     topics = topics.where(closed: false)
+  #   end
+
+  #   topics
+  # end
+
 end

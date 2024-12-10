@@ -1,8 +1,8 @@
 # frozen_string_literal: true
-class CreateWorkflowStepOption < ActiveRecord::Migration[7.1]
+class CreateWorkflowStepOptions < ActiveRecord::Migration[7.1]
   def change
     create_table :workflow_step_options do |t|
-      t.references :workflow_step_id, foreign_key: true
+      t.references :workflow_step, foreign_key: true
       t.string :slug
       t.integer :target_step_id
 
