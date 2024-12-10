@@ -1,25 +1,45 @@
 import Component from "@glimmer/component";
 import { action } from "@ember/object";
+import { fn } from "@ember/helper";
+import { service } from "@ember/service";
 import { i18n } from "discourse-i18n";
 import DButton from "discourse/components/d-button";
+import { ajax } from "discourse/lib/ajax";
+import { popupAjaxError } from "discourse/lib/ajax-error";
 
 
 export default class WorkflowButtonsComponent extends Component {
+  @service dialog;
+
   @action
-  ActOnWorkflow(option) {
+  actOnWorkflow(option) {
     console.log(`Acting on workflow with slug: ${option}`);
+
+    this.dialog.yesNoConfirm({
+      message: i18n(`discourse_workflow.options.${option}.confirmation`),
+      didConfirm: () => {
+        ajax(`/discourse_workflow/${this.args.topic_id}/act`, {
+          type: "POST",
+          data: { option },
+        })
+        .then(() => {
+          this.refresh();
+        })
+        .catch(popupAjaxError);
+      },
+    });
   }
 
-  workflowActionLabel  = (option) => {
-    return `discourse_workflow.options.${option}`;
+  workflowActionLabel = (option) => {
+    return `discourse_workflow.options.${option}.button_label`;
   }
 
   <template>
     {{#each @workflow_step_options as |option|}}
       <DButton
-        @action={{this.ActOnWorkflow option}}
+        class="btn-primary"
+        @action={{fn this.actOnWorkflow option}}
         @label={{this.workflowActionLabel option}}
-        @class="btn-primary"
       />
     {{/each}}
   </template>

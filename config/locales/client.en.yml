@@ -2,4 +2,6 @@ en:
   js:
     discourse_workflow:
       options:
-        ready: "Ready"
+        ready:
+          button_label: "Ready"
+          confirmation: "Are you sure you want to mark this topic as ready?"
