@@ -5,6 +5,8 @@ module ::DiscourseWorkflow
     self.table_name = 'workflow_step_options'
     belongs_to :workflow_step
 
+    has_one :workflow_option
+
    # validates :post_id, presence: true, uniqueness: true
   end
 end

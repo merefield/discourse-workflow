@@ -6,5 +6,4 @@ en:
       no_midway_error: "You cannot create a Topic midway through a workflow and this Category is part of a workflow."
     options:
       start: "Start"
-
-      
+      ready: "Ready"

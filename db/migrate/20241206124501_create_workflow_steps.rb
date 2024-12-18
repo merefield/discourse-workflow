@@ -9,7 +9,6 @@ class CreateWorkflowSteps < ActiveRecord::Migration[7.1]
       t.string :name
       t.string :description
       t.string :step_type
-      t.string :action_groups
 
       t.timestamps
     end

@@ -1,0 +1,30 @@
+<DBreadcrumbsItem
+  @path="/admin/plugins/discourse-workflow/workflows"
+  @label={{i18n "admin.discourse_workflow.workflows.title"}}
+/>
+
+<div class="discourse-workflow-workflows admin-detail">
+  <DPageSubheader
+    @titleLabel={{i18n "admin.discourse_workflow.workflows.title"}}
+    @descriptionLabel={{i18n "admin.discourse_workflow.workflows.instructions"}}
+  >
+    <:actions as |actions|>
+      <actions.Primary
+        @label="admin.discourse_workflow.workflows.new"
+        @title="admin.discourse_workflow.workflows.new"
+        @route="adminPlugins.show.discourse-workflow-workflows.new"
+        @routeModels="discourse-workflow"
+        @icon="plus"
+        class="admin-workflows-new"
+      />
+    </:actions>
+  </DPageSubheader>
+
+  <div class="workflows-list">
+    {{#if this.model.workflows}}
+        <WorkflowListEditor @workflow={{this.model}} />
+    {{else}}
+      {{i18n "admin.discourse_workflow.workflows.none"}}
+    {{/if}}
+  </div>
+</div>

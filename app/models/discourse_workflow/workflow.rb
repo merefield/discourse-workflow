@@ -8,9 +8,13 @@ module ::DiscourseWorkflow
 
     # before_validation :generate_unique_slug
 
-    validates :ensure_name_ascii
-    validates :ensure_slug
+    validate :ensure_name_ascii
+    validate :ensure_slug
     validates :slug, presence: true, uniqueness: true
+
+    has_many :workflow_steps, dependent: :destroy
+
+    scope :ordered, -> { order("lower(name) ASC") }
  
 
     def ensure_name_ascii

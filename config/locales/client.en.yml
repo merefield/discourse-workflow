@@ -5,3 +5,12 @@ en:
         ready:
           button_label: "Ready"
           confirmation: "Are you sure you want to mark this topic as ready?"
+  admin_js:
+    admin:
+      discourse_workflow:
+        title: "Discourse Workflow"
+        workflows:
+          title: "Workflows"
+          instructions: "Create a workflow by adding a series of steps. Each step can have a different user or group assigned to it. When a topic is created in a category with a workflow, it will be assigned to the first step. The user or group assigned to that step will be notified. When the user or group completes the step, the topic will be assigned to the next step."
+          none: "No workflows have been created yet."
+          new: "Create a New Workflow"

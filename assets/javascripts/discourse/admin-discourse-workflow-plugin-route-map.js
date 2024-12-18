@@ -4,7 +4,7 @@ export default {
   path: "/plugins",
 
   map() {
-    this.route("discourse-worflows", { path: "workflow" }, function () {
+    this.route("discourse-workflow-workflows", { path: "workflows" }, function () {
       this.route("new");
       this.route("edit", { path: "/:id/edit" });
     });

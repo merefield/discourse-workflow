@@ -8,11 +8,11 @@
 
 enabled_site_setting :workflow_enabled
 
-module ::Locations
+module ::DiscourseWorkflow
   PLUGIN_NAME = "discourse-workflow"
 end
 
-# require_relative "lib/workflow/engine"
+require_relative "lib/discourse_workflow/engine"
 
 # register_asset 'stylesheets/common/locations.scss'
 # register_asset 'stylesheets/desktop/locations.scss', :desktop
@@ -36,13 +36,24 @@ after_initialize do
   %w(
     ../app/models/discourse_workflow/workflow.rb
     ../app/models/discourse_workflow/workflow_step.rb
+    ../app/models/discourse_workflow/workflow_option.rb
     ../app/models/discourse_workflow/workflow_step_option.rb
     ../app/models/discourse_workflow/workflow_state.rb
+    ../app/serializers/discourse_workflow/workflow_step_option_serializer.rb
+    ../app/serializers/discourse_workflow/workflow_step_serializer.rb
+    ../app/serializers/discourse_workflow/workflow_serializer.rb
+    ../app/controllers/discourse_workflow/admin/workflows_controller.rb
+    ../app/controllers/discourse_workflow/admin/workflow_steps_controller.rb
+    ../config/routes.rb
     ../lib/discourse_workflow/topic_extension.rb
     ../lib/discourse_workflow/not_midway_validator.rb
   ).each do |path|
     load File.expand_path(path, __FILE__)
   end
+
+  add_admin_route("admin.discourse_workflow.title", "discourse-workflow", { use_new_show_route: true })
+
+  #    ../app/serializers/discourse_workflow/workflow_option_serializer.rb 
 
   reloadable_patch { Topic.prepend(DiscourseWorkflow::TopicExtension) }
 
