@@ -21,8 +21,8 @@
   </DPageSubheader>
 
   <div class="workflows-list">
-    {{#if this.model.workflows}}
-        <WorkflowListEditor @workflow={{this.model}} />
+    {{#if this.model.content.length}}
+        <WorkflowListEditor @workflows={{this.model.content}} />
     {{else}}
       {{i18n "admin.discourse_workflow.workflows.none"}}
     {{/if}}

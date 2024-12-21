@@ -5,7 +5,7 @@ module DiscourseWorkflow
     class WorkflowsController < ::Admin::AdminController
       # requires_plugin ::DiscourseWorkflow::PLUGIN_NAME
 
-      before_action :find_workflow, only: %i[edit update destroy create]
+      before_action :find_workflow, only: %i[edit update destroy]
 
       def index
         workflows =
@@ -23,7 +23,9 @@ module DiscourseWorkflow
       end
 
       def create
+        #byebug
         workflow = Workflow.new(workflow_params)
+        workflow.save!
       end
 
       def update
@@ -48,48 +50,26 @@ module DiscourseWorkflow
             :name,
             :description,
             :enabled,
-            :system_prompt,
-            :priority,
-            :top_p,
-            :temperature,
-            :default_llm,
-            :user_id,
-            :max_context_posts,
-            :vision_enabled,
-            :vision_max_pixels,
-            :rag_chunk_tokens,
-            :rag_chunk_overlap_tokens,
-            :rag_conversation_chunks,
-            :question_consolidator_llm,
-            :allow_chat_channel_mentions,
-            :allow_chat_direct_messages,
-            :allow_topic_mentions,
-            :allow_workflowl_messages,
-            :tool_details,
-            :forced_tool_count,
-            :force_default_llm,
-            allowed_group_ids: [],
-            rag_uploads: [:id],
           )
 
-        if tools = params.dig(:workflow, :tools)
-          permitted[:tools] = permit_tools(tools)
-        end
+        # if tools = params.dig(:workflow, :tools)
+        #   permitted[:tools] = permit_tools(tools)
+        # end
 
         permitted
       end
 
-      def permit_tools(tools)
-        return [] if !tools.is_a?(Array)
+      # def permit_tools(tools)
+      #   return [] if !tools.is_a?(Array)
 
-        tools.filter_map do |tool, options, force_tool|
-          break nil if !tool.is_a?(String)
-          options&.permit! if options && options.is_a?(ActionController::Parameters)
+      #   tools.filter_map do |tool, options, force_tool|
+      #     break nil if !tool.is_a?(String)
+      #     options&.permit! if options && options.is_a?(ActionController::Parameters)
 
-          # this is simpler from a storage perspective, 1 way to store tools
-          [tool, options, !!force_tool]
-        end
-      end
+      #     # this is simpler from a storage perspective, 1 way to store tools
+      #     [tool, options, !!force_tool]
+      #   end
+      # end
     end
   end
 end

@@ -11,9 +11,9 @@ import concatClass from "discourse/helpers/concat-class";
 import { popupAjaxError } from "discourse/lib/ajax-error";
 import i18n from "discourse-common/helpers/i18n";
 import AdminConfigAreaEmptyList from "admin/components/admin-config-area-empty-list";
-import WorkflowEditor from "./workflow-editor";
+import WorkflowStepEditor from "./workflow-step-editor";
 
-export default class WorkflowListEditor extends Component {
+export default class WorkflowStepsListEditor extends Component {
   @service adminPluginNavManager;
 
   @action
@@ -33,36 +33,35 @@ export default class WorkflowListEditor extends Component {
   <template>
     <DBreadcrumbsItem
       @path="/admin/plugins/{{this.adminPluginNavManager.currentPlugin.name}}/workflows"
-      @label={{i18n "discourse_workflow.workflows.short_title"}}
+      @label={{i18n "admin.discourse_workflow.workflows.steps.short_title"}}
     />
-    <section class="workflow-list-editor__current admin-detail pull-left">
-      {{#if @currentWorkflow}}
-        <WorkflowEditor @model={{@currentWorkflow}} @workflows={{@workflows}} />
+    <section class="workflow-steps-list-editor__current admin-detail pull-left">
+      {{#if @currentWorkflowStep}}
+        <WorkflowStepEditor @model={{@currentWorkflowStep}} @workflowsSteps={{@workflowSteps}} @workflow={{@workflow}}/>
       {{else}}
-        {{!-- <DPageSubheader
-          @titleLabel={{i18n "discourse_workflow.workflows.short_title"}}
+        <DPageSubheader
+          @titleLabel={{i18n "admin.discourse_workflow.workflows.steps.title"}}
           @descriptionLabel={{i18n
-            "discourse_workflow.workflows.workflow_description"
+            "admin.discourse_workflow.workflows.steps.description"
           }}
           @learnMoreUrl="https://meta.discourse.org/t/ai-bot-workflows/306099"
         >
-          <:actions as |actions|>
+          {{!-- <:actions as |actions|>
             <actions.Primary
               @label="discourse_workflow.workflows.new"
               @route="adminPlugins.show.discourse-workflows.new"
               @icon="plus"
               class="workflow-list-editor__new-button"
             />
-          </:actions>
-        </DPageSubheader> --}}
+          </:actions> --}}
+        </DPageSubheader>
 
-        {{#if @workflows}}
-          <table class="content-list workflow-list-editor d-admin-table">
+        {{#if @workflowSteps}}
+          <table class="content-list workflow-steps-list-editor d-admin-table">
             <thead>
               <tr>
-                <th>{{i18n "admin.discourse_workflow.workflows.enabled"}}</th>
-                <th>{{i18n "admin.discourse_workflow.workflows.name"}}</th>
-                <th>{{i18n "admin.discourse_workflow.workflows.description"}}</th>
+                <th>{{i18n "discourse_workflow.workflows.name"}}</th>
+                <th>{{i18n "discourse_workflow.workflows.enabled"}}</th>
                 <th></th>
               </tr>
             </thead>
@@ -75,30 +74,30 @@ export default class WorkflowListEditor extends Component {
                     (if workflow.priority "priority")
                   }}
                 >
+                  <td class="d-admin-row__overview">
+                    <div class="workflow-list__name-with-description">
+                      <div class="workflow-list__name">
+                        <strong>
+                          {{workflow.name}}
+                        </strong>
+                      </div>
+                      <div class="workflow-list__description">
+                        {{workflow.description}}
+                      </div>
+                    </div>
+                  </td>
                   <td class="d-admin-row__detail">
                     <DToggleSwitch
                       @state={{workflow.enabled}}
                       {{on "click" (fn this.toggleEnabled workflow)}}
                     />
                   </td>
-                  <td class="d-admin-row__overview">
-                    <div class="workflow-list__name">
-                      <strong>
-                        {{workflow.name}}
-                      </strong>
-                    </div>
-                  </td>
-                  <td class="d-admin-row__overview">
-                      <div class="workflow-list__description">
-                        {{workflow.description}}
-                      </div>
-                  </td>
                   <td class="d-admin-row__controls">
                     <LinkTo
-                      @route="adminPlugins.show.discourse-workflow-workflows.edit"
+                      @route="adminPlugins.show.discourse-workflows.edit"
                       @model={{workflow}}
                       class="btn btn-text btn-small"
-                    >{{i18n "admin.discourse_workflow.workflows.edit"}} </LinkTo>
+                    >{{i18n "discourse_workflow.workflows.edit"}} </LinkTo>
                   </td>
                 </tr>
               {{/each}}
@@ -106,10 +105,10 @@ export default class WorkflowListEditor extends Component {
           </table>
         {{else}}
           <AdminConfigAreaEmptyList
-            @ctaLabel="discourse_workflow.workflows.new"
+            @ctaLabel="admin.discourse_workflow.workflows.steps.new"
             @ctaRoute="adminPlugins.show.discourse-workflows.new"
-            @ctaClass="workflow-list-editor__empty-new-button"
-            @emptyLabel="discourse_workflow.workflows.no_workflows"
+            @ctaClass="workflow-steps-list-editor__empty-new-button"
+            @emptyLabel="admin.discourse_workflow.workflows.steps.no_steps"
           />
         {{/if}}
       {{/if}}

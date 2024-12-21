@@ -8,8 +8,10 @@ module ::DiscourseWorkflow
 
     # before_validation :generate_unique_slug
 
+    before_validation :ensure_slug
+
     validate :ensure_name_ascii
-    validate :ensure_slug
+    # validate :ensure_slug
     validates :slug, presence: true, uniqueness: true
 
     has_many :workflow_steps, dependent: :destroy
@@ -30,8 +32,9 @@ module ::DiscourseWorkflow
 
     def ensure_slug
       return if name.blank?
+      byebug
 
-      self.name.strip!
+      self.name.strip
 
       # auto slug
       self.slug = Slug.for(name, "")

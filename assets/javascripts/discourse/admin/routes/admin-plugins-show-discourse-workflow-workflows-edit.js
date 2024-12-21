@@ -12,7 +12,7 @@ export default class AdminPluginsShowDiscourseWorkflowWorkflowEdit extends Disco
   setupController(controller, model) {
     super.setupController(controller, model);
     controller.set(
-      "allPersonas",
+      "allWorkflows",
       this.modelFor("adminPlugins.show.discourse-workflows")
     );
   }

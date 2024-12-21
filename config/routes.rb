@@ -3,15 +3,15 @@ Discourse::Application.routes.draw do
 
   scope "/admin/plugins/discourse-workflow" do
     resources :workflows,
-              only: %i[index new create edit show update destroy],
+              only: %i[index create edit show update destroy],
               path: "workflows",
               controller: "discourse_workflow/admin/workflows" do
         resources :workflow_steps,
-                 only: %i[index new create edit show update destroy],
+                 only: %i[index create edit show update destroy],
                  path: "workflow_steps",
                   controller: "discourse_workflow/admin/workflow_steps" do
           resources :workflow_step_options,
-                   only: %i[index new create edit show update destroy],
+                   only: %i[index create edit show update destroy],
                    path: "workflow_step_options",
                     controller: "discourse_workflow/admin/workflow_step_options"
         end
