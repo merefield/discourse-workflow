@@ -23,7 +23,7 @@ import DTooltip from "float-kit/components/d-tooltip";
 // import AiLlmSelector from "./ai-llm-selector";
 // import AiPersonaToolOptions from "./workflow-tool-options";
 // import AiToolSelector from "./ai-tool-selector";
-import WorkflowStepsListEditor from "./workflow-steps-list-editor";
+import WorkflowStepListEditor from "./workflow-step-list-editor";
 
 export default class WorkflowEditor extends Component {
   @service router;
@@ -38,35 +38,35 @@ export default class WorkflowEditor extends Component {
 
   @action
   updateModel() {
-    this.editingModel = this.args.model.workingCopy();
-    this.showDelete = !this.args.model.isNew && !this.args.model.system;
+    this.editingModel = this.args.workflow.workingCopy();
+    this.showDelete = !this.args.workflow.isNew && !this.args.workflow.system;
   }
 
   @action
   async save() {
-    const isNew = this.args.model.isNew;
+    const isNew = this.args.workflow.isNew;
     this.isSaving = true;
 
-    const backupModel = this.args.model.workingCopy();
+    const backupModel = this.args.workflow.workingCopy();
 
-    this.args.model.setProperties(this.editingModel);
+    this.args.workflow.setProperties(this.editingModel);
     try {
-      await this.args.model.save();
+      await this.args.workflow.save();
       this.#sortWorkflows();
-      if (isNew && this.args.model.rag_uploads.length === 0) {
-        this.args.personas.addObject(this.args.model);
-        this.router.transitionTo(
-          "adminPlugins.show.discourse-ai-personas.edit",
-          this.args.model
-        );
-      } else {
+      // if (isNew && this.args.workflow.rag_uploads.length === 0) {
+      //   this.args.personas.addObject(this.args.workflow);
+      //   this.router.transitionTo(
+      //     "adminPlugins.show.discourse-ai-personas.edit",
+      //     this.args.workflow
+      //   );
+      // } else {
         this.toasts.success({
           data: { message: I18n.t("admin.discourse_workflow.workflows.saved") },
           duration: 2000,
         });
-      }
+      // }
     } catch (e) {
-      this.args.model.setProperties(backupModel);
+      this.args.workflow.setProperties(backupModel);
       popupAjaxError(e);
     } finally {
       later(() => {
@@ -80,8 +80,8 @@ export default class WorkflowEditor extends Component {
     return this.dialog.confirm({
       message: I18n.t("admin.discourse_workflow.workflows.confirm_delete"),
       didConfirm: () => {
-        return this.args.model.destroyRecord().then(() => {
-          this.args.workflow_steps.removeObject(this.args.model);
+        return this.args.workflow.destroyRecord().then(() => {
+          this.args.workflow_steps.removeObject(this.args.workflow);
           this.router.transitionTo(
             "adminPlugins.show.discourse-workflows.index"
           );
@@ -96,18 +96,21 @@ export default class WorkflowEditor extends Component {
   }
 
   async toggleField(field, sortWorkflows) {
-    this.args.model.set(field, !this.args.model[field]);
-    this.editingModel.set(field, this.args.model[field]);
-    if (!this.args.model.isNew) {
+    this.args.workflow.set(field, !this.args.workflow[field]);
+    this.editingModel.set(field, this.args.workflow[field]);
+    debugger;
+    if (!this.args.workflow.isNew) {
       try {
         const args = {};
-        args[field] = this.args.model[field];
+        args[field] = this.args.workflow[field];
 
-        await this.args.model.update(args);
+        await this.args.workflow.update(args);
+        debugger;
         if (sortWorkflows) {
           this.sortWorkflows();
         }
       } catch (e) {
+        debugger;
         popupAjaxError(e);
       }
     }
@@ -130,12 +133,11 @@ export default class WorkflowEditor extends Component {
       class="form-horizontal workflow-editor"
       {{didUpdate this.updateModel @model.id}}
       {{didInsert this.updateModel @model.id}}
-      {{didInsert this.updateAllGroups @model.id}}
     >
       <div class="control-group">
         <DToggleSwitch
           class="workflow-editor__enabled"
-          @state={{@model.enabled}}
+          @state={{@workflow.enabled}}
           @label="admin.discourse_workflow.workflows.enabled"
           {{on "click" this.toggleEnabled}}
         />
@@ -159,11 +161,10 @@ export default class WorkflowEditor extends Component {
       </div>
       <div class="control-group">
         {{!-- <label>{{I18n.t "admin.discourse_workflow.workflows.steps"}}</label> --}}
-        <WorkflowStepsListEditor
+        <WorkflowStepListEditor
           class="workflow-editor__steps"
-          @id={{this.model.id}}
+          @workflow={{@workflow}}
           @disabled={{this.editingModel.system}}
-          @tools={{@personas.resultSetMeta.tools}}
           @onChange={{this.stepsChanged}}
         />
       </div>

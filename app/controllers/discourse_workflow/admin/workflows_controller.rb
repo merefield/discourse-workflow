@@ -29,7 +29,11 @@ module DiscourseWorkflow
       end
 
       def update
-        @workflow.update(workflow_params)
+       if @workflow.update(workflow_params)
+          render json: WorkflowSerializer.new(@workflow, root: false)
+        else
+          render_json_error @workflow
+        end
       end
 
       def destroy

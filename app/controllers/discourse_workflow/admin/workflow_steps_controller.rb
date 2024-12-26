@@ -5,10 +5,10 @@ module DiscourseWorkflow
       requires_plugin ::DiscourseWorkflow::PLUGIN_NAME
 
       before_action :set_workflow, only: [:index, :new, :create]
-      before_action :set_workflow_step, only: [:show, :edit, :update, :destroy]
+      # before_action :set_workflow_step, only: [:show, :edit, :update, :destroy]
 
       def index
-        @workflow_steps = @workflow.workflow_steps
+        @workflow_steps = @workflow.workflow_steps || []
       end
 
       def show
@@ -20,11 +20,12 @@ module DiscourseWorkflow
 
       def create
         @workflow_step = @workflow.workflow_steps.build(workflow_step_params)
-        if @workflow_step.save
-          redirect_to admin_plugins_discourse_workflow_workflows_path, notice: 'Workflow step was successfully created.'
-        else
-          render :new
-        end
+        @workflow_step.save!
+        # if @workflow_step.save
+        #   redirect_to admin_plugins_discourse_workflow_workflows_path, notice: 'Workflow step was successfully created.'
+        # else
+        #   render :new
+        # end
       end
 
       def edit
@@ -46,7 +47,7 @@ module DiscourseWorkflow
       private
 
       def set_workflow
-        @workflow = Workflow.find(params[:workflow_id])
+        @workflow = Workflow.find(params[:workflow_step][:workflow_id])
       end
 
       def set_workflow_step

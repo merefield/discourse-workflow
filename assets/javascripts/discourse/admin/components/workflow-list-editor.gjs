@@ -37,7 +37,7 @@ export default class WorkflowListEditor extends Component {
     />
     <section class="workflow-list-editor__current admin-detail pull-left">
       {{#if @currentWorkflow}}
-        <WorkflowEditor @model={{@currentWorkflow}} @workflows={{@workflows}} />
+        <WorkflowEditor @workflow={{@currentWorkflow}} @workflows={{@workflows}} />
       {{else}}
         {{!-- <DPageSubheader
           @titleLabel={{i18n "discourse_workflow.workflows.short_title"}}

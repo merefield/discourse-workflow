@@ -12,22 +12,22 @@ module DiscourseWorkflow
               :starting_category_id,
               :final_category_id
 
-    has_many :workflow_steps, serializer: WorkflowStepSerializer, embed: :object
+    has_many :workflow_step, serializer: WorkflowStepSerializer, embed: :object, key: :workflow_steps
 
     def workflow_steps_count
-      object.workflow_steps.count
+      object.workflow_step.count
     end
 
     def starting_category_id
-      object.workflow_steps.first&.category_id
+      object.workflow_step.first&.category_id
     end
 
     def final_category_id
-      object.workflow_steps.last&.category_id
+      object.workflow_step.last&.category_id
     end
 
     # def workflow_steps
-    #   object.workflow_steps
+    #   object.workflow_step
     # end
 
     # def name

@@ -30,11 +30,8 @@ export default class Workflow extends RestModel {
 
   workingCopy() {
     let attrs = this.getProperties(CREATE_ATTRIBUTES);
-    // this.populateToolOptions(attrs);
 
     const workflow = Workflow.create(attrs);
-    // persona.forcedTools = (this.forcedTools || []).slice();
-    // persona.forced_tool_count = this.forced_tool_count || -1;
     return workflow;
   }
 

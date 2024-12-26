@@ -19,6 +19,9 @@ en:
           name: "Name"
           description: "Description"
           steps:
+            workflow_step_id: "ID"
+            category: "Category"
+            step_type: "Type"
             title: "Steps"
             new: "Add a New Step"
             none: "No steps have been added yet."

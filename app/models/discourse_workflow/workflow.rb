@@ -14,7 +14,7 @@ module ::DiscourseWorkflow
     # validate :ensure_slug
     validates :slug, presence: true, uniqueness: true
 
-    has_many :workflow_steps, dependent: :destroy
+    has_many :workflow_step, dependent: :destroy
 
     scope :ordered, -> { order("lower(name) ASC") }
  
@@ -32,7 +32,6 @@ module ::DiscourseWorkflow
 
     def ensure_slug
       return if name.blank?
-      byebug
 
       self.name.strip
 
@@ -43,7 +42,7 @@ module ::DiscourseWorkflow
         self.slug = ""
       end
     end
- 
+
   #  def generate_unique_slug
   #    base_slug = name.to_s.parameterize(separator: '_')
   #    slug_candidate = base_slug
