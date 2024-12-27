@@ -1,21 +1,19 @@
 import DiscourseRoute from "discourse/routes/discourse";
 
-export default class AdminPluginsShowDiscourseWorkflowWorkflowStepsEdit extends DiscourseRoute {
+export default class AdminPluginsShowDiscourseWorkflowWorkflowStepsNew extends DiscourseRoute {
   async model(params) {
-    // Get all workflow steps for the current workflow
-    const workflow = this.modelFor("adminPlugins.show.discourse-workflow-workflows");
-    const workflowSteps = workflow.workflow_steps || [];
-
-    // Find the workflow step by its ID
-    const id = parseInt(params.workflow_id, 10);
-    return workflowSteps.findBy("id", id);
+    const allWorkflowSteps = this.modelFor(
+      "adminPlugins.show.discourse-workflow-steps"
+    );
+    const id = parseInt(params.id, 10);
+    return allWorkflowSteps.findBy("id", id);
   }
 
   setupController(controller, model) {
     super.setupController(controller, model);
 
-    // Pass all workflow steps and the parent workflow to the controller
-    const workflow = this.modelFor("adminPlugins.show.discourse-workflow-workflows");
+    // Pass the parent workflow and its steps to the controller
+    const workflowSteps = this.modelFor("adminPlugins.show.discourse-workflow-workflow-steps");
     controller.set("workflow", workflow);
     controller.set("allWorkflowSteps", workflow.steps || []);
   }

@@ -9,9 +9,9 @@ export default {
       this.route("edit", { path: "/:id/edit" });
     });
     // Add routes for workflow_steps
-    this.route("discourse-workflow-workflow-steps", function () {
+    this.route("discourse-workflow-workflow-steps", { path: "workflow-steps" }, function () {
       this.route("new"); // New workflow step route
-      this.route("edit"); // Edit workflow step route
+      this.route("edit", { path: "/:id/edit" }); // Edit workflow step route
     });
   },
 };

@@ -124,7 +124,7 @@ export default class WorkflowStepsListEditor extends Component {
                   <td class="d-admin-row__controls">
                     <LinkTo
                       @route="adminPlugins.show.discourse-workflow-workflow-steps.edit"
-                      @model={{@step}}
+                      @model={{step}}
                       class="btn btn-text btn-small"
                     >{{i18n "admin.discourse_workflow.workflows.edit"}} </LinkTo>
                   </td>
