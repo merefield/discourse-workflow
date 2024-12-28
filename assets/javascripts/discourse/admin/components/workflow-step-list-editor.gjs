@@ -24,7 +24,7 @@ export default class WorkflowStepsListEditor extends Component {
   @service adminPluginNavManager;
   @service store;
   @tracked currentWorkflowStep = this.args.currentWorkflowStep;
-  @tracked showStepForm = false;
+  // @tracked showStepForm = false;
   @tracked workflowSteps = [];
   @tracked workflowStepsPresent = false;
 
@@ -44,7 +44,7 @@ export default class WorkflowStepsListEditor extends Component {
 
   @action
   newStep() {
-    this.showStepForm = true;
+    // this.showStepForm = true;
     this.currentWorkflowStep = this.store.createRecord("workflow-step", {
       workflow_id: this.args.workflow.id,
     });
@@ -62,10 +62,12 @@ export default class WorkflowStepsListEditor extends Component {
 
   @bind
   loadSteps() {
-    this.store.findAll("workflow-step", { workflow_id: this.args.workflow.id }).then((steps) => {
-      this.workflowSteps = steps.content;
-      this.workflowStepsPresent = steps.content.length > 0 ? true : false;
-    });
+    if (!this.args.currentWorkflowStep) {
+      this.store.findAll("workflow-step", { workflow_id: this.args.workflow.id }).then((steps) => {
+        this.workflowSteps = steps.content;
+        this.workflowStepsPresent = steps.content.length > 0 ? true : false;
+      });
+    }
   }
 
   // workflowSteps() {
@@ -151,8 +153,7 @@ export default class WorkflowStepsListEditor extends Component {
                       {{step.step_type}}
                     </div>
                   </td>
-                  <td class="d-admin-row__controls">\
-                    {{log step.id}}
+                  <td class="d-admin-row__controls">
                     <LinkTo
                       @route="adminPlugins.show.discourse-workflow-workflows.steps.edit"
                       @model={{step}}

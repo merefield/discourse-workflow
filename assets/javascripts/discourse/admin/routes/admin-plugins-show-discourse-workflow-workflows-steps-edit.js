@@ -18,7 +18,6 @@ export default class AdminPluginsShowDiscourseWorkflowWorkflowStepsEdit extends 
   // }
 
   async model(params) {
-    debugger;
     const allWorkflowSteps = this.modelFor(
       "adminPlugins.show.discourse-workflows-workflow-steps"
     );
@@ -28,8 +27,6 @@ export default class AdminPluginsShowDiscourseWorkflowWorkflowStepsEdit extends 
 
   setupController(controller, model) {
     super.setupController(controller, model);
-
-    debugger;
 
     // Pass the parent workflow and its steps to the controller
     // const allWorkflowSteps = this.modelFor("adminPlugins.show.discourse-workflow-workflow-steps");
@@ -43,7 +40,6 @@ export default class AdminPluginsShowDiscourseWorkflowWorkflowStepsEdit extends 
     // const workflowSteps = allWorkflowSteps.findBy("workflow_id", model.workflow_id);
     controller.set('currentWorkflowStep', model);
     this.store.find('workflow', model.workflow_id).then((result) => {
-      debugger;
       console.log('Workflow:', result);
       controller.set('workflow', result);
     });

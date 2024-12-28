@@ -5,11 +5,11 @@ module DiscourseWorkflow
       requires_plugin ::DiscourseWorkflow::PLUGIN_NAME
 
       before_action :set_workflow, only: [:index, :new, :create]
-      # before_action :set_workflow_step, only: [:show, :edit, :update, :destroy]
+      before_action :set_workflow_step, only: [:show, :edit, :update, :destroy]
 
       def index
         if @workflow.present?
-          @workflow_steps = @workflow.workflow_steps
+          @workflow_steps = WorkflowStep.where(workflow_id: @workflow.id)
         else
           @workflow_steps = WorkflowStep.all
         end
@@ -28,8 +28,10 @@ module DiscourseWorkflow
       end
 
       def create
-        @workflow_step = @workflow.workflow_steps.build(workflow_step_params)
-        @workflow_step.save!
+        # @workflow_step = @workflow.workflow_steps.build(workflow_step_params)
+        # @workflow_step.save!
+        workflow_step = WorkflowStep.new(workflow_step_params)
+        workflow_step.save!
         # if @workflow_step.save
         #   redirect_to admin_plugins_discourse_workflow_workflows_path, notice: 'Workflow step was successfully created.'
         # else
@@ -56,7 +58,7 @@ module DiscourseWorkflow
       private
 
       def set_workflow
-        workflow_id = params.dig(:workflow_step, :workflow_id)
+        workflow_id = params.dig(:workflow_id)
         if workflow_id.present?
             @workflow = Workflow.find(workflow_id)
         else
@@ -69,7 +71,7 @@ module DiscourseWorkflow
       end
 
       def workflow_step_params
-        params.require(:workflow_step).permit(:name, :description, :position, :other_attributes...)
+        params.require(:workflow_step).permit(:workflow_id, :name, :description, :position, :other_attributes...)
       end
 
       def ensure_admin

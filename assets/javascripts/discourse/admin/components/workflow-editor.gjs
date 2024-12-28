@@ -98,19 +98,16 @@ export default class WorkflowEditor extends Component {
   async toggleField(field, sortWorkflows) {
     this.args.workflow.set(field, !this.args.workflow[field]);
     this.editingModel.set(field, this.args.workflow[field]);
-    debugger;
     if (!this.args.workflow.isNew) {
       try {
         const args = {};
         args[field] = this.args.workflow[field];
 
         await this.args.workflow.update(args);
-        debugger;
         if (sortWorkflows) {
           this.sortWorkflows();
         }
       } catch (e) {
-        debugger;
         popupAjaxError(e);
       }
     }

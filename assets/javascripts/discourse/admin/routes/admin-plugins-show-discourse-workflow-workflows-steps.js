@@ -3,7 +3,6 @@ import { i18n } from "discourse-i18n";
 
 export default class AdminPluginsShowDiscourseWorkflowWorkflowSteps extends DiscourseRoute {
   model() {
-    debugger;
     return this.store.findAll("workflow-step");
   }
 
