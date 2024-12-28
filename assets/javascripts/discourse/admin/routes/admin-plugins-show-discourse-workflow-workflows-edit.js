@@ -5,7 +5,7 @@ export default class AdminPluginsShowDiscourseWorkflowWorkflowEdit extends Disco
     const allWorkflows = this.modelFor(
       "adminPlugins.show.discourse-workflows"
     );
-    const id = parseInt(params.id, 10);
+    const id = parseInt(params.workflow_id, 10);
     return allWorkflows.findBy("id", id);
   }
 

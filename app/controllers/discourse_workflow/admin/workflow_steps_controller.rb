@@ -8,7 +8,16 @@ module DiscourseWorkflow
       # before_action :set_workflow_step, only: [:show, :edit, :update, :destroy]
 
       def index
-        @workflow_steps = @workflow.workflow_steps || []
+        if @workflow.present?
+          @workflow_steps = @workflow.workflow_steps
+        else
+          @workflow_steps = WorkflowStep.all
+        end
+        render_json_dump (
+          { workflow_steps:
+          ActiveModel::ArraySerializer.new(@workflow_steps, 
+          each_serializer: DiscourseWorkflow::WorkflowStepSerializer)
+          })
       end
 
       def show
@@ -47,7 +56,12 @@ module DiscourseWorkflow
       private
 
       def set_workflow
-        @workflow = Workflow.find(params[:workflow_step][:workflow_id])
+        workflow_id = params.dig(:workflow_step, :workflow_id)
+        if workflow_id.present?
+            @workflow = Workflow.find(workflow_id)
+        else
+          @workflow = nil
+        end
       end
 
       def set_workflow_step

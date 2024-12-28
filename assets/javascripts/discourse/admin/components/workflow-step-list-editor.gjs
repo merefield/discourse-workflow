@@ -1,5 +1,6 @@
 import Component from "@glimmer/component";
-import { fn } from "@ember/helper";
+import { fn, array, hash } from "@ember/helper";
+import { bind } from "discourse-common/utils/decorators";
 import { on } from "@ember/modifier";
 import { action } from "@ember/object";
 import { cached, tracked } from "@glimmer/tracking";
@@ -16,12 +17,16 @@ import WorkflowStepEditor from "./workflow-step-editor";
 import categoryLink from "discourse/helpers/category-link";
 import DButton from "discourse/components/d-button";
 import I18n from "discourse-i18n";
+import didInsert from "@ember/render-modifiers/modifiers/did-insert";
+import didUpdate from "@ember/render-modifiers/modifiers/did-update";
 
 export default class WorkflowStepsListEditor extends Component {
   @service adminPluginNavManager;
   @service store;
-  @tracked currentWorkflowStep = null;
-  @tracked showStepForm = false;  
+  @tracked currentWorkflowStep = this.args.currentWorkflowStep;
+  @tracked showStepForm = false;
+  @tracked workflowSteps = [];
+  @tracked workflowStepsPresent = false;
 
   // @action
   // async toggleEnabled(workflow) {
@@ -45,15 +50,40 @@ export default class WorkflowStepsListEditor extends Component {
     });
   }
 
+  // get workflowStepRecord() {
+  //   debugger;
+  //   if (this.args.action === "edit") {
+  //     return this.args.currentWorkflowStep;
+  //   } else {
+  //     return this.currentWorkflowStep 
+  //   }
+  //   // return this.store.peekRecord("workflow-step", this.currentWorkflowStep.id);
+  // }
+
+  @bind
+  loadSteps() {
+    this.store.findAll("workflow-step", { workflow_id: this.args.workflow.id }).then((steps) => {
+      this.workflowSteps = steps.content;
+      this.workflowStepsPresent = steps.content.length > 0 ? true : false;
+    });
+  }
+
+  // workflowSteps() {
+  //   const steps = this.store.findAll("workflow-step", { workflow_id: this.args.workflow.id });
+  //   debugger;
+  //   console.log(steps);
+  //   return steps;
+  // }
+
   <template>
     {{!-- <DBreadcrumbsItem
       @path="/admin/plugins/{{this.adminPluginNavManager.currentPlugin.name}}/workflows"
       @label={{i18n "admin.discourse_workflow.workflows.steps.short_title"}}
     /> --}}
-    <section class="workflow-step-list-editor__current admin-detail pull-left">
+    <section class="workflow-step-list-editor__current admin-detail pull-left"
+    {{didInsert this.loadSteps}}>
       {{#if this.currentWorkflowStep}}
-        {{log this.currentWorkflowStep}}
-        <WorkflowStepEditor @currentWorkflowStep={{this.currentWorkflowStep}} @workflowSteps={{@workflowSteps}} @workflow={{@workflow}}/>
+        <WorkflowStepEditor @currentWorkflowStep={{this.currentWorkflowStep}} @workflow={{@workflow}}/>
       {{else}}
         <DPageSubheader
           @titleLabel={{i18n "admin.discourse_workflow.workflows.steps.title"}}
@@ -72,7 +102,7 @@ export default class WorkflowStepsListEditor extends Component {
           </:actions> --}}
         </DPageSubheader>
 
-        {{#if @workflow.workflow_steps}}
+        {{#if this.workflowStepsPresent}}
           <table class="content-list workflow-step-list-editor d-admin-table">
             <thead>
               <tr>
@@ -85,7 +115,7 @@ export default class WorkflowStepsListEditor extends Component {
               </tr>
             </thead>
             <tbody>
-              {{#each @workflow.workflow_steps as |step|}}
+              {{#each this.workflowSteps as |step|}}
                 <tr
                   data-workflow-step-id={{step.workflow_step_id}}
                   class={{concatClass
@@ -121,9 +151,10 @@ export default class WorkflowStepsListEditor extends Component {
                       {{step.step_type}}
                     </div>
                   </td>
-                  <td class="d-admin-row__controls">
+                  <td class="d-admin-row__controls">\
+                    {{log step.id}}
                     <LinkTo
-                      @route="adminPlugins.show.discourse-workflow-workflow-steps.edit"
+                      @route="adminPlugins.show.discourse-workflow-workflows.steps.edit"
                       @model={{step}}
                       class="btn btn-text btn-small"
                     >{{i18n "admin.discourse_workflow.workflows.edit"}} </LinkTo>

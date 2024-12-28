@@ -6,13 +6,13 @@ export default {
   map() {
     this.route("discourse-workflow-workflows", { path: "workflows" }, function () {
       this.route("new");
-      this.route("edit", { path: "/:id/edit" });
+      this.route("edit", { path: "/:workflow_id/edit" });
+      this.route("steps", { path: "workflow-steps" }, function () {
+        this.route("new"); // New workflow step route
+        this.route("edit", { path: "/:step_id/edit" }); // Edit workflow step route
+      });
     });
     // Add routes for workflow_steps
-    this.route("discourse-workflow-workflow-steps", { path: "workflow-steps" }, function () {
-      this.route("new"); // New workflow step route
-      this.route("edit", { path: "/:id/edit" }); // Edit workflow step route
-    });
   },
 };
 

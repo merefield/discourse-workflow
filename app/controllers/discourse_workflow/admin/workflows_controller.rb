@@ -5,7 +5,7 @@ module DiscourseWorkflow
     class WorkflowsController < ::Admin::AdminController
       # requires_plugin ::DiscourseWorkflow::PLUGIN_NAME
 
-      before_action :find_workflow, only: %i[edit update destroy]
+      before_action :find_workflow, only: %i[edit show update destroy]
 
       def index
         workflows =
@@ -19,6 +19,10 @@ module DiscourseWorkflow
       end
 
       def edit
+        render json: WorkflowSerializer.new(@workflow)
+      end
+
+      def show
         render json: WorkflowSerializer.new(@workflow)
       end
 

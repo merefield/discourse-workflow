@@ -2,6 +2,7 @@ module DiscourseWorkflow
   class WorkflowStepSerializer < ApplicationSerializer
 
     attributes :id,
+              :workflow_id,
               :category_id,
               :workflow_step_id,
               :slug,
