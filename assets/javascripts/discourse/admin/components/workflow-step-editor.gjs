@@ -7,6 +7,9 @@ import didInsert from "@ember/render-modifiers/modifiers/did-insert";
 import didUpdate from "@ember/render-modifiers/modifiers/did-update";
 import { Input } from "@ember/component";
 import Textarea from "discourse/components/d-textarea";
+// import CategoryChooser from "discourse/components/category-chooser";
+//import CategoryChooserComponent from "select-kit/components/category-chooser";
+import CategoryChooser from "select-kit/components/category-chooser";
 import DButton from "discourse/components/d-button";
 import { LinkTo } from "@ember/routing";
 import { service } from "@ember/service";
@@ -35,6 +38,11 @@ export default class WorkflowStepEditor extends Component {
   updateModel() {
     this.editingModel = this.args.currentWorkflowStep.workingCopy();
     this.showDelete = !this.args.currentWorkflowStep.isNew && !this.args.currentWorkflowStep.system;
+  }
+
+  @action
+  updateCategory(categoryId) {
+    this.editingModel.category_id = categoryId;
   }
 
   @action
@@ -79,6 +87,12 @@ export default class WorkflowStepEditor extends Component {
           @type="text"
           @value={{this.editingModel.name}}
           disabled={{this.editingModel.system}}
+        />
+      </div>
+      <div class="control-group">
+        <CategoryChooser
+          @value={{this.editingModel.category_id}}
+          @onChangeCategory={{fn (mut this.editingModel.category_id)}}
         />
       </div>
       <div class="control-group">

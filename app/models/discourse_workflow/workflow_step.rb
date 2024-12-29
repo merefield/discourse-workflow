@@ -6,6 +6,7 @@ module ::DiscourseWorkflow
     belongs_to :workflow
     has_many :workflow_step_option
 
-   # validates :post_id, presence: true, uniqueness: true
+   validates :category_id, presence: true
+   validates :name, presence: true
   end
 end

@@ -7,3 +7,16 @@ en:
     options:
       start: "Start"
       ready: "Ready"
+  activerecord:
+    errors:
+      models:
+        workflow:
+          attributes:
+            name:
+              blank: "A workflow must have a name"
+        workflow_step:
+          attributes:
+            name:
+              blank: "A workflow step must have a name"
+            category_id:
+              blank: "You must select a Category"
