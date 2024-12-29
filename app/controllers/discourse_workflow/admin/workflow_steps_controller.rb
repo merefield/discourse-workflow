@@ -38,12 +38,14 @@ module DiscourseWorkflow
             workflow_step.workflow_step_id = WorkflowStep.maximum(:workflow_step_id) + 1
           end
         end
-        workflow_step.save!
-        # if @workflow_step.save
-        #   redirect_to admin_plugins_discourse_workflow_workflows_path, notice: 'Workflow step was successfully created.'
-        # else
-        #   render :new
-        # end
+        if workflow_step.save
+          render json: {
+            workflow_step: WorkflowStepSerializer.new(workflow_step, root: false),
+             },
+          status: :created
+        else
+          render_json_error workflow_step
+        end
       end
 
       def edit

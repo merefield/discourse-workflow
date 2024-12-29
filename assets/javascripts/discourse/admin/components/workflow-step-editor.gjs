@@ -3,6 +3,7 @@ import { fn } from "@ember/helper";
 import { on } from "@ember/modifier";
 import { action } from "@ember/object";
 import { cached, tracked } from "@glimmer/tracking";
+import { later } from "@ember/runloop";
 import didInsert from "@ember/render-modifiers/modifiers/did-insert";
 import didUpdate from "@ember/render-modifiers/modifiers/did-update";
 import { Input } from "@ember/component";
@@ -46,7 +47,8 @@ export default class WorkflowStepEditor extends Component {
   }
 
   @action
-  save() {
+  async save() {
+    debugger;
     const isNew = this.args.currentWorkflowStep.isNew;
     this.isSaving = true;
 
@@ -54,11 +56,31 @@ export default class WorkflowStepEditor extends Component {
 
     this.args.currentWorkflowStep.setProperties(this.editingModel);
     try {
-      this.args.currentWorkflowStep.save();
+      debugger;
+      await this.args.currentWorkflowStep.save();
       this.isSaving = false;
-    } catch (err) {
+      // this.#sortPersonas();
+      // if (isNew) {
+      //   this.args.workflow_steps.addObject(this.args.currentWorkflowStep);
+      //   this.router.transitionTo(
+      //     "adminPlugins.show.discourse-workflow-workflows.steps.edit",
+      //     this.args.currentWorkflowStep
+      //   );
+      // } else {
+        this.toasts.success({
+          data: { message: I18n.t("admin.discourse_workflow.workflows.saved") },
+          duration: 2000,
+        });
+      // }
+    } catch (e) {
       this.args.currentWorkflowStep.setProperties(backupModel);
-      popupAjaxError(err);
+      popupAjaxError(e);
+    } finally {
+      debugger;
+      later(() => {
+        debugger;
+        this.isSaving = false;
+      }, 1000);
     }
   }
 
@@ -93,6 +115,7 @@ export default class WorkflowStepEditor extends Component {
         <CategoryChooser
           @value={{this.editingModel.category_id}}
           @onChangeCategory={{fn (mut this.editingModel.category_id)}}
+          disabled={{this.editingModel.system}}
         />
       </div>
       <div class="control-group">
