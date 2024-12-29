@@ -48,7 +48,6 @@ export default class WorkflowStepEditor extends Component {
 
   @action
   async save() {
-    debugger;
     const isNew = this.args.currentWorkflowStep.isNew;
     this.isSaving = true;
 
@@ -56,7 +55,6 @@ export default class WorkflowStepEditor extends Component {
 
     this.args.currentWorkflowStep.setProperties(this.editingModel);
     try {
-      debugger;
       await this.args.currentWorkflowStep.save();
       this.isSaving = false;
       // this.#sortPersonas();
@@ -68,7 +66,7 @@ export default class WorkflowStepEditor extends Component {
       //   );
       // } else {
         this.toasts.success({
-          data: { message: I18n.t("admin.discourse_workflow.workflows.saved") },
+          data: { message: I18n.t("admin.discourse_workflow.workflows.steps.saved") },
           duration: 2000,
         });
       // }
@@ -76,9 +74,7 @@ export default class WorkflowStepEditor extends Component {
       this.args.currentWorkflowStep.setProperties(backupModel);
       popupAjaxError(e);
     } finally {
-      debugger;
       later(() => {
-        debugger;
         this.isSaving = false;
       }, 1000);
     }
@@ -112,6 +108,7 @@ export default class WorkflowStepEditor extends Component {
         />
       </div>
       <div class="control-group">
+      <label>{{I18n.t "admin.discourse_workflow.workflows.steps.category"}}</label>
         <CategoryChooser
           @value={{this.editingModel.category_id}}
           @onChangeCategory={{fn (mut this.editingModel.category_id)}}

@@ -53,9 +53,12 @@ module DiscourseWorkflow
 
       def update
         if @workflow_step.update(workflow_step_params)
-          redirect_to admin_plugins_discourse_workflow_workflows_path, notice: 'Workflow step was successfully updated.'
+          render json: {
+            workflow_step: WorkflowStepSerializer.new(@workflow_step, root: false),
+             },
+          status: :ok
         else
-          render :edit
+          render_json_error @workflow_step
         end
       end
 

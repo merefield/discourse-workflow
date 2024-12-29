@@ -51,6 +51,11 @@ after_initialize do
     load File.expand_path(path, __FILE__)
   end
 
+  SeedFu.fixture_paths << Rails
+  .root
+  .join("plugins", "discourse-workflow", "db", "fixtures")
+  .to_s
+
   add_admin_route("admin.discourse_workflow.title", "discourse-workflow", { use_new_show_route: true })
 
   #    ../app/serializers/discourse_workflow/workflow_option_serializer.rb 
