@@ -63,8 +63,11 @@ module DiscourseWorkflow
       end
 
       def destroy
-        @workflow_step.destroy
-        redirect_to admin_plugins_discourse_workflow_workflows_path, notice: 'Workflow step was successfully destroyed.'
+        if @workflow_step.destroy
+          head :no_content
+        else
+          render_json_error @workflow_step
+        end
       end
 
       private

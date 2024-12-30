@@ -81,6 +81,22 @@ export default class WorkflowStepEditor extends Component {
     }
   }
 
+  @action
+  delete() {
+    return this.dialog.confirm({
+      message: I18n.t("admin.discourse_workflow.workflows.steps.confirm_delete"),
+      didConfirm: () => {
+        return this.args.currentWorkflowStep.destroyRecord().then(() => {
+          // this.args.workflowSteps.removeObject(this.args.currentWorkflowStep);
+          this.router.transitionTo(
+            "adminPlugins.show.discourse-workflow-workflows.edit",
+            this.args.currentWorkflowStep.workflow_id
+          );
+        });
+      },
+    });
+  }
+
   <template>
     {{log this}}
     <AdvancedBackButton

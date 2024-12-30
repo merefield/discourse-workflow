@@ -31,6 +31,7 @@ en:
             description: "Description"
             no_steps: "No steps have been added yet."
             saved: "Workflow Step saved!"
+            confirm_delete: "Are you sure you want to delete this workflow step?"
           back: "Back"
           save: "Save"
           saved: "Workflow saved!"
