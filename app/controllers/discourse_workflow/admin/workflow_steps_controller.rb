@@ -32,7 +32,7 @@ module DiscourseWorkflow
         # @workflow_step.save!
         workflow_step = WorkflowStep.new(workflow_step_params)
         if !workflow_step.workflow_step_id.present?
-          if WorkflowStep.count == 0
+          if WorkflowStep.count == 0 || WorkflowStep.where(workflow_id: workflow_step.workflow_id).count == 0
             workflow_step.workflow_step_id = 1
           else
             workflow_step.workflow_step_id = WorkflowStep.maximum(:workflow_step_id) + 1
