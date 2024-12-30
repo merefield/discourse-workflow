@@ -116,6 +116,10 @@ export default class WorkflowEditor extends Component {
     }
   }
 
+  get showSteps() {
+    return this.args.workflow.id > 0;
+  }
+
   #sortWorkflows() {
     const sorted = this.args.workflows.toArray().sort((a, b) => {
       return a.name.localeCompare(b.name);
@@ -163,15 +167,17 @@ export default class WorkflowEditor extends Component {
           disabled={{this.editingModel.system}}
         />
       </div>
-      <div class="control-group">
-        {{!-- <label>{{I18n.t "admin.discourse_workflow.workflows.steps"}}</label> --}}
-        <WorkflowStepListEditor
-          class="workflow-editor__steps"
-          @workflow={{@workflow}}
-          @disabled={{this.editingModel.system}}
-          @onChange={{this.stepsChanged}}
-        />
-      </div>
+      {{#if this.showSteps}}
+        <div class="control-group">
+          {{!-- <label>{{I18n.t "admin.discourse_workflow.workflows.steps"}}</label> --}}
+          <WorkflowStepListEditor
+            class="workflow-editor__steps"
+            @workflow={{@workflow}}
+            @disabled={{this.editingModel.system}}
+            @onChange={{this.stepsChanged}}
+          />
+        </div>
+      {{/if}}
       {{!-- {{#unless this.editingModel.system}}
         <AiPersonaToolOptions
           @persona={{this.editingModel}}

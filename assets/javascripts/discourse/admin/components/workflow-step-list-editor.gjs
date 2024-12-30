@@ -62,8 +62,8 @@ export default class WorkflowStepsListEditor extends Component {
 
   @bind
   loadSteps() {
-    if (!this.args.currentWorkflowStep) {
-      this.store.findAll("workflow-step", { workflow_id: this.args.workflow.id }).then((steps) => {
+    if (!this.args.currentWorkflowStep && this.args.workflow.id) {
+      this.store.find("workflow-step", { workflow_id: this.args.workflow.id }).then((steps) => {
         this.workflowSteps = steps.content;
         this.workflowStepsPresent = steps.content.length > 0 ? true : false;
       });

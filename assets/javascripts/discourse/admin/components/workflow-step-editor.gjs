@@ -20,6 +20,7 @@ import concatClass from "discourse/helpers/concat-class";
 import { popupAjaxError } from "discourse/lib/ajax-error";
 import i18n from "discourse-common/helpers/i18n";
 import AdminConfigAreaEmptyList from "admin/components/admin-config-area-empty-list";
+import AdvancedBackButton from "./advanced-back-button";
 import I18n from "discourse-i18n";
 
 export default class WorkflowStepEditor extends Component {
@@ -82,16 +83,14 @@ export default class WorkflowStepEditor extends Component {
 
   <template>
     {{log this}}
-    <LinkTo
+    <AdvancedBackButton
       {{!-- @route="adminPlugins.show.discourse-workflow-workflows.edit {{@currentWorkflowStep.workflow_id}}" --}}
       @route="adminPlugins.show.discourse-workflow-workflows.edit"
       {{!-- @workflow_id={{@workflow.id}} --}}
       {{!-- @model={{@workflow}} --}}
       @model={{@currentWorkflowStep.workflow_id}}
-      @label="admin.discourse_workflow.workflows.back"
-    >
-    <h1>Back</h1>
-    </LinkTo>
+      {{!-- @label="admin.discourse_workflow.workflows.back" --}}
+    />
     <form
       class="form-horizontal workflow-step-editor"
       {{didUpdate this.updateModel @currentWorkflowStep.id}}
