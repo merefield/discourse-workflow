@@ -10,6 +10,10 @@ Discourse::Application.routes.draw do
               only: %i[index create edit show update destroy],
               path: "workflow_steps",
               controller: "discourse_workflow/admin/workflow_steps"
+    resources :workflow_steps,
+              only: %i[edit],
+              path: "workflows/workflow_steps",
+              controller: "discourse_workflow/admin/workflow_steps"
     resources :workflow_step_options,
               only: %i[index create edit show update destroy],
               path: "workflow_step_options",

@@ -1,20 +1,19 @@
 import Component from "@glimmer/component";
-import { fn } from "@ember/helper";
+import { fn, hash } from "@ember/helper";
 import { on } from "@ember/modifier";
 import { action } from "@ember/object";
 import { cached, tracked } from "@glimmer/tracking";
 import { later } from "@ember/runloop";
+import DBreadcrumbsItem from "discourse/components/d-breadcrumbs-item";
+import BackButton from "discourse/components/back-button";
 import didInsert from "@ember/render-modifiers/modifiers/did-insert";
 import didUpdate from "@ember/render-modifiers/modifiers/did-update";
 import { Input } from "@ember/component";
 import Textarea from "discourse/components/d-textarea";
-// import CategoryChooser from "discourse/components/category-chooser";
-//import CategoryChooserComponent from "select-kit/components/category-chooser";
 import CategoryChooser from "select-kit/components/category-chooser";
 import DButton from "discourse/components/d-button";
 import { LinkTo } from "@ember/routing";
 import { service } from "@ember/service";
-import DBreadcrumbsItem from "discourse/components/d-breadcrumbs-item";
 import DPageSubheader from "discourse/components/d-page-subheader";
 import DToggleSwitch from "discourse/components/d-toggle-switch";
 import concatClass from "discourse/helpers/concat-class";
@@ -24,6 +23,7 @@ import AdminConfigAreaEmptyList from "admin/components/admin-config-area-empty-l
 import I18n from "discourse-i18n";
 
 export default class WorkflowStepEditor extends Component {
+  @service adminPluginNavManager;
   @service router;
   @service store;
   @service dialog;
@@ -81,10 +81,17 @@ export default class WorkflowStepEditor extends Component {
   }
 
   <template>
-    {{!-- <BackButton
-      @route="adminPlugins.show.discourse-workflow-workflows-edit/{{this.model.id}}"
+    {{log this}}
+    <LinkTo
+      {{!-- @route="adminPlugins.show.discourse-workflow-workflows.edit {{@currentWorkflowStep.workflow_id}}" --}}
+      @route="adminPlugins.show.discourse-workflow-workflows.edit"
+      {{!-- @workflow_id={{@workflow.id}} --}}
+      {{!-- @model={{@workflow}} --}}
+      @model={{@currentWorkflowStep.workflow_id}}
       @label="admin.discourse_workflow.workflows.back"
-    /> --}}
+    >
+    <h1>Back</h1>
+    </LinkTo>
     <form
       class="form-horizontal workflow-step-editor"
       {{didUpdate this.updateModel @currentWorkflowStep.id}}

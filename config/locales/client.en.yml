@@ -11,13 +11,15 @@ en:
         title: "Discourse Workflow"
         workflows:
           title: "Workflows"
-          short_title: "Workflow"
+          short_title: "Workflows"
           instructions: "Create a workflow by adding a series of steps. Each step can have a different user or group assigned to it. When a topic is created in a category with a workflow, it will be assigned to the first step. The user or group assigned to that step will be notified. When the user or group completes the step, the topic will be assigned to the next step."
           none: "No workflows have been created yet."
           new: "Create a New Workflow"
           enabled: "Enabled"
           name: "Name"
           description: "Description"
+          workflow:
+            short_title: "Workflow"
           steps:
             workflow_step_id: "ID"
             category: "Category"

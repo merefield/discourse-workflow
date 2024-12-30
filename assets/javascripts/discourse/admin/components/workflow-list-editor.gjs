@@ -33,7 +33,7 @@ export default class WorkflowListEditor extends Component {
   <template>
     <DBreadcrumbsItem
       @path="/admin/plugins/{{this.adminPluginNavManager.currentPlugin.name}}/workflows"
-      @label={{i18n "discourse_workflow.workflows.short_title"}}
+      @label={{i18n "admin.discourse_workflow.workflows.short_title"}}
     />
     <section class="workflow-list-editor__current admin-detail pull-left">
       {{#if @currentWorkflow}}

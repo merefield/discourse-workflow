@@ -78,10 +78,10 @@ export default class WorkflowStepsListEditor extends Component {
   // }
 
   <template>
-    {{!-- <DBreadcrumbsItem
-      @path="/admin/plugins/{{this.adminPluginNavManager.currentPlugin.name}}/workflows"
+    <DBreadcrumbsItem
+      @path="/admin/plugins/{{this.adminPluginNavManager.currentPlugin.name}}/workflows/steps"
       @label={{i18n "admin.discourse_workflow.workflows.steps.short_title"}}
-    /> --}}
+    />
     <section class="workflow-step-list-editor__current admin-detail pull-left"
     {{didInsert this.loadSteps}}>
       {{#if this.currentWorkflowStep}}

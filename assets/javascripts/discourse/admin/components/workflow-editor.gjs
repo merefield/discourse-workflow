@@ -3,6 +3,7 @@ import { cached, tracked } from "@glimmer/tracking";
 import { Input } from "@ember/component";
 import { on } from "@ember/modifier";
 import { action } from "@ember/object";
+import DBreadcrumbsItem from "discourse/components/d-breadcrumbs-item";
 import didInsert from "@ember/render-modifiers/modifiers/did-insert";
 import didUpdate from "@ember/render-modifiers/modifiers/did-update";
 import { LinkTo } from "@ember/routing";
@@ -16,6 +17,7 @@ import Avatar from "discourse/helpers/bound-avatar-template";
 import { popupAjaxError } from "discourse/lib/ajax-error";
 import Group from "discourse/models/group";
 import I18n from "discourse-i18n";
+import i18n from "discourse-common/helpers/i18n";
 import AdminUser from "admin/models/admin-user";
 import ComboBox from "select-kit/components/combo-box";
 import GroupChooser from "select-kit/components/group-chooser";
@@ -26,6 +28,7 @@ import DTooltip from "float-kit/components/d-tooltip";
 import WorkflowStepListEditor from "./workflow-step-list-editor";
 
 export default class WorkflowEditor extends Component {
+  @service adminPluginNavManager;
   @service router;
   @service store;
   @service dialog;
@@ -122,6 +125,10 @@ export default class WorkflowEditor extends Component {
   }
 
   <template>
+    <DBreadcrumbsItem
+      @path="/admin/plugins/{{this.adminPluginNavManager.currentPlugin.name}}/workflows/{{@model.id}}"
+      @label={{i18n "admin.discourse_workflow.workflows.workflow.short_title"}}
+    />
     <BackButton
       @route="adminPlugins.show.discourse-workflow-workflows"
       @label="admin.discourse_workflow.workflows.back"
