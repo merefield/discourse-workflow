@@ -4,9 +4,6 @@ module ::DiscourseWorkflow
   class WorkflowStepOption < ActiveRecord::Base
     self.table_name = 'workflow_step_options'
     belongs_to :workflow_step
-
-    has_one :workflow_option
-
-   # validates :post_id, presence: true, uniqueness: true
+    belongs_to :workflow_option
   end
 end

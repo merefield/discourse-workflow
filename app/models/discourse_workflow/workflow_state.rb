@@ -5,7 +5,5 @@ module ::DiscourseWorkflow
     self.table_name = 'workflow_states'
     belongs_to :workflow
     belongs_to :workflow_step
-
-     # validates :post_id, presence: true, uniqueness: true
   end
 end

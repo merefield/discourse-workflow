@@ -4,8 +4,6 @@ module ::DiscourseWorkflow
   class Workflow < ActiveRecord::Base
     self.table_name = 'workflows'
 
-   # validates :post_id, presence: true, uniqueness: true
-
     # before_validation :generate_unique_slug
 
     before_validation :ensure_slug
@@ -15,6 +13,7 @@ module ::DiscourseWorkflow
     validates :slug, presence: true, uniqueness: true
 
     has_many :workflow_step, dependent: :destroy
+    has_many :workflow_state
 
     scope :ordered, -> { order("lower(name) ASC") }
  

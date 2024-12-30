@@ -120,17 +120,11 @@ after_initialize do
   end
   add_to_class(:topic, :workflow_step_options) do 
     DiscourseWorkflow::WorkflowState
-      .joins(workflow_step: :workflow_step_option)
+      .joins(workflow_step: { workflow_step_option: :workflow_option })
       .where(topic_id: self.id)
-      .select('workflow_step_options.slug')
+      .select('workflow_options.slug')
       .map(&:slug)
   end
-      
-      
-  # add_to_class(:topic, :buttons) do |self|
-    
-    
-    # { WorkflowState.find_by(topic_id: self.id)&.workflow&.workflow_step_id }
 
   add_to_serializer(:topic_view, :workflow_slug, include_condition: -> { object.topic.workflow_slug.present? }) do
     object.topic.workflow_slug
