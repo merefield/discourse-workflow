@@ -49,6 +49,7 @@ module DiscourseWorkflow
       end
 
       def edit
+        byebug
       end
 
       def update

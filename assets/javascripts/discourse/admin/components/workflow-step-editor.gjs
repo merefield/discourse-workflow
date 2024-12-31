@@ -100,12 +100,8 @@ export default class WorkflowStepEditor extends Component {
   <template>
     {{log this}}
     <AdvancedBackButton
-      {{!-- @route="adminPlugins.show.discourse-workflow-workflows.edit {{@currentWorkflowStep.workflow_id}}" --}}
       @route="adminPlugins.show.discourse-workflow-workflows.edit"
-      {{!-- @workflow_id={{@workflow.id}} --}}
-      {{!-- @model={{@workflow}} --}}
       @model={{@currentWorkflowStep.workflow_id}}
-      {{!-- @label="admin.discourse_workflow.workflows.back" --}}
     />
     <form
       class="form-horizontal workflow-step-editor"

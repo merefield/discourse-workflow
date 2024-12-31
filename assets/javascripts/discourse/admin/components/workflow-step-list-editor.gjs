@@ -19,6 +19,7 @@ import DButton from "discourse/components/d-button";
 import I18n from "discourse-i18n";
 import didInsert from "@ember/render-modifiers/modifiers/did-insert";
 import didUpdate from "@ember/render-modifiers/modifiers/did-update";
+import WorkflowLinkButton from "./workflow-link-button";
 
 export default class WorkflowStepsListEditor extends Component {
   @service adminPluginNavManager;
@@ -165,11 +166,17 @@ export default class WorkflowStepsListEditor extends Component {
             </tbody>
           </table>
         {{else}}
-          <DButton
+        {{log @workflow.id}}
+          <WorkflowLinkButton
+            @route="adminPlugins.show.discourse-workflow-workflows.steps.new"
+            @label="admin.discourse_workflow.workflows.steps.new"
+            @model={{@workflow.id}}
+          />
+          {{!-- <DButton
             class="btn-primary workflow-editor__save"
             @action={{this.newStep}}
             @disabled={{this.isSaving}}
-          >{{I18n.t "admin.discourse_workflow.workflows.steps.new"}}</DButton>
+          >{{I18n.t "admin.discourse_workflow.workflows.steps.new"}}</DButton> --}}
         {{/if}}
       {{/if}}
     </section>
