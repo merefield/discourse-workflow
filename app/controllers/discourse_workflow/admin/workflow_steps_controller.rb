@@ -24,7 +24,6 @@ module DiscourseWorkflow
       end
 
       def new
-        byebug
         workflow_step = WorkflowStep.new(workflow_step_params)
         if workflow_step.save
           render json: {
@@ -37,9 +36,6 @@ module DiscourseWorkflow
       end
 
       def create
-        byebug
-        # @workflow_step = @workflow.workflow_steps.build(workflow_step_params)
-        # @workflow_step.save!
         workflow_step = WorkflowStep.new(workflow_step_params)
         if !workflow_step.workflow_step_id.present?
           if WorkflowStep.count == 0 || WorkflowStep.where(workflow_id: workflow_step.workflow_id).count == 0
@@ -59,7 +55,6 @@ module DiscourseWorkflow
       end
 
       def edit
-        byebug
       end
 
       def update

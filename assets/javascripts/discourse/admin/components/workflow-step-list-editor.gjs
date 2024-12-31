@@ -176,6 +176,7 @@ export default class WorkflowStepsListEditor extends Component {
               {{/each}}
             </tbody>
           </table>
+          {{/if}}
           <WorkflowLinkButton
             @route="adminPlugins.show.discourse-workflow-workflows.steps.new"
             @label="admin.discourse_workflow.workflows.steps.new"
@@ -189,7 +190,6 @@ export default class WorkflowStepsListEditor extends Component {
             @icon="plus"
             class="workflow-step-list-editor__new-button"
           /> --}}
-        {{else}}
           {{!-- <WorkflowDeepLinkButton
             @route="adminPlugins.show.discourse-workflow-workflows.steps.new"
             @label="admin.discourse_workflow.workflows.steps.new"
@@ -201,7 +201,7 @@ export default class WorkflowStepsListEditor extends Component {
             @action={{this.newStep}}
             @disabled={{this.isSaving}}
           >{{I18n.t "admin.discourse_workflow.workflows.steps.new"}}</DButton> --}}
-        {{/if}}
+
       {{/if}}
     </section>
   </template>
