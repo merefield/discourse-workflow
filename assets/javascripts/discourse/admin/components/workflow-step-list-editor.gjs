@@ -20,6 +20,7 @@ import I18n from "discourse-i18n";
 import didInsert from "@ember/render-modifiers/modifiers/did-insert";
 import didUpdate from "@ember/render-modifiers/modifiers/did-update";
 import WorkflowLinkButton from "./workflow-link-button";
+import WorkflowDeepLinkButton from "./workflow-deep-link-button";
 
 export default class WorkflowStepsListEditor extends Component {
   @service adminPluginNavManager;
@@ -43,12 +44,21 @@ export default class WorkflowStepsListEditor extends Component {
   //   }
   // }
 
-  @action
-  newStep() {
-    // this.showStepForm = true;
-    this.currentWorkflowStep = this.store.createRecord("workflow-step", {
-      workflow_id: this.args.workflow.id,
-    });
+  // @action
+  // newStep() {
+  //   // this.showStepForm = true;
+  //   this.currentWorkflowStep = this.store.createRecord("workflow-step", {
+  //     workflow_id: this.args.workflow.id,
+  //   });
+  // }
+
+  
+  get newStep() {
+    debugger;
+  //   // this.showStepForm = true;
+    return this.store.createRecord("workflow-step", {
+       workflow_id: this.args.workflow.id,
+   });
   }
 
   // get workflowStepRecord() {
@@ -97,8 +107,9 @@ export default class WorkflowStepsListEditor extends Component {
         >
           {{!-- <:actions as |actions|>
             <actions.Primary
-              @label="discourse_workflow.workflows.new"
-              @route="adminPlugins.show.discourse-workflows.new"
+              @label="admin.discourse_workflow.workflows.steps.new"
+              @route="adminPlugins.show.discourse-workflow-workflows.steps.new"
+              @models={{array @workflow.id}}
               @icon="plus"
               class="workflow-step-list-editor__new-button"
             />
@@ -157,7 +168,7 @@ export default class WorkflowStepsListEditor extends Component {
                   <td class="d-admin-row__controls">
                     <LinkTo
                       @route="adminPlugins.show.discourse-workflow-workflows.steps.edit"
-                      @model={{step}}
+                      @models={{array @workflow.id step}}
                       class="btn btn-text btn-small"
                     >{{i18n "admin.discourse_workflow.workflows.edit"}} </LinkTo>
                   </td>
@@ -165,13 +176,26 @@ export default class WorkflowStepsListEditor extends Component {
               {{/each}}
             </tbody>
           </table>
-        {{else}}
-        {{log @workflow.id}}
           <WorkflowLinkButton
             @route="adminPlugins.show.discourse-workflow-workflows.steps.new"
             @label="admin.discourse_workflow.workflows.steps.new"
-            @model={{@workflow.id}}
+            @model={{@workflow}}
+            {{!-- @workflow_id={{@workflow.id}} --}}
           />
+          {{!-- <LinkTo
+            @label="admin.discourse_workflow.workflows.steps.new"
+            @route="adminPlugins.show.discourse-workflow-workflows.steps.new"
+            @model={{@workflow.id}}
+            @icon="plus"
+            class="workflow-step-list-editor__new-button"
+          /> --}}
+        {{else}}
+          {{!-- <WorkflowDeepLinkButton
+            @route="adminPlugins.show.discourse-workflow-workflows.steps.new"
+            @label="admin.discourse_workflow.workflows.steps.new"
+            @models={{array @workflow.id ""}}
+            @workflow_id={{@workflow.id}}
+          /> --}}
           {{!-- <DButton
             class="btn-primary workflow-editor__save"
             @action={{this.newStep}}

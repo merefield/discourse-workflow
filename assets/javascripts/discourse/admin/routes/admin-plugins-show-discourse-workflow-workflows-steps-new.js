@@ -5,11 +5,14 @@ export default class AdminPluginsShowDiscourseWorkflowWorkflowStepsNew extends D
     debugger;
     // Create a new workflow step record
 
-    const workflowSteps = this.modelFor("adminPlugins.show.discourse-workflow-workflows-steps");
+    const workflow = this.modelFor("adminPlugins.show.discourse-workflow-workflows-steps");
 
     debugger;
 
-    const record = this.store.createRecord("workflow-step");
+    const record = this.store.createRecord("workflow-step", {
+      workflow_id: workflow.id,
+      workflow_step_id: workflow.workflow_steps[workflow.workflow_steps.length - 1].workflow_step_id + 1,
+    });
 
     // Attach it to the current workflow
     // const workflow = this.modelFor("adminPlugins.show.discourse-workflow-workflows");

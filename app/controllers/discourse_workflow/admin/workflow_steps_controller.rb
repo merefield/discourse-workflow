@@ -24,10 +24,20 @@ module DiscourseWorkflow
       end
 
       def new
-        @workflow_step = @workflow.workflow_steps.build
+        byebug
+        workflow_step = WorkflowStep.new(workflow_step_params)
+        if workflow_step.save
+          render json: {
+            workflow_step: WorkflowStepSerializer.new(workflow_step, root: false),
+             },
+          status: :created
+        else
+          render_json_error workflow_step
+        end
       end
 
       def create
+        byebug
         # @workflow_step = @workflow.workflow_steps.build(workflow_step_params)
         # @workflow_step.save!
         workflow_step = WorkflowStep.new(workflow_step_params)

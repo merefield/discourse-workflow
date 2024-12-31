@@ -2,7 +2,6 @@ import DiscourseRoute from "discourse/routes/discourse";
 
 export default class AdminPluginsShowDiscourseWorkflowWorkflowEdit extends DiscourseRoute {
   async model(params) {
-    debugger;
     const allWorkflows = await this.modelFor(
       "adminPlugins.show.discourse-workflow-workflows"
     ).content;

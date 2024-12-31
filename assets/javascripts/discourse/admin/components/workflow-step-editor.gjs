@@ -20,7 +20,7 @@ import concatClass from "discourse/helpers/concat-class";
 import { popupAjaxError } from "discourse/lib/ajax-error";
 import i18n from "discourse-common/helpers/i18n";
 import AdminConfigAreaEmptyList from "admin/components/admin-config-area-empty-list";
-import AdvancedBackButton from "./advanced-back-button";
+import WorkflowBackButton from "./workflow-back-button";
 import I18n from "discourse-i18n";
 
 export default class WorkflowStepEditor extends Component {
@@ -49,7 +49,9 @@ export default class WorkflowStepEditor extends Component {
 
   @action
   async save() {
+    debugger;
     const isNew = this.args.currentWorkflowStep.isNew;
+    debugger;
     this.isSaving = true;
 
     const backupModel = this.args.currentWorkflowStep.workingCopy();
@@ -98,8 +100,7 @@ export default class WorkflowStepEditor extends Component {
   }
 
   <template>
-    {{log this}}
-    <AdvancedBackButton
+    <WorkflowBackButton
       @route="adminPlugins.show.discourse-workflow-workflows.edit"
       @model={{@currentWorkflowStep.workflow_id}}
     />

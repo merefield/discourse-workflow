@@ -5,7 +5,17 @@ export default class Adapter extends RestAdapter {
 
   basePath(store, type, findArgs) {
     debugger;
-    return `/admin/plugins/discourse-workflow/workflows/${findArgs.workflow_id}/`;
+
+    if (findArgs) {
+      if (typeof findArgs === "object") {
+        return `/admin/plugins/discourse-workflow/workflows/${findArgs.workflow_id}/`
+      } else {
+        return `/admin/plugins/discourse-workflow/`
+        // return `/admin/plugins/discourse-workflow/workflows/${findArgs}/`
+      }
+    } else {
+      return "/admin/plugins/discourse-workflow/";
+    }
   }
 
   pathFor(store, type, findArgs) {
@@ -19,7 +29,7 @@ export default class Adapter extends RestAdapter {
   }
 
   apiNameFor() {
-    debugger;
+    // debugger;
     return "workflow_step";
   }
 }
