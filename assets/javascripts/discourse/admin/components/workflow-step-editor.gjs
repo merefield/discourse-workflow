@@ -49,9 +49,7 @@ export default class WorkflowStepEditor extends Component {
 
   @action
   async save() {
-    debugger;
     const isNew = this.args.currentWorkflowStep.isNew;
-    debugger;
     this.isSaving = true;
 
     const backupModel = this.args.currentWorkflowStep.workingCopy();
@@ -89,6 +87,11 @@ export default class WorkflowStepEditor extends Component {
       message: I18n.t("admin.discourse_workflow.workflows.steps.confirm_delete"),
       didConfirm: () => {
         return this.args.currentWorkflowStep.destroyRecord().then(() => {
+          this.toasts.success({
+            data: { message: I18n.t("admin.discourse_workflow.workflows.steps.deleted") },
+            duration: 2000,
+          });
+
           // this.args.workflowSteps.removeObject(this.args.currentWorkflowStep);
           this.router.transitionTo(
             "adminPlugins.show.discourse-workflow-workflows.edit",

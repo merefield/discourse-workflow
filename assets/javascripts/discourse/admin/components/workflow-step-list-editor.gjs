@@ -26,50 +26,15 @@ export default class WorkflowStepsListEditor extends Component {
   @service adminPluginNavManager;
   @service store;
   @tracked currentWorkflowStep = this.args.currentWorkflowStep;
-  // @tracked showStepForm = false;
   @tracked workflowSteps = [];
   @tracked workflowStepsPresent = false;
 
-  // @action
-  // async toggleEnabled(workflow) {
-  //   const oldValue = workflow.enabled;
-  //   const newValue = !oldValue;
 
-  //   try {
-  //     workflow.set("enabled", newValue);
-  //     await workflow.save();
-  //   } catch (err) {
-  //     workflow.set("enabled", oldValue);
-  //     popupAjaxError(err);
-  //   }
-  // }
-
-  // @action
-  // newStep() {
-  //   // this.showStepForm = true;
-  //   this.currentWorkflowStep = this.store.createRecord("workflow-step", {
-  //     workflow_id: this.args.workflow.id,
-  //   });
-  // }
-
-  
   get newStep() {
-    debugger;
-  //   // this.showStepForm = true;
     return this.store.createRecord("workflow-step", {
        workflow_id: this.args.workflow.id,
    });
   }
-
-  // get workflowStepRecord() {
-  //   debugger;
-  //   if (this.args.action === "edit") {
-  //     return this.args.currentWorkflowStep;
-  //   } else {
-  //     return this.currentWorkflowStep 
-  //   }
-  //   // return this.store.peekRecord("workflow-step", this.currentWorkflowStep.id);
-  // }
 
   @bind
   loadSteps() {
@@ -80,13 +45,6 @@ export default class WorkflowStepsListEditor extends Component {
       });
     }
   }
-
-  // workflowSteps() {
-  //   const steps = this.store.findAll("workflow-step", { workflow_id: this.args.workflow.id });
-  //   debugger;
-  //   console.log(steps);
-  //   return steps;
-  // }
 
   <template>
     <DBreadcrumbsItem

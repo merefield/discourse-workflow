@@ -32,7 +32,6 @@ export default class WorkflowStep extends RestModel {
   }
 
   createProperties() {
-    debugger;
     let attrs = this.getProperties(CREATE_ATTRIBUTES);
     return attrs;
   }
