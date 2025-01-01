@@ -1,7 +1,9 @@
 import DiscourseRoute from "discourse/routes/discourse";
 
 export default class AdminPluginsShowDiscourseWorkflowWorkflowStepOptionsNew extends DiscourseRoute {
+
   async model(params) {
+    debugger;
     // Get the parent workflow step
     const workflowStep = this.modelFor("adminPlugins.show.discourse-workflow-workflows-steps");
     // Create a new workflow step record

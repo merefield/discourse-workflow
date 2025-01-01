@@ -127,13 +127,21 @@ export default class WorkflowStepsListEditor extends Component {
     this.workflowSteps = this.workflowSteps.sort((a, b) => a.position - b.position);
   }
 
+  isfirstStep(step, length) {
+    return step.position === 1;
+  }
+
+  islastStep(step, length) {
+    return step.position === length;
+  }
+
   <template>
     <DBreadcrumbsItem
       @path="/admin/plugins/{{this.adminPluginNavManager.currentPlugin.name}}/workflows/steps"
       @label={{i18n "admin.discourse_workflow.workflows.steps.short_title"}}
     />
     <section class="workflow-step-list-editor__current admin-detail pull-left"
-    {{didInsert this.loadSteps}}>
+      {{didInsert this.loadSteps}}>
       {{#if this.currentWorkflowStep}}
         <WorkflowStepEditor @currentWorkflowStep={{this.currentWorkflowStep}} @workflow={{@workflow}}/>
       {{else}}
@@ -214,7 +222,23 @@ export default class WorkflowStepsListEditor extends Component {
                     </div>
                   </td>
                   <td class="d-admin-row__controls">
-                    <DButton
+                    {{#unless (this.isfirstStep step this.workflowSteps.length)}}
+                      <DButton
+                        class="workflow-editor__ai_enabled"
+                        @icon="arrow-up"
+                        @title="admin.discourse_workflow.workflows.steps.move_up"
+                        {{on "click" (fn this.moveUp step)}}
+                      />
+                    {{/unless}}
+                    {{#unless (this.islastStep step this.workflowSteps.length)}}
+                      <DButton
+                        class="workflow-editor__ai_enabled"
+                        @icon="arrow-down"
+                        @title="admin.discourse_workflow.workflows.steps.move_down"
+                        {{on "click" (fn this.moveDown step)}}
+                      />
+                    {{/unless}}
+                    {{!-- <DButton
                       class="workflow-editor__ai_enabled"
                       @icon="arrow-up"
                       @title="admin.discourse_workflow.workflows.steps.move_up"
@@ -225,7 +249,7 @@ export default class WorkflowStepsListEditor extends Component {
                       @icon="arrow-down"
                       @title="admin.discourse_workflow.workflows.steps.move_down"
                       {{on "click" (fn this.moveDown  step)}}
-                    />
+                    /> --}}
                     <LinkTo
                       @route="adminPlugins.show.discourse-workflow-workflows.steps.edit"
                       @models={{array @workflow.id step}}

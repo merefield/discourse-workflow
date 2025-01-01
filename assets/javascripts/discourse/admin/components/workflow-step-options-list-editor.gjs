@@ -51,6 +51,8 @@ export default class WorkflowStepOptionsListEditor extends Component {
   }
 
   <template>
+
+    asdflasdkjflaksdfjlskdjf
     {{!-- <DBreadcrumbsItem
       @path="/admin/plugins/{{this.adminPluginNavManager.currentPlugin.name}}/workflows/steps"
       @label={{i18n "admin.discourse_workflow.workflows.steps.short_title"}}

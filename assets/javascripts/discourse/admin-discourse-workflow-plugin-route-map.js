@@ -10,6 +10,10 @@ export default {
       this.route("steps", { path: "/:workflow_id/workflow_steps" }, function () {
         this.route("new"); // New workflow step route
         this.route("edit", { path: "/:step_id/edit" }); // Edit workflow step route
+        this.route("options", { path: "/:step_id/workflow_options" }, function () {
+          this.route("new"); // New workflow step option route
+          this.route("edit", { path: "/:option_id/edit" }); // Edit workflow step option route
+        }) 
       });
     });
   },

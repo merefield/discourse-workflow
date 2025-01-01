@@ -23,6 +23,7 @@ import i18n from "discourse-common/helpers/i18n";
 import AdminConfigAreaEmptyList from "admin/components/admin-config-area-empty-list";
 import WorkflowBackButton from "./workflow-back-button";
 import I18n from "discourse-i18n";
+import WorkflowStepOptionsListEditor from "./workflow-step-options-list-editor";
 
 export default class WorkflowStepEditor extends Component {
   @service adminPluginNavManager;
@@ -126,6 +127,10 @@ export default class WorkflowStepEditor extends Component {
     }
   }
 
+  get showStepOptions() {
+    return this.args.currentWorkflowStep.id > 0;
+  }
+
   <template>
     <WorkflowBackButton
       @route="adminPlugins.show.discourse-workflow-workflows.edit"
@@ -185,13 +190,17 @@ export default class WorkflowStepEditor extends Component {
           disabled={{not this.editingModel.ai_enabled}}
         />
       </div>
-      {{!-- {{#unless this.editingModel.system}}
-        <AiPersonaToolOptions
-          @persona={{this.editingModel}}
-          @tools={{this.selectedToolNames}}
-          @allTools={{@personas.resultSetMeta.tools}}
-        />
-      {{/unless}} --}}
+      {{#if this.showStepOptions}}
+        <div class="control-group">
+          {{!-- <label>{{I18n.t "admin.discourse_workflow.workflows.steps"}}</label> --}}
+          <WorkflowStepOptionsListEditor
+            class="workflow-editor__steps_options"
+            @workflowStep={{@currentWorkflowStep}}
+            @disabled={{this.editingModel.system}}
+            @onChange={{this.stepOptionsChanged}}
+          />
+        </div>
+      {{/if}}
       <div class="control-group workflow-editor__action_panel">
         <DButton
           class="btn-primary workflow-editor__save"
