@@ -7,7 +7,7 @@ export default class AdminPluginsShowDiscourseWorkflowWorkflowStepsNew extends D
     // Create a new workflow step record
     const record = this.store.createRecord("workflow-step", {
       workflow_id: workflow.id,
-      workflow_step_id:  workflow.workflow_steps.length > 0 ? workflow.workflow_steps[workflow.workflow_steps.length - 1].workflow_step_id + 1 : 1,
+      position:  workflow.workflow_steps.length > 0 ? workflow.workflow_steps[workflow.workflow_steps.length - 1].position + 1 : 1,
     });
 
     // Attach it to the parent workflow to current step

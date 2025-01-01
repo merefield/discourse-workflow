@@ -9,9 +9,9 @@ module DiscourseWorkflow
 
       def index
         if @workflow.present?
-          @workflow_steps = WorkflowStep.where(workflow_id: @workflow.id).order(:workflow_step_id)
+          @workflow_steps = WorkflowStep.where(workflow_id: @workflow.id).order(:position)
         else
-          @workflow_steps = WorkflowStep.all.order(:workflow_step_id)
+          @workflow_steps = WorkflowStep.all.order(:position)
         end
         render_json_dump (
           { workflow_steps:
@@ -37,11 +37,11 @@ module DiscourseWorkflow
 
       def create
         workflow_step = WorkflowStep.new(workflow_step_params)
-        if !workflow_step.workflow_step_id.present?
+        if !workflow_step.position.present?
           if WorkflowStep.count == 0 || WorkflowStep.where(workflow_id: workflow_step.workflow_id).count == 0
-            workflow_step.workflow_step_id = 1
+            workflow_step.position = 1
           else
-            workflow_step.workflow_step_id = WorkflowStep.maximum(:workflow_step_id) + 1
+            workflow_step.position = WorkflowStep.maximum(:position) + 1
           end
         end
         if workflow_step.save
@@ -92,7 +92,7 @@ module DiscourseWorkflow
       end
 
       def workflow_step_params
-        params.require(:workflow_step).permit(:workflow_id, :name, :description, :category_id, :other_attributes...)
+        params.require(:workflow_step).permit(:workflow_id, :position, :name, :description, :category_id, :ai_enabled, :ai_prompt, :other_attributes...)
       end
 
       def ensure_admin

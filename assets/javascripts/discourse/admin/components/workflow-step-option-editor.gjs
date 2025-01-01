@@ -1,6 +1,5 @@
 import Component from "@glimmer/component";
 import { fn, hash } from "@ember/helper";
-import not from "truth-helpers/helpers/not";
 import { on } from "@ember/modifier";
 import { action } from "@ember/object";
 import { cached, tracked } from "@glimmer/tracking";
@@ -24,7 +23,7 @@ import AdminConfigAreaEmptyList from "admin/components/admin-config-area-empty-l
 import WorkflowBackButton from "./workflow-back-button";
 import I18n from "discourse-i18n";
 
-export default class WorkflowStepEditor extends Component {
+export default class WorkflowStepOptionEditor extends Component {
   @service adminPluginNavManager;
   @service router;
   @service store;
@@ -39,8 +38,8 @@ export default class WorkflowStepEditor extends Component {
 
   @action
   updateModel() {
-    this.editingModel = this.args.currentWorkflowStep.workingCopy();
-    this.showDelete = !this.args.currentWorkflowStep.isNew && !this.args.currentWorkflowStep.system;
+    this.editingModel = this.args.currentWorkflowStepOption.workingCopy();
+    this.showDelete = !this.args.currentWorkflowStepOption.isNew && !this.args.currentWorkflowStepOption.system;
   }
 
   @action
@@ -50,21 +49,21 @@ export default class WorkflowStepEditor extends Component {
 
   @action
   async save() {
-    const isNew = this.args.currentWorkflowStep.isNew;
+    const isNew = this.args.currentWorkflowStepOption.isNew;
     this.isSaving = true;
 
-    const backupModel = this.args.currentWorkflowStep.workingCopy();
-    debugger;
-    this.args.currentWorkflowStep.setProperties(this.editingModel);
+    const backupModel = this.args.currentWorkflowStepOption.workingCopy();
+
+    this.args.currentWorkflowStepOption.setProperties(this.editingModel);
     try {
-      await this.args.currentWorkflowStep.save();
+      await this.args.currentWorkflowStepOption.save();
       this.isSaving = false;
       // this.#sortPersonas();
       // if (isNew) {
-      //   this.args.workflow_steps.addObject(this.args.currentWorkflowStep);
+      //   this.args.workflow_steps.addObject(this.args.currentWorkflowStepOption);
       //   this.router.transitionTo(
       //     "adminPlugins.show.discourse-workflow-workflows.steps.edit",
-      //     this.args.currentWorkflowStep
+      //     this.args.currentWorkflowStepOption
       //   );
       // } else {
         this.toasts.success({
@@ -73,7 +72,7 @@ export default class WorkflowStepEditor extends Component {
         });
       // }
     } catch (e) {
-      this.args.currentWorkflowStep.setProperties(backupModel);
+      this.args.currentWorkflowStepOption.setProperties(backupModel);
       popupAjaxError(e);
     } finally {
       later(() => {
@@ -87,54 +86,31 @@ export default class WorkflowStepEditor extends Component {
     return this.dialog.confirm({
       message: I18n.t("admin.discourse_workflow.workflows.steps.confirm_delete"),
       didConfirm: () => {
-        return this.args.currentWorkflowStep.destroyRecord().then(() => {
+        return this.args.currentWorkflowStepOption.destroyRecord().then(() => {
           this.toasts.success({
             data: { message: I18n.t("admin.discourse_workflow.workflows.steps.deleted") },
             duration: 2000,
           });
 
-          // this.args.currentWorkflowSteps.removeObject(this.args.currentWorkflowStep);
+          // this.args.workflowSteps.removeObject(this.args.currentWorkflowStepOption);
           this.router.transitionTo(
             "adminPlugins.show.discourse-workflow-workflows.edit",
-            this.args.currentWorkflowStep.workflow_id
+            this.args.currentWorkflowStepOption.workflow_id
           );
         });
       },
     });
   }
 
-  @action
-  async toggleAiEnabled() {
-    await this.toggleField("ai_enabled");
-  }
-
-  async toggleField(field, sortWorkflowSteps) {
-    this.args.currentWorkflowStep.set(field, !this.args.currentWorkflowStep[field]);
-    this.editingModel.set(field, this.args.currentWorkflowStep[field]);
-    if (!this.args.currentWorkflowStep.isNew) {
-      try {
-        const args = {};
-        args[field] = this.args.currentWorkflowStep[field];
-
-        await this.args.currentWorkflowStep.update(args);
-        if (sortWorkflowSteps) {
-          this.sortWorkflowSteps();
-        }
-      } catch (e) {
-        popupAjaxError(e);
-      }
-    }
-  }
-
   <template>
     <WorkflowBackButton
-      @route="adminPlugins.show.discourse-workflow-workflows.edit"
-      @model={{@currentWorkflowStep.workflow_id}}
+      @route="adminPlugins.show.discourse-workflow-workflows.steps.edit"
+      @model={{@currentWorkflowStepOption.position}}
     />
     <form
       class="form-horizontal workflow-step-editor"
-      {{didUpdate this.updateModel @currentWorkflowStep.id}}
-      {{didInsert this.updateModel @currentWorkflowStep.id}}
+      {{didUpdate this.updateModel @currentWorkflowStepOption.id}}
+      {{didInsert this.updateModel @currentWorkflowStepOption.id}}
     >
       {{!-- <div class="control-group">
         <DToggleSwitch
@@ -170,20 +146,14 @@ export default class WorkflowStepEditor extends Component {
         />
       </div>
       <div class="control-group">
-        <DToggleSwitch
-          class="workflow-editor__enabled"
-          @state={{this.editingModel.ai_enabled}}
-          @label="admin.discourse_workflow.workflows.steps.ai_enabled"
-          {{on "click" this.toggleAiEnabled}}
-        />
-      </div>
-      <div class="control-group">
-        <label>{{I18n.t "admin.discourse_workflow.workflows.steps.ai_prompt"}}</label>
-        <Textarea
-          class="workflow-editor__ai_prompt"
-          @value={{this.editingModel.ai_prompt}}
-          disabled={{not this.editingModel.ai_enabled}}
-        />
+        {{!-- <label>{{I18n.t "admin.discourse_workflow.workflows.steps"}}</label> --}}
+        {{!-- <WorkflowStepListEditor
+          class="workflow-editor__steps"
+          @id={{this.model.id}}
+          @disabled={{this.editingModel.system}}
+          @workflowSteps={{@workflow.workflow_steps}}
+          @onChange={{this.stepsChanged}}
+        /> --}}
       </div>
       {{!-- {{#unless this.editingModel.system}}
         <AiPersonaToolOptions

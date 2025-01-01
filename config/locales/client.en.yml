@@ -21,9 +21,10 @@ en:
           workflow:
             short_title: "Workflow"
           steps:
-            workflow_step_id: "ID"
+            position: "ID"
             category: "Category"
-            step_type: "Type"
+            ai_enabled: "AI Enabled"
+            ai_prompt: "AI Prompt"
             title: "Steps"
             new: "Add a New Step"
             none: "No steps have been added yet."

@@ -44,6 +44,7 @@ after_initialize do
     ../app/serializers/discourse_workflow/workflow_serializer.rb
     ../app/controllers/discourse_workflow/admin/workflows_controller.rb
     ../app/controllers/discourse_workflow/admin/workflow_steps_controller.rb
+    ../app/controllers/discourse_workflow/admin/workflow_step_options_controller.rb
     ../config/routes.rb
     ../lib/discourse_workflow/topic_extension.rb
     ../lib/discourse_workflow/not_midway_validator.rb
@@ -150,9 +151,9 @@ after_initialize do
     topic, opts = params
 
     if SiteSetting.workflow_enabled
-      workflow_step = DiscourseWorkflow::WorkflowStep.find_by(category_id: topic.category_id, workflow_step_id: 1)
+      workflow_step = DiscourseWorkflow::WorkflowStep.find_by(category_id: topic.category_id, position: 1)
       if workflow_step
-        DiscourseWorkflow::WorkflowState.create!(topic_id: topic.id, workflow_id: workflow_step.workflow_id, workflow_step_id: workflow_step.id)
+        DiscourseWorkflow::WorkflowState.create!(topic_id: topic.id, workflow_id: workflow_step.workflow_id, position: workflow_step.id)
       end
     end
   end

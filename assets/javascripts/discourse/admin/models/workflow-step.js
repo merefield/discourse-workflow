@@ -3,11 +3,12 @@ import RestModel from "discourse/models/rest";
 
 const CREATE_ATTRIBUTES = [
   "workflow_id",
-  "workflow_step_id",
+  "position",
   "name",
   "category_id",
   "description",
-  "step_type",
+  "ai_enabled",
+  "ai_prompt"
 ];
 
 export default class WorkflowStep extends RestModel {

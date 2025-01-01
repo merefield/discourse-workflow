@@ -21,6 +21,7 @@ import didInsert from "@ember/render-modifiers/modifiers/did-insert";
 import didUpdate from "@ember/render-modifiers/modifiers/did-update";
 import WorkflowLinkButton from "./workflow-link-button";
 import WorkflowDeepLinkButton from "./workflow-deep-link-button";
+import { sort } from '@ember/object/computed';
 
 export default class WorkflowStepsListEditor extends Component {
   @service adminPluginNavManager;
@@ -29,11 +30,31 @@ export default class WorkflowStepsListEditor extends Component {
   @tracked workflowSteps = [];
   @tracked workflowStepsPresent = false;
 
+  // get sortedSteps() {
+  //   return this.workflowSteps.sort((a, b) => {
+  //     // Replace 'name' with the key you want to sort by
+  //     return a.position > b.position;
+  //   });
+  // }
 
   get newStep() {
     return this.store.createRecord("workflow-step", {
        workflow_id: this.args.workflow.id,
    });
+  }
+
+  @action
+  async toggleAiEnabled(step) {
+    const oldValue = step.ai_enabled;
+    const newValue = !oldValue;
+
+    try {
+      step.set("ai_enabled", newValue);
+      await step.save();
+    } catch (err) {
+      step.set("ai_enabled", oldValue);
+      popupAjaxError(err);
+    }
   }
 
   @bind
@@ -44,6 +65,66 @@ export default class WorkflowStepsListEditor extends Component {
         this.workflowStepsPresent = steps.content.length > 0 ? true : false;
       });
     }
+  }
+
+  @action
+  moveUp(step) {
+    const steps = this.workflowSteps;
+    const index = steps.indexOf(step);
+    if (step.position > 1) {
+      const filteredSteps = steps.filter((s) => s.position < step.position);
+      const previousStep = filteredSteps.length > 1
+        ? filteredSteps.reduce((prev, curr) => (prev.position > curr.position ? prev : curr))
+        : filteredSteps[0] || null;
+      const previousPosition = previousStep ? previousStep.position : step.position - 1;
+      if (previousStep) {
+        try {
+          previousStep.set("position", step.position);
+          previousStep.save();
+        } catch (err) {
+          popupAjaxError(err);
+          return;
+        }
+      }
+      try {
+        step.set("position", previousPosition);
+        step.save();
+      } catch (err) {
+        popupAjaxError(err);
+        return;
+      }
+    }
+    this.workflowSteps = this.workflowSteps.sort((a, b) => a.position - b.position);
+  }
+
+  @action
+  moveDown(step) {
+    const steps = this.workflowSteps;
+    const index = steps.indexOf(step);
+    if (step.position < steps.length) {
+      const filteredSteps = steps.filter((s) => s.position > step.position);
+      const nextStep = filteredSteps.length > 1
+        ? filteredSteps.reduce((prev, curr) => (prev.position < curr.position ? prev : curr))
+        : filteredSteps[0] || null;
+      const nextPosition = nextStep ? nextStep.position : step.position + 1;
+      if (nextStep) {
+        try {
+          nextStep.set("position", step.position);
+          nextStep.save();
+        } catch (err) {
+          popupAjaxError(err);
+          return;
+        }
+      }
+      try {
+        step.set("position", nextPosition);
+        step.save();
+      } catch (err) {
+        popupAjaxError(err);
+        return;
+      }
+    }
+    this.workflowSteps = this.workflowSteps.sort((a, b) => a.position - b.position);
   }
 
   <template>
@@ -78,26 +159,27 @@ export default class WorkflowStepsListEditor extends Component {
           <table class="content-list workflow-step-list-editor d-admin-table">
             <thead>
               <tr>
-                <th>{{i18n "admin.discourse_workflow.workflows.steps.workflow_step_id"}}</th>
+                <th>{{i18n "admin.discourse_workflow.workflows.steps.position"}}</th>
                 <th>{{i18n "admin.discourse_workflow.workflows.steps.name"}}</th>
                 <th>{{i18n "admin.discourse_workflow.workflows.steps.category"}}</th>
                 <th>{{i18n "admin.discourse_workflow.workflows.steps.description"}}</th>
-                <th>{{i18n "admin.discourse_workflow.workflows.steps.step_type"}}</th>
+                <th>{{i18n "admin.discourse_workflow.workflows.steps.ai_enabled"}}</th>
+                <th>{{i18n "admin.discourse_workflow.workflows.steps.ai_prompt"}}</th>
                 <th></th>
               </tr>
             </thead>
             <tbody>
               {{#each this.workflowSteps as |step|}}
                 <tr
-                  data-workflow-step-id={{step.workflow_step_id}}
+                  data-workflow-step-id={{step.position}}
                   class={{concatClass
                     "workflow-step-list__row d-admin-row__content"
                   }}
                 >
                   <td class="d-admin-row__overview">
-                    <div class="workflow-step-list__workflow_step_id">
+                    <div class="workflow-step-list__position">
                       <strong>
-                        {{step.workflow_step_id}}
+                        {{step.position}}
                       </strong>
                     </div>
                   </td>
@@ -119,11 +201,31 @@ export default class WorkflowStepsListEditor extends Component {
                     </div>
                   </td>
                   <td class="d-admin-row__overview">
-                    <div class="workflow-step-list__step_type">
-                      {{step.step_type}}
+                    <DToggleSwitch
+                      class="workflow-editor__ai_enabled"
+                      @state={{step.ai_enabled}}
+                      @label="admin.discourse_workflow.workflows.enabled"
+                      {{on "click" (fn this.toggleAiEnabled  step)}}
+                    />
+                  </td>
+                  <td class="d-admin-row__overview">
+                    <div class="workflow-step-list__ai_prompt">
+                      {{step.ai_prompt}}
                     </div>
                   </td>
                   <td class="d-admin-row__controls">
+                    <DButton
+                      class="workflow-editor__ai_enabled"
+                      @icon="arrow-up"
+                      @title="admin.discourse_workflow.workflows.steps.move_up"
+                      {{on "click" (fn this.moveUp  step)}}
+                    />
+                    <DButton
+                      class="workflow-editor__ai_enabled"
+                      @icon="arrow-down"
+                      @title="admin.discourse_workflow.workflows.steps.move_down"
+                      {{on "click" (fn this.moveDown  step)}}
+                    />
                     <LinkTo
                       @route="adminPlugins.show.discourse-workflow-workflows.steps.edit"
                       @models={{array @workflow.id step}}

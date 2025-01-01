@@ -4,11 +4,12 @@ class CreateWorkflowSteps < ActiveRecord::Migration[7.1]
     create_table :workflow_steps do |t|
       t.references :workflow, foreign_key: true
       t.references :category, foreign_key: true
-      t.integer :workflow_step_id
+      t.integer :position
       t.string :slug
       t.string :name
-      t.string :description
-      t.string :step_type
+      t.text :description
+      t.boolean :ai_enabled, default: false
+      t.text :ai_prompt
 
       t.timestamps
     end

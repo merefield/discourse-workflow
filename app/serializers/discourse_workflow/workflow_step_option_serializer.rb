@@ -3,7 +3,7 @@ module DiscourseWorkflow
 
     attributes :id,
               :workflow_option_id,
-              :workflow_step_id,
+              :position,
               :target_step_id
 
     def name

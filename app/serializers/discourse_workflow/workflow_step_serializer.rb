@@ -4,11 +4,12 @@ module DiscourseWorkflow
     attributes :id,
               :workflow_id,
               :category_id,
-              :workflow_step_id,
+              :position,
               :slug,
               :name,
               :description,
-              :step_type
+              :ai_enabled,
+              :ai_prompt
 
     has_many :workflow_step_option, serializer: WorkflowStepOptionSerializer, embed: :object
     has_one :category, serializer: CategorySerializer, embed: :object
