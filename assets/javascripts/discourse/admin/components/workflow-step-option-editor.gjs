@@ -22,6 +22,8 @@ import i18n from "discourse-common/helpers/i18n";
 import AdminConfigAreaEmptyList from "admin/components/admin-config-area-empty-list";
 import WorkflowBackButton from "./workflow-back-button";
 import I18n from "discourse-i18n";
+import DropdownSelectBox from "select-kit/components/dropdown-select-box";
+
 
 export default class WorkflowStepOptionEditor extends Component {
   @service adminPluginNavManager;
@@ -102,6 +104,14 @@ export default class WorkflowStepOptionEditor extends Component {
     });
   }
 
+  get availableSteps() {
+     const steps = this.args.workflowSteps || []
+     const filteredSteps = steps
+        .map(({ position, name, description }) => ({ id: position, name, description }))
+        .filter(step => step.id !== this.args.workflowStep.position);
+    return filteredSteps;
+  }
+
   <template>
     <WorkflowBackButton
       @route="adminPlugins.show.discourse-workflow-workflows.steps.edit"
@@ -122,29 +132,42 @@ export default class WorkflowStepOptionEditor extends Component {
       </div> --}}
       <div class="control-group">
         <label>{{I18n.t "admin.discourse_workflow.workflows.name"}}</label>
-        <Input
-          class="workflow-editor__name"
-          @type="text"
+        <DropdownSelectBox
+          {{!-- @id={{concat "topic-footer-dropdown-" actionable.id}} --}}
           @value={{this.editingModel.name}}
-          disabled={{this.editingModel.system}}
+          @content={{@workflowOptions}}
+          @onChange={{fn (mut this.editingModel.name)}}
+          @options={{hash
+            disabled=this.editingModel.system
+            none="admin.discourse_workflow.workflows.steps.options.select_an_option"
+          }}
         />
+                              {{!-- none=actionable.noneItem --}}
+          {{!-- class={{concat-class "topic-footer-dropdown" actionable.classNames}} --}}
       </div>
       <div class="control-group">
+        <label>{{I18n.t "admin.discourse_workflow.workflows.steps.options.target_step"}}</label>
+        <DropdownSelectBox
+          {{!-- @id={{concat "topic-footer-dropdown-" actionable.id}} --}}
+          @value={{this.editingModel.target_step_position}}
+          @content={{this.availableSteps}}
+          @onChange={{fn (mut this.editingModel.target_step_position)}}
+          @options={{hash
+            disabled=this.editingModel.system
+            none="admin.discourse_workflow.workflows.steps.options.no_target_step"
+          }}
+        />
+                              {{!-- none=actionable.noneItem --}}
+          {{!-- class={{concat-class "topic-footer-dropdown" actionable.classNames}} --}}
+      </div>
+      {{!-- <div class="control-group">
       <label>{{I18n.t "admin.discourse_workflow.workflows.steps.category"}}</label>
         <CategoryChooser
           @value={{this.editingModel.category_id}}
           @onChangeCategory={{fn (mut this.editingModel.category_id)}}
           disabled={{this.editingModel.system}}
         />
-      </div>
-      <div class="control-group">
-        <label>{{I18n.t "admin.discourse_workflow.workflows.description"}}</label>
-        <Textarea
-          class="workflow-editor__description"
-          @value={{this.editingModel.description}}
-          disabled={{this.editingModel.system}}
-        />
-      </div>
+      </div> --}}
       <div class="control-group">
         {{!-- <label>{{I18n.t "admin.discourse_workflow.workflows.steps"}}</label> --}}
         {{!-- <WorkflowStepListEditor

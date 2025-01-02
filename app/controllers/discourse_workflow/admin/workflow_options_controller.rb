@@ -4,7 +4,7 @@ module DiscourseWorkflow
       requires_plugin ::DiscourseWorkflow::PLUGIN_NAME
 
       def index
-        workflow_options = WorkflowStepOption.all.order(:id)
+        workflow_options = WorkflowOption.all.order(:id)
         render_json_dump (
           { workflow_options:
           ActiveModel::ArraySerializer.new(workflow_options, 

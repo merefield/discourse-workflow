@@ -37,6 +37,9 @@ en:
             options:
               title: "Options"
               new: "Add a New Option"
+              target_step: "Target Step"
+              no_target_step: "No target step selected"
+              select_an_option: "Select an option"
           back: "Back"
           save: "Save"
           saved: "Workflow saved!"

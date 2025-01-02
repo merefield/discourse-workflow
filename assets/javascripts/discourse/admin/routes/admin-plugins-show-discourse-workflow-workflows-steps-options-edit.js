@@ -9,4 +9,19 @@ export default class AdminPluginsShowDiscourseWorkflowWorkflowStepOptionsNew ext
     const workflowStepOption = allWorkflowStepOptions.findBy("id", id);
     return workflowStepOption;
   }
+
+  async setupController(controller, model) {
+    super.setupController(controller, model);
+
+    const workflowOptions = await this.store.findAll("workflow-option");
+    controller.set(
+      "workflowOptions",
+      workflowOptions.content
+    );
+    const workflowSteps = await this.store.findAll("workflow-step", { workflow_id: this.currentModel.workflowStep.workflow_id });
+    controller.set(
+      "workflowSteps",
+      workflowSteps.content
+    );
+  }
 }

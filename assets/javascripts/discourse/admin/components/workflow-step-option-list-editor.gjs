@@ -60,7 +60,12 @@ export default class WorkflowStepOptionsListEditor extends Component {
     {{didInsert this.loadStepOptions}}>
      {{log this.currentWorkflowStepOption}}
       {{#if this.currentWorkflowStepOption}}
-        <WorkflowStepOptionEditor @currentWorkflowStepOption={{this.currentWorkflowStepOption}} @workflowStep={{@workflowStep}}/>
+        <WorkflowStepOptionEditor
+          @currentWorkflowStepOption={{this.currentWorkflowStepOption}}
+          @workflowStep={{@workflowStep}}
+          @workflowSteps={{@workflowSteps}}
+          @workflowOptions={{@workflowOptions}}
+        />
       {{else}}
         <DPageSubheader
           @titleLabel={{i18n "admin.discourse_workflow.workflows.steps.options.title"}}
