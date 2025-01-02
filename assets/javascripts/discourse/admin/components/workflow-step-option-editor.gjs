@@ -105,7 +105,7 @@ export default class WorkflowStepOptionEditor extends Component {
   <template>
     <WorkflowBackButton
       @route="adminPlugins.show.discourse-workflow-workflows.steps.edit"
-      @model={{@currentWorkflowStepOption.position}}
+      @model={{@currentWorkflowStepOption.workflow_step_id}}
     />
     <form
       class="form-horizontal workflow-step-editor"

@@ -21,27 +21,28 @@ import didInsert from "@ember/render-modifiers/modifiers/did-insert";
 import didUpdate from "@ember/render-modifiers/modifiers/did-update";
 import WorkflowLinkButton from "./workflow-link-button";
 import WorkflowDeepLinkButton from "./workflow-deep-link-button";
+import WorkflowStepOptionEditor from "./workflow-step-option-editor";
 
 export default class WorkflowStepOptionsListEditor extends Component {
   // @service adminPluginNavManager;
   @service store;
-  @tracked currentWorkflowStep = this.args.currentWorkflowStep;
-  @tracked workflowSteps = [];
-  @tracked workflowStepsPresent = false;
+  @tracked currentWorkflowStepOption = this.args.currentWorkflowStepOption;
+  @tracked workflowStepOptions = [];
+  @tracked workflowStepOptionsPresent = false;
 
 
-  get newStep() {
-    return this.store.createRecord("workflow-step", {
-       workflow_id: this.args.workflow.id,
+  get newStepOption() {
+    return this.store.createRecord("workflow-step-option", {
+       workflow_step_id: this.args.workflowStep.id,
    });
   }
 
   @bind
-  loadSteps() {
-    if (!this.args.currentWorkflowStep && this.args.workflow.id) {
-      this.store.find("workflow-step", { workflow_id: this.args.workflow.id }).then((steps) => {
-        this.workflowSteps = steps.content;
-        this.workflowStepsPresent = steps.content.length > 0 ? true : false;
+  loadStepOptions() {
+    if (!this.args.currentWorkflowStepOption && this.args.workflowStep.id) {
+      this.store.find("workflow-step-option", { workflow_id: this.args.workflowStep.workflow_id, workflow_step_id: this.args.workflowStep.id }).then((options) => {
+        this.workflowStepOptionss = options.content;
+        this.workflowStepOptionsPresent = options.content.length > 0 ? true : false;
       });
     }
   }
@@ -51,17 +52,16 @@ export default class WorkflowStepOptionsListEditor extends Component {
   }
 
   <template>
-
-    asdflasdkjflaksdfjlskdjf
     {{!-- <DBreadcrumbsItem
       @path="/admin/plugins/{{this.adminPluginNavManager.currentPlugin.name}}/workflows/steps"
       @label={{i18n "admin.discourse_workflow.workflows.steps.short_title"}}
     /> --}}
-    <section class="workflow-step-list-editor__current admin-detail pull-left">
-    {{!-- {{didInsert this.loadSteps}}> --}}
-      {{!-- {{#if this.currentWorkflowStep}}
-        <WorkflowStepEditor @currentWorkflowStep={{this.currentWorkflowStep}} @workflow={{@workflow}}/>
-      {{else}} --}}
+    <section class="workflow-step-list-editor__current admin-detail pull-left"
+    {{didInsert this.loadStepOptions}}>
+     {{log this.currentWorkflowStepOption}}
+      {{#if this.currentWorkflowStepOption}}
+        <WorkflowStepOptionEditor @currentWorkflowStepOption={{this.currentWorkflowStepOption}} @workflowStep={{@workflowStep}}/>
+      {{else}}
         <DPageSubheader
           @titleLabel={{i18n "admin.discourse_workflow.workflows.steps.options.title"}}
           @descriptionLabel={{i18n
@@ -80,7 +80,7 @@ export default class WorkflowStepOptionsListEditor extends Component {
           </:actions> --}}
         </DPageSubheader>
 
-        {{!-- {{#if this.workflowStepsPresent}} --}}
+        {{#if this.workflowStepOptionsPresent}}
           <table class="content-list workflow-step-list-editor d-admin-table">
             <thead>
               <tr>
@@ -134,7 +134,7 @@ export default class WorkflowStepOptionsListEditor extends Component {
               {{/each}}
             </tbody>
           </table>
-          {{!-- {{/if}} --}}
+        {{/if}}
           <WorkflowLinkButton
             @route="adminPlugins.show.discourse-workflow-workflows.steps.options.new"
             @label="admin.discourse_workflow.workflows.steps.options.new"
@@ -160,7 +160,7 @@ export default class WorkflowStepOptionsListEditor extends Component {
             @disabled={{this.isSaving}}
           >{{I18n.t "admin.discourse_workflow.workflows.steps.new"}}</DButton> --}}
 
-      {{!-- {{/if}} --}}
+      {{/if}}
     </section>
   </template>
 }

@@ -11,7 +11,7 @@ module DiscourseWorkflow
               :ai_enabled,
               :ai_prompt
 
-    has_many :workflow_step_option, serializer: WorkflowStepOptionSerializer, embed: :object
+    has_many :workflow_step_option, serializer: WorkflowStepOptionSerializer, embed: :object, key: :workflow_step_options
     has_one :category, serializer: CategorySerializer, embed: :object
 
     def category

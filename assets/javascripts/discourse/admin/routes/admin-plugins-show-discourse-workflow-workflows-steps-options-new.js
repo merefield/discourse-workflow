@@ -3,12 +3,12 @@ import DiscourseRoute from "discourse/routes/discourse";
 export default class AdminPluginsShowDiscourseWorkflowWorkflowStepOptionsNew extends DiscourseRoute {
 
   async model(params) {
-    debugger;
     // Get the parent workflow step
-    const workflowStep = this.modelFor("adminPlugins.show.discourse-workflow-workflows-steps");
+    const workflowStep = this.modelFor("adminPlugins.show.discourse-workflow-workflows-steps-options");
     // Create a new workflow step record
+    debugger;
     const record = this.store.createRecord("workflow-step-option", {
-      position: workflowStep.id,
+      workflow_step_id: workflowStep.id,
       position:  workflowStep.workflow_step_options.length > 0 ? workflowStep.workflow_step_options[workflowStep.workflow_step_options.length - 1].position + 1 : 1,
     });
 
@@ -21,7 +21,7 @@ export default class AdminPluginsShowDiscourseWorkflowWorkflowStepOptionsNew ext
   setupController(controller, model) {
     super.setupController(controller, model);
 
-    workflowOptions = this.store.findAll("workflow-option");
+    const workflowOptions = this.store.findAll("workflow-option");
     controller.set(
       "workflowOptions",
       workflowOptions

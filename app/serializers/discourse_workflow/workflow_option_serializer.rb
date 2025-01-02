@@ -1,9 +1,9 @@
 module DiscourseWorkflow
-  class WorkflowpOptionSerializer < ApplicationSerializer
+  class WorkflowOptionSerializer < ApplicationSerializer
 
     attributes :id,
               :name,
-              :slug,
+              :slug
 
     # def name
     #   DiscourseWorkflow::WorkflowOption.find_by(id: object.workflow_option_id)&.name

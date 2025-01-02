@@ -22,16 +22,16 @@ Discourse::Application.routes.draw do
               controller: "discourse_workflow/admin/workflow_steps"
     resources :workflow_step_options,
               only: %i[create update destroy],
-              path: "workflow_options",
+              path: "workflow_step_options",
               controller: "discourse_workflow/admin/workflow_step_options"
     # resources :workflow_step_options,
     #           only: %i[index create edit show update destroy],
     #           path: "workflow_step_options",
     #           controller: "discourse_workflow/admin/workflow_step_options"
-    # resources :workflow_options,
-    #           only: %i[index],
-    #           path: "workflow_options",
-    #           controller: "discourse_workflow/admin/workflow_options"
+    resources :workflow_options,
+              only: %i[index],
+              path: "workflow_options",
+              controller: "discourse_workflow/admin/workflow_options"
   end
 end
 

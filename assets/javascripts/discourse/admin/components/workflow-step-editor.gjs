@@ -23,7 +23,7 @@ import i18n from "discourse-common/helpers/i18n";
 import AdminConfigAreaEmptyList from "admin/components/admin-config-area-empty-list";
 import WorkflowBackButton from "./workflow-back-button";
 import I18n from "discourse-i18n";
-import WorkflowStepOptionsListEditor from "./workflow-step-options-list-editor";
+import WorkflowStepOptionListEditor from "./workflow-step-option-list-editor";
 
 export default class WorkflowStepEditor extends Component {
   @service adminPluginNavManager;
@@ -55,7 +55,6 @@ export default class WorkflowStepEditor extends Component {
     this.isSaving = true;
 
     const backupModel = this.args.currentWorkflowStep.workingCopy();
-    debugger;
     this.args.currentWorkflowStep.setProperties(this.editingModel);
     try {
       await this.args.currentWorkflowStep.save();
@@ -193,7 +192,7 @@ export default class WorkflowStepEditor extends Component {
       {{#if this.showStepOptions}}
         <div class="control-group">
           {{!-- <label>{{I18n.t "admin.discourse_workflow.workflows.steps"}}</label> --}}
-          <WorkflowStepOptionsListEditor
+          <WorkflowStepOptionListEditor
             class="workflow-editor__steps_options"
             @workflowStep={{@currentWorkflowStep}}
             @disabled={{this.editingModel.system}}

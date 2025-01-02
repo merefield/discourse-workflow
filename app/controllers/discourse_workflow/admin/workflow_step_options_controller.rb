@@ -9,9 +9,9 @@ module DiscourseWorkflow
 
       def index
         if @workflow.present?
-          @workflow_step_options = WorkflowStepOption.where(position: @workflow.id).order(:workflow_step_option_id)
+          @workflow_step_options = WorkflowStepOption.where(position: @workflow.id).order(:position)
         else
-          @workflow_step_options = WorkflowStepOption.all.order(:workflow_step_option_id)
+          @workflow_step_options = WorkflowStepOption.all.order(:position)
         end
         render_json_dump (
           { workflow_step_options:

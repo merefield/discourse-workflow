@@ -34,6 +34,9 @@ en:
             saved: "Workflow Step saved!"
             confirm_delete: "Are you sure you want to delete this workflow step?"
             deleted: "Workflow Step deleted!"
+            options:
+              title: "Options"
+              new: "Add a New Option"
           back: "Back"
           save: "Save"
           saved: "Workflow saved!"
