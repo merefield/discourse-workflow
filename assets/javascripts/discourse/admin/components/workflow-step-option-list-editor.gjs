@@ -55,6 +55,75 @@ export default class WorkflowStepOptionsListEditor extends Component {
     return workflowSteps.find((step) => step.id === stepOption.target_step_id)?.position;
   }
 
+  @action
+  moveUp(option) {
+    const options = this.workflowStepOptions;
+    const index = options.indexOf(option);
+    if (option.position > 1) {
+      const filteredOptions = options.filter((s) => s.position < option.position);
+      const previousOption = filteredOptions.length > 1
+        ? filteredOptions.reduce((prev, curr) => (prev.position > curr.position ? prev : curr))
+        : filteredOptions[0] || null;
+      const previousPosition = previousOption ? previousOption.position : option.position - 1;
+      if (previousOption) {
+        try {
+          previousOption.set("position", option.position);
+          previousOption.save();
+        } catch (err) {
+          popupAjaxError(err);
+          return;
+        }
+      }
+      try {
+        option.set("position", previousPosition);
+        option.save();
+      } catch (err) {
+        popupAjaxError(err);
+        return;
+      }
+    }
+    this.workflowStepOptions = this.workflowStepOptions.sort((a, b) => a.position - b.position);
+  }
+
+  @action
+  moveDown(option) {
+    const options = this.workflowStepOptions;
+    const index = options.indexOf(option);
+    if (option.position < options.length) {
+      const filteredOptions = options.filter((s) => s.position > option.position);
+      const nextOption = filteredOptions.length > 1
+        ? filteredOptions.reduce((prev, curr) => (prev.position < curr.position ? prev : curr))
+        : filteredOptions[0] || null;
+      const nextPosition = nextOption ? nextOption.position : option.position + 1;
+      if (nextOption) {
+        try {
+          nextOption.set("position", option.position);
+          nextOption.save();
+        } catch (err) {
+          popupAjaxError(err);
+          return;
+        }
+      }
+      try {
+        option.set("position", nextPosition);
+        option.save();
+      } catch (err) {
+        popupAjaxError(err);
+        return;
+      }
+    }
+    this.workflowStepOptions = this.workflowStepOptions.sort((a, b) => a.position - b.position);
+  }
+
+  isfirstOption(option, length) {
+    return option.position === 1;
+  }
+
+  islastOption(option, length) {
+    return option.position === length;
+  }
+
+
   <template>
     {{!-- <DBreadcrumbsItem
       @path="/admin/plugins/{{this.adminPluginNavManager.currentPlugin.name}}/workflows/steps"
@@ -132,6 +201,22 @@ export default class WorkflowStepOptionsListEditor extends Component {
                     </div>
                   </td>
                   <td class="d-admin-row__controls">
+                    {{#unless (this.isfirstOption stepOption this.workflowStepOptions.length)}}
+                      <DButton
+                        class="workflow-step-option-list-editor__up_arrow"
+                        @icon="arrow-up"
+                        @title="admin.discourse_workflow.workflows.options.move_up"
+                        {{on "click" (fn this.moveUp stepOption)}}
+                      />
+                    {{/unless}}
+                    {{#unless (this.islastOption stepOption this.workflowStepOptions.length)}}
+                      <DButton
+                        class="workflow-step-option-list-editor__down_arrow"
+                        @icon="arrow-down"
+                        @title="admin.discourse_workflow.workflows.options.move_down"
+                        {{on "click" (fn this.moveDown stepOption)}}
+                      />
+                    {{/unless}}
                     <LinkTo
                       @route="adminPlugins.show.discourse-workflow-workflows.steps.options.edit"
                       @models={{array @workflowStep.workflow_id @workflowStep.id stepOption}}
