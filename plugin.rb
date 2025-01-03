@@ -132,6 +132,7 @@ after_initialize do
     DiscourseWorkflow::WorkflowState
       .joins(workflow_step: { workflow_step_option: :workflow_option })
       .where(topic_id: self.id)
+      .order('workflow_step_options.position')
       .select('workflow_options.slug')
       .map(&:slug)
   end
