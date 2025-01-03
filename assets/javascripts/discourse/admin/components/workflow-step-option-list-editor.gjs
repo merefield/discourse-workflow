@@ -52,6 +52,9 @@ export default class WorkflowStepOptionsListEditor extends Component {
   }
 
   convertStepIdToPosition(workflowSteps, stepOption) {
+    if (!workflowSteps) {
+      return;
+    }
     return workflowSteps.find((step) => step.id === stepOption.target_step_id)?.position;
   }
 
