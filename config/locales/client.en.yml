@@ -11,6 +11,15 @@ en:
         start:
           button_label: "Start"
           confirmation: "Are you sure you want to start this workflow?"
+        accept:
+          button_label: "Accept"
+          confirmation: "Are you sure you want to accept this topic?"
+        reject:
+          button_label: "Reject"
+          confirmation: "Are you sure you want to reject this topic?"
+        done:
+          button_label: "Done"
+          confirmation: "Are you sure you want to mark this topic as done?"
   admin_js:
     admin:
       discourse_workflow:

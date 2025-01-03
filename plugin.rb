@@ -45,6 +45,7 @@ after_initialize do
     ../app/controllers/discourse_workflow/admin/workflows_controller.rb
     ../app/controllers/discourse_workflow/admin/workflow_steps_controller.rb
     ../app/controllers/discourse_workflow/admin/workflow_step_options_controller.rb
+    ../app/controllers/discourse_workflow/workflow_action_controller.rb
     ../config/routes.rb
     ../lib/discourse_workflow/topic_extension.rb
     ../lib/discourse_workflow/not_midway_validator.rb

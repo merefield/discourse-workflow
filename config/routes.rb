@@ -26,3 +26,7 @@ Discourse::Application.routes.draw do
               controller: "discourse_workflow/admin/workflow_options"
   end
 end
+
+::DiscourseWorkflow::Engine.routes.draw do
+  post "/act/:topic_id" => "workflow_action#act"
+end

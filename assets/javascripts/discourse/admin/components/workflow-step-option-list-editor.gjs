@@ -39,7 +39,6 @@ export default class WorkflowStepOptionsListEditor extends Component {
 
   @bind
   loadStepOptions() {
-    debugger;
     if (!this.args.currentWorkflowStepOption && this.args.workflowStep.id) {
       this.store.find("workflow-step-option", { workflow_id: this.args.workflowStep.workflow_id, workflow_step_id: this.args.workflowStep.id }).then((options) => {
         this.workflowStepOptions = options.content;
@@ -53,7 +52,6 @@ export default class WorkflowStepOptionsListEditor extends Component {
   }
 
   convertStepIdToPosition(workflowSteps, stepOption) {
-    debugger;
     return workflowSteps.find((step) => step.id === stepOption.target_step_id)?.position;
   }
 

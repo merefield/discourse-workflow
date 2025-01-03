@@ -4,7 +4,6 @@ export default class Adapter extends RestAdapter {
   jsonMode = true;
 
   basePath(store, type, findArgs) {
-    debugger;
     if (findArgs) {
       if (typeof findArgs === "object") {
         return `/admin/plugins/discourse-workflow/workflows/${findArgs.workflow_id}/workflow_steps/${findArgs.workflow_step_id}/`

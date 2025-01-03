@@ -10,6 +10,7 @@ import { popupAjaxError } from "discourse/lib/ajax-error";
 
 export default class WorkflowButtonsComponent extends Component {
   @service dialog;
+  @service router;
 
   @action
   actOnWorkflow(option) {
@@ -18,14 +19,17 @@ export default class WorkflowButtonsComponent extends Component {
     this.dialog.yesNoConfirm({
       message: i18n(`discourse_workflow.options.${option}.confirmation`),
       didConfirm: () => {
-        ajax(`/discourse_workflow/act/${this.args.topic_id}`, {
+        ajax(`/discourse-workflow/act/${this.args.topic_id}`, {
           type: "POST",
           data: { option },
         })
         .then(() => {
-          this.refresh();
+          this.router.refresh();
         })
-        .catch(popupAjaxError);
+        .catch((err) =>
+        {
+          popupAjaxError(err)
+        });
       },
     });
   }
