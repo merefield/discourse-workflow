@@ -8,8 +8,8 @@ module DiscourseWorkflow
       before_action :set_workflow_step_option, only: [:show, :edit, :update, :destroy]
 
       def index
-        if @workflow.present?
-          @workflow_step_options = WorkflowStepOption.where(position: @workflow.id).order(:position)
+        if @workflow_step.present?
+          @workflow_step_options = WorkflowStepOption.where(workflow_step_id: @workflow_step.id).order(:position)
         else
           @workflow_step_options = WorkflowStepOption.all.order(:position)
         end
@@ -38,10 +38,10 @@ module DiscourseWorkflow
       def create
         workflow_step_option = WorkflowStepOption.new(workflow_step_option_params)
         if !workflow_step_option.position.present?
-          if WorkflowStepOption.count == 0 || WorkflowStepOption.where(position: workflow_step_option.position).count == 0
+          if WorkflowStepOption.count == 0 || WorkflowStepOption.where(workflow_step_id: workflow_step_option.workflow_step_id).count == 0
             workflow_step_option.position = 1
           else
-            workflow_step_option.position = WorkflowStepOption.maximum(:position) + 1
+            workflow_step_option.position = WorkflowStepOption..where(workflow_step_id: workflow_step_option.workflow_step_id).maximum(:position) + 1
           end
         end
         if workflow_step_option.save
@@ -79,9 +79,9 @@ module DiscourseWorkflow
       private
 
       def set_workflow_step
-        position = params.dig(:position)
-        if position.present?
-            @workflow_step = WorkflowStep.find(position)
+        id = params.dig(:workflow_step_id)
+        if id.present?
+            @workflow_step = WorkflowStep.find(id)
         else
           @workflow_step = nil
         end
@@ -92,7 +92,7 @@ module DiscourseWorkflow
       end
 
       def workflow_step_option_params
-        params.require(:workflow_step_option).permit(:position, :name, :description, :category_id, :other_attributes...)
+        params.require(:workflow_step_option).permit(:position, :workflow_step_id, :workflow_option_id, :target_step_id, :other_attributes...)
       end
 
       def ensure_admin

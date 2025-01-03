@@ -49,4 +49,6 @@ option_fixtures = [
   }
 ]
 
-options = DiscourseWorkflow::WorkflowOption.create!(option_fixtures)
+if DiscourseWorkflow::WorkflowOption.count == 0
+  DiscourseWorkflow::WorkflowOption.create!(option_fixtures)
+end

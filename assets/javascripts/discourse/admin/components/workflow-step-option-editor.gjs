@@ -107,8 +107,8 @@ export default class WorkflowStepOptionEditor extends Component {
   get availableSteps() {
      const steps = this.args.workflowSteps || []
      const filteredSteps = steps
-        .map(({ position, name, description }) => ({ id: position, name, description }))
-        .filter(step => step.id !== this.args.workflowStep.position);
+        .map(({ id, name, description }) => ({ id, name, description }))
+        .filter(step => step.id !== this.args.workflowStep.id);
     return filteredSteps;
   }
 
@@ -134,9 +134,9 @@ export default class WorkflowStepOptionEditor extends Component {
         <label>{{I18n.t "admin.discourse_workflow.workflows.name"}}</label>
         <DropdownSelectBox
           {{!-- @id={{concat "topic-footer-dropdown-" actionable.id}} --}}
-          @value={{this.editingModel.name}}
+          @value={{this.editingModel.workflow_option_id}}
           @content={{@workflowOptions}}
-          @onChange={{fn (mut this.editingModel.name)}}
+          @onChange={{fn (mut this.editingModel.workflow_option_id)}}
           @options={{hash
             disabled=this.editingModel.system
             none="admin.discourse_workflow.workflows.steps.options.select_an_option"
@@ -149,9 +149,9 @@ export default class WorkflowStepOptionEditor extends Component {
         <label>{{I18n.t "admin.discourse_workflow.workflows.steps.options.target_step"}}</label>
         <DropdownSelectBox
           {{!-- @id={{concat "topic-footer-dropdown-" actionable.id}} --}}
-          @value={{this.editingModel.target_step_position}}
+          @value={{this.editingModel.target_step_id}}
           @content={{this.availableSteps}}
-          @onChange={{fn (mut this.editingModel.target_step_position)}}
+          @onChange={{fn (mut this.editingModel.target_step_id)}}
           @options={{hash
             disabled=this.editingModel.system
             none="admin.discourse_workflow.workflows.steps.options.no_target_step"

@@ -4,7 +4,6 @@ import dIcon from "discourse-common/helpers/d-icon";
 import { i18n } from "discourse-i18n";
 
 <template>
-  {{log @route}}
   <LinkTo class="btn btn-primary"
     @route={{@route}}
     @models={{@models}}

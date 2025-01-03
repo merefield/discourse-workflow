@@ -18,7 +18,7 @@ export default class WorkflowButtonsComponent extends Component {
     this.dialog.yesNoConfirm({
       message: i18n(`discourse_workflow.options.${option}.confirmation`),
       didConfirm: () => {
-        ajax(`/discourse_workflow/${this.args.topic_id}/act`, {
+        ajax(`/discourse_workflow/act/${this.args.topic_id}`, {
           type: "POST",
           data: { option },
         })
@@ -35,12 +35,16 @@ export default class WorkflowButtonsComponent extends Component {
   }
 
   <template>
-    {{#each @workflow_step_options as |option|}}
-      <DButton
-        class="btn-primary"
-        @action={{fn this.actOnWorkflow option}}
-        @label={{this.workflowActionLabel option}}
-      />
-    {{/each}}
+    <div class="workflow-action-buttons">
+      {{i18n "discourse_workflow.topic_banner.actions_intro"}}
+      {{#each @workflow_step_options as |option|}}
+
+        <DButton
+          class="btn-primary"
+          @action={{fn this.actOnWorkflow option}}
+          @label={{this.workflowActionLabel option}}
+        />
+      {{/each}}
+    </div>
   </template>
 }

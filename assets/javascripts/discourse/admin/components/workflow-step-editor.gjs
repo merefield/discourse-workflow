@@ -71,6 +71,12 @@ export default class WorkflowStepEditor extends Component {
           data: { message: I18n.t("admin.discourse_workflow.workflows.steps.saved") },
           duration: 2000,
         });
+        // if (isNew) {
+        //   this.router.transitionTo(
+        //     "adminPlugins.show.discourse-workflow-workflows.steps.edit",
+        //     this.args.currentWorkflowStep.id
+        //   );
+        // }
       // }
     } catch (e) {
       this.args.currentWorkflowStep.setProperties(backupModel);
@@ -192,9 +198,11 @@ export default class WorkflowStepEditor extends Component {
       {{#if this.showStepOptions}}
         <div class="control-group">
           {{!-- <label>{{I18n.t "admin.discourse_workflow.workflows.steps"}}</label> --}}
+          {{log @workflowSteps}}
           <WorkflowStepOptionListEditor
             class="workflow-editor__steps_options"
             @workflowStep={{@currentWorkflowStep}}
+            @workflowSteps={{@workflowSteps}}
             @disabled={{this.editingModel.system}}
             @onChange={{this.stepOptionsChanged}}
           />

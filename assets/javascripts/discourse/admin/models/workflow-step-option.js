@@ -3,8 +3,9 @@ import RestModel from "discourse/models/rest";
 
 const CREATE_ATTRIBUTES = [
   "workflow_step_id",
+  "workflow_option_id",
   "position",
-  "name"
+  "target_step_id"
 ];
 
 export default class WorkflowStepOption extends RestModel {

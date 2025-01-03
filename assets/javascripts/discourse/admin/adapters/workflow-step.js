@@ -4,8 +4,10 @@ export default class Adapter extends RestAdapter {
   jsonMode = true;
 
   basePath(store, type, findArgs) {
+    debugger;
     if (findArgs) {
       if (typeof findArgs === "object") {
+        if (findArgs)
         return `/admin/plugins/discourse-workflow/workflows/${findArgs.workflow_id}/`
       } else {
         return `/admin/plugins/discourse-workflow/`

@@ -39,16 +39,22 @@ export default class WorkflowStepOptionsListEditor extends Component {
 
   @bind
   loadStepOptions() {
+    debugger;
     if (!this.args.currentWorkflowStepOption && this.args.workflowStep.id) {
       this.store.find("workflow-step-option", { workflow_id: this.args.workflowStep.workflow_id, workflow_step_id: this.args.workflowStep.id }).then((options) => {
-        this.workflowStepOptionss = options.content;
+        this.workflowStepOptions = options.content;
         this.workflowStepOptionsPresent = options.content.length > 0 ? true : false;
       });
     }
   }
 
   localizedStepOptionName(stepOption) {
-    return i18n(`admin.discourse_workflow.workflows.steps.options.${stepOption.slug}`);
+    return i18n(`admin.discourse_workflow.workflows.steps.options.actions.${stepOption.workflow_option.slug}`);
+  }
+
+  convertStepIdToPosition(workflowSteps, stepOption) {
+    debugger;
+    return workflowSteps.find((step) => step.id === stepOption.target_step_id)?.position;
   }
 
   <template>
@@ -58,7 +64,6 @@ export default class WorkflowStepOptionsListEditor extends Component {
     /> --}}
     <section class="workflow-step-list-editor__current admin-detail pull-left"
     {{didInsert this.loadStepOptions}}>
-     {{log this.currentWorkflowStepOption}}
       {{#if this.currentWorkflowStepOption}}
         <WorkflowStepOptionEditor
           @currentWorkflowStepOption={{this.currentWorkflowStepOption}}
@@ -89,15 +94,14 @@ export default class WorkflowStepOptionsListEditor extends Component {
           <table class="content-list workflow-step-list-editor d-admin-table">
             <thead>
               <tr>
-                <th>{{i18n "admin.discourse_workflow.workflows.steps.options.workflow_step_option_id"}}</th>
+                <th>{{i18n "admin.discourse_workflow.workflows.steps.options.position"}}</th>
                 <th>{{i18n "admin.discourse_workflow.workflows.steps.options.name"}}</th>
                 <th>{{i18n "admin.discourse_workflow.workflows.steps.options.target_position"}}</th>
-                <th>{{i18n "admin.discourse_workflow.workflows.steps.options.actions"}}</th>
                 <th></th>
               </tr>
             </thead>
             <tbody>
-              {{#each @workflowStepOptions as |stepOption|}}
+              {{#each this.workflowStepOptions as |stepOption|}}
                 <tr
                   data-workflow-step-option-id={{stepOption.workflow_step_option_id}}
                   class={{concatClass
@@ -105,21 +109,22 @@ export default class WorkflowStepOptionsListEditor extends Component {
                   }}
                 >
                   <td class="d-admin-row__overview">
-                    <div class="workflow-step-option-list__workflow_step_option_id">
-                      {{categoryLink stepOption.category}}
+                    <div class="workflow-step-option-list__position">
+                      {{stepOption.position}}
                     </div>
                   </td>
                   <td class="d-admin-row__overview">
                     <div class="workflow-step-option-list__name">
                       <strong>
-                        {{this.localizedStepOptionName stepOption.slug}}
+                        {{this.localizedStepOptionName stepOption}}
                       </strong>
                     </div>
                   </td>
                   <td class="d-admin-row__overview">
                     <div class="workflow-step-option-list__target_position">
                       <strong>
-                        {{stepOption.target_position}}
+                        {{log this.args.workflowSteps}}
+                        {{this.convertStepIdToPosition this.args.workflowSteps stepOption}}
                       </strong>
                     </div>
                   </td>
@@ -131,7 +136,7 @@ export default class WorkflowStepOptionsListEditor extends Component {
                   <td class="d-admin-row__controls">
                     <LinkTo
                       @route="adminPlugins.show.discourse-workflow-workflows.steps.options.edit"
-                      @models={{array @workflowStep.id stepOption}}
+                      @models={{array @workflowStep.workflow_id @workflowStep.id stepOption}}
                       class="btn btn-text btn-small"
                     >{{i18n "admin.discourse_workflow.workflows.edit"}} </LinkTo>
                   </td>

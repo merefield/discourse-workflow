@@ -143,7 +143,7 @@ export default class WorkflowStepsListEditor extends Component {
     <section class="workflow-step-list-editor__current admin-detail pull-left"
       {{didInsert this.loadSteps}}>
       {{#if this.currentWorkflowStep}}
-        <WorkflowStepEditor @currentWorkflowStep={{this.currentWorkflowStep}} @workflow={{@workflow}}/>
+        <WorkflowStepEditor @currentWorkflowStep={{this.currentWorkflowStep}} @workflow={{@workflow}} @workflowSteps={{@workflowSteps}}/>
       {{else}}
         <DPageSubheader
           @titleLabel={{i18n "admin.discourse_workflow.workflows.steps.title"}}

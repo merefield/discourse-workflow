@@ -8,11 +8,17 @@ module DiscourseWorkflow
       before_action :find_workflow, only: %i[edit show update destroy]
 
       def index
-        workflows =
-          Workflow.ordered.map do |workflow|
-            WorkflowSerializer.new(workflow, root: false)
-          end
-        render json: { workflows: workflows }
+        @workflows = Workflow.order(:enabled).order(:name).order(:id)
+        render_json_dump (
+          { workflows:
+          ActiveModel::ArraySerializer.new(@workflows, 
+          each_serializer: DiscourseWorkflow::WorkflowSerializer)
+          })
+        # workflows =
+        #   Workflow.ordered.map do |workflow|
+        #     WorkflowSerializer.new(workflow, root: false)
+        #   end
+        # render json: { workflows: workflows }
       end
 
       def new

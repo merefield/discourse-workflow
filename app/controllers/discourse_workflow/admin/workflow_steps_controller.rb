@@ -49,6 +49,7 @@ module DiscourseWorkflow
             workflow_step: WorkflowStepSerializer.new(workflow_step, root: false),
              },
           status: :created
+          # redirect_to edit_workflow_workflow_step_path(workflow_id: workflow_step.workflow_id, id: workflow_step.id)
         else
           render_json_error workflow_step
         end

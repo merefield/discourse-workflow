@@ -119,6 +119,14 @@ after_initialize do
       .first
       &.name
   end
+  add_to_class(:topic, :workflow_step_position) do 
+    DiscourseWorkflow::WorkflowState
+      .joins(:workflow_step)
+      .where(topic_id: self.id)
+      .select('workflow_steps.position')
+      .first
+      &.position
+  end
   add_to_class(:topic, :workflow_step_options) do 
     DiscourseWorkflow::WorkflowState
       .joins(workflow_step: { workflow_step_option: :workflow_option })
@@ -143,6 +151,10 @@ after_initialize do
     object.topic.workflow_step_name
   end
 
+  add_to_serializer(:topic_view, :workflow_step_position, include_condition: -> { object.topic.workflow_step_position.present? }) do
+    object.topic.workflow_step_position
+  end
+
   add_to_serializer(:topic_view, :workflow_step_options, include_condition: -> { object.topic.workflow_step_options.present? }) do
     object.topic.workflow_step_options
   end
@@ -153,7 +165,7 @@ after_initialize do
     if SiteSetting.workflow_enabled
       workflow_step = DiscourseWorkflow::WorkflowStep.find_by(category_id: topic.category_id, position: 1)
       if workflow_step
-        DiscourseWorkflow::WorkflowState.create!(topic_id: topic.id, workflow_id: workflow_step.workflow_id, position: workflow_step.id)
+        DiscourseWorkflow::WorkflowState.create!(topic_id: topic.id, workflow_id: workflow_step.workflow_id, workflow_step_id: workflow_step.id)
       end
     end
   end
