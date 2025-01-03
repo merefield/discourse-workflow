@@ -157,7 +157,12 @@ after_initialize do
   end
 
   add_to_serializer(:topic_view, :workflow_step_options, include_condition: -> { object.topic.workflow_step_options.present? }) do
-    object.topic.workflow_step_options
+    begin
+      scope.ensure_can_create_topic_on_category!(self.category_id)
+      object.topic.workflow_step_options
+    rescue Discourse::InvalidAccess
+      nil
+    end
   end
 
   DiscourseEvent.on(:topic_created) do |*params|
