@@ -8,6 +8,9 @@
 
 enabled_site_setting :workflow_enabled
 
+register_asset 'stylesheets/common/workflow_common.scss'
+# register_asset 'stylesheets/mobile/chatbot_mobile.scss', :mobile
+
 module ::DiscourseWorkflow
   PLUGIN_NAME = "discourse-workflow"
 end

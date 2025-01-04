@@ -2,9 +2,11 @@ en:
   js:
     discourse_workflow:
       topic_banner:
-        intro: "This topic is at step position: %{workflow_step_position} of workflow: %{workflow_name}"
-        actions_intro: "You can take the following actions:"
-        comment_placeholder: "Add a comment..."
+        title: "Discourse Workflow"
+        step_title: "Step:"
+        workflow_title: "Workflow:"
+        step: "%{workflow_step_position}. %{workflow_step_name}"
+        actions_intro: "Actions:"
       options:
         ready:
           button_label: "Ready"
@@ -21,6 +23,9 @@ en:
         done:
           button_label: "Done"
           confirmation: "Are you sure you want to mark this topic as done?"
+        finish:
+          button_label: "Finish"
+          confirmation: "Are you sure you want to finish this workflow?"
   admin_js:
     admin:
       discourse_workflow:

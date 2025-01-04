@@ -40,17 +40,20 @@ export default class WorkflowButtonsComponent extends Component {
   }
 
   <template>
-    <div class="workflow-action-buttons">
+    <div class="workflow-banner-title workflow-buttons-title">
       {{i18n "discourse_workflow.topic_banner.actions_intro"}}
-      {{#each @workflow_step_options as |option|}}
+    </div>
+    <div class="workflow-action-buttons">
+    {{#each @workflow_step_options as |option|}}
+      <div class="workflow-action-button">
         <DButton
           class="btn-primary"
           @action={{fn this.actOnWorkflow option}}
           @label={{this.workflowActionLabel option}}
         />
-      {{/each}}
+      </div>
+    {{/each}}
     </div>
   </template>
 }
 
-        // @valueChange={{action (mut this.comment)}}

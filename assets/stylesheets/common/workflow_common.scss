@@ -1,0 +1,41 @@
+.regular {
+  .workflow-topic-banner {
+    background-color: $secondary;
+    padding: 7px;
+    margin-top: 10px;
+    border-radius: 5px;
+    border: solid 1px $primary-medium;
+    max-width: 500px;
+
+    .workflow-banner-border-title {
+      position: relative;
+      top: -1.6em;
+      margin-left: 0.5em;
+      padding-bottom: -1.2em;
+      display: inline;
+      background-color: $secondary;
+      font-size: 0.8em;
+    }
+    
+    .workflow-banner-meta {
+      padding: 5px;
+      display: grid;
+      grid-row-gap: 10px;
+      grid-column-gap: 5px;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 240px));
+      margin-top: -1.2em;
+      .workflow-banner-section {
+        display: grid;
+        grid-template-columns: 80px 160px;
+        min-width: 240px;
+        .workflow-action-buttons{
+          display: inline-flex;
+        }
+        .workflow-action-button{
+          margin-bottom: 5px;
+          margin-right: 10px;
+        }
+      }
+    }
+  }
+}
