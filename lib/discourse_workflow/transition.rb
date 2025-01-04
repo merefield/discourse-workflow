@@ -1,7 +1,7 @@
 module DiscourseWorkflow
   class Transition
 
-    def transition(user_id, topic, option, comment)
+    def transition(user_id, topic, option)
       success = false
       workflow_state = WorkflowState.find_by(topic_id: topic.id)
       if workflow_state && topic
@@ -43,8 +43,7 @@ module DiscourseWorkflow
                   ending_position: workflow_state.workflow_step.position,
                   step_option_id: step_option_id,
                   step_option_name: step_option_name,
-                  step_option_slug: step_option_slug,
-                  comment: comment
+                  step_option_slug: step_option_slug
                 )
                 success = true
               end

@@ -21,7 +21,6 @@ class CreateWorkflowAuditLog < ActiveRecord::Migration[7.2]
       t.bigint :step_option_id
       t.string :step_option_name
       t.string :step_option_slug
-      t.text :comment
 
       t.timestamps
     end

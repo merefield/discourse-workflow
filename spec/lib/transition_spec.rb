@@ -37,8 +37,7 @@ describe ::DiscourseWorkflow::Transition do
     DiscourseWorkflow::Transition.new
   }
 
-  let(:comment) { "Test Comment" }
   it "creates an audit log entry" do
-    expect { transition.transition(user.id, topic, option_1.slug, comment) }.to change { ::DiscourseWorkflow::WorkflowAuditLog.count }.by(1)
+    expect { transition.transition(user.id, topic, option_1.slug) }.to change { ::DiscourseWorkflow::WorkflowAuditLog.count }.by(1)
   end
 end

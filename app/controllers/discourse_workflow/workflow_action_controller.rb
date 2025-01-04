@@ -6,9 +6,8 @@ module DiscourseWorkflow
       guardian.ensure_can_create_topic_on_category!(topic.category_id)
       user_id = current_user.id
       option = params[:option]
-      comment = params[:comment]
       if user_id.present? && option.present? && topic.present?
-        successful_transition = Transition.new.transition(user_id, topic, option, comment)
+        successful_transition = Transition.new.transition(user_id, topic, option)
       end
       if successful_transition
         render json: success_json
