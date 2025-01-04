@@ -6,11 +6,13 @@ import { i18n } from "discourse-i18n";
 import DButton from "discourse/components/d-button";
 import { ajax } from "discourse/lib/ajax";
 import { popupAjaxError } from "discourse/lib/ajax-error";
-
+import Textarea from "discourse/components/d-textarea";
+import { cached, tracked } from "@glimmer/tracking";
 
 export default class WorkflowButtonsComponent extends Component {
   @service dialog;
   @service router;
+  @tracked comment = "";
 
   @action
   actOnWorkflow(option) {
@@ -21,7 +23,7 @@ export default class WorkflowButtonsComponent extends Component {
       didConfirm: () => {
         ajax(`/discourse-workflow/act/${this.args.topic_id}`, {
           type: "POST",
-          data: { option },
+          data: { option, comment: this.comment },
         })
         .then(() => {
           this.router.refresh();
@@ -49,6 +51,13 @@ export default class WorkflowButtonsComponent extends Component {
           @label={{this.workflowActionLabel option}}
         />
       {{/each}}
+      <Textarea
+        class="workflow-action-comment"
+        placeholder={{i18n "discourse_workflow.topic_banner.comment_placeholder"}}
+        @value={{this.comment}}
+      />
     </div>
   </template>
 }
+
+        // @valueChange={{action (mut this.comment)}}

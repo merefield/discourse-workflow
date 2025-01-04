@@ -39,6 +39,7 @@ after_initialize do
     ../app/models/discourse_workflow/workflow_option.rb
     ../app/models/discourse_workflow/workflow_step_option.rb
     ../app/models/discourse_workflow/workflow_state.rb
+    ../app/models/discourse_workflow/workflow_audit_log.rb
     ../app/serializers/discourse_workflow/workflow_step_option_serializer.rb
     ../app/serializers/discourse_workflow/workflow_step_serializer.rb
     ../app/serializers/discourse_workflow/workflow_serializer.rb
@@ -49,6 +50,7 @@ after_initialize do
     ../config/routes.rb
     ../lib/discourse_workflow/topic_extension.rb
     ../lib/discourse_workflow/not_midway_validator.rb
+    ../lib/discourse_workflow/transition.rb
   ).each do |path|
     load File.expand_path(path, __FILE__)
   end

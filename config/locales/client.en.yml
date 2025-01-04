@@ -4,6 +4,7 @@ en:
       topic_banner:
         intro: "This topic is at step position: %{workflow_step_position} of workflow: %{workflow_name}"
         actions_intro: "You can take the following actions:"
+        comment_placeholder: "Add a comment..."
       options:
         ready:
           button_label: "Ready"

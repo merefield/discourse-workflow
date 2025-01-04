@@ -5,7 +5,7 @@ class CreateWorkflowStepOptions < ActiveRecord::Migration[7.1]
       t.integer :position
       t.references :workflow_step, foreign_key: true
       t.references :workflow_option, foreign_key: true
-      t.integer :target_step_id
+      t.bigint :target_step_id
 
       t.timestamps
     end
