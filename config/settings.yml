@@ -2,3 +2,6 @@ plugins:
   workflow_enabled:
     client: true
     default: true
+  workflow_open_ai_key:
+    client: false
+    default: ''
