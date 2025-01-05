@@ -80,6 +80,22 @@ after_initialize do
     Workflow.joins(:workflow_steps).where(workflow_steps: { category_id: self.id }).first&.slug
   end
 
+  # prevent non-staff from changing category on a workflow topic
+  PostRevisor.track_topic_field(:category_id) do |tc, category_id|
+   if tc.guardian.is_staff?
+    tc.record_change('category_id', tc.topic.category_id, category_id)
+    tc.topic.category_id = category_id
+   else
+      if ::DiscourseWorkflow::WorkflowState.find_by(topic_id: tc.topic.id).present?
+        # TODO get this to work and add a translation
+        tc.topic.errors.add(:base, :workflow,  message: "you can't change category on a workflow topic unless you are staff")
+        next
+      else
+        tc.record_change('category_id', tc.topic.category_id, category_id)
+        tc.topic.category_id = category_id
+      end
+    end
+  end
   
 
   # [
