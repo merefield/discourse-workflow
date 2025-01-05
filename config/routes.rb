@@ -29,4 +29,5 @@ end
 
 ::DiscourseWorkflow::Engine.routes.draw do
   post "/act/:topic_id" => "workflow_action#act"
+  get "/visualisation/:topic_id" => "workflow_visualisation#network"
 end

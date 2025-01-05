@@ -5,7 +5,7 @@
     margin-top: 10px;
     border-radius: 5px;
     border: solid 1px $primary-medium;
-    max-width: 500px;
+    max-width: 610px;
 
     .workflow-banner-border-title {
       position: relative;
@@ -26,7 +26,7 @@
       margin-top: -1.2em;
       .workflow-banner-section {
         display: grid;
-        grid-template-columns: 80px 160px;
+        grid-template-columns: 80px 160px 160px;
         min-width: 240px;
         .workflow-action-buttons{
           display: inline-flex;
@@ -36,6 +36,56 @@
           margin-right: 10px;
         }
       }
+    }
+  }
+}
+
+.workflow-visualisation-modal {
+  // max-width: 800px;
+  max-height: 800px;
+  width: 100%;
+
+  .d-modal__container {
+    max-width: 1000px;
+    max-height: 800px;
+    width: 100%;
+  }
+  .modal-body {
+    padding: 0;
+  }
+}
+
+#workflow-visualisation {
+  svg {
+    z-index: 1000;
+    border: 1px solid #ccc;
+    background-color: $primary;
+
+    .node {
+        stroke: #333;
+        stroke-width: 1px;
+    }
+    .link {
+        fill: none;
+        stroke: #aaa;
+        stroke-width: 2px;
+    }
+    .arrowhead {
+        fill: #aaa;
+    }
+    .lane {
+        fill: #f9f9f9;
+        stroke: #ddd;
+        stroke-width: 1px;
+    }
+    .lane-label {
+        font-size: 14px;
+        fill: #333;
+        font-weight: bold;
+    }
+    .link-label {
+        font-size: 12px;
+        fill: #555;
     }
   }
 }

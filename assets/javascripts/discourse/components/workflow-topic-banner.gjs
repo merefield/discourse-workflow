@@ -7,9 +7,19 @@ import DButton from "discourse/components/d-button";
 import { ajax } from "discourse/lib/ajax";
 import { popupAjaxError } from "discourse/lib/ajax-error";
 import WorkflowButtons from "./workflow-buttons";
+import WorkflowVisualisation from "./workflow-visualisation";
 
 
 export default class WorkflowButtonsComponent extends Component {
+  @service modal;
+
+  @action
+  showMyModal() {
+    this.modal.show(WorkflowVisualisation, {
+      model: { topic_id: this.args.topic_id}
+    });
+  };
+
   <template>
     <div class="workflow-topic-banner">
       <div class="workflow-banner-border-title">{{i18n "discourse_workflow.topic_banner.title"}}</div>
@@ -21,6 +31,14 @@ export default class WorkflowButtonsComponent extends Component {
         <div class="workflow-banner-section workflow-step-name">
           <div class="workflow-banner-title workflow-step-name-title">{{i18n "discourse_workflow.topic_banner.step_title"}}</div>
           <div class="workflow-step-name">{{i18n "discourse_workflow.topic_banner.step" workflow_step_position=@workflow_step_position workflow_step_name=@workflow_step_name}}</div>
+          <div class="workflow-action-button">
+          <DButton
+            class="btn-primary"
+            @icon="network-wired"
+            @action={{this.showMyModal}}
+            @label="discourse_workflow.topic_banner.visualisation_button"
+          />
+          </div>
         </div>
         <div class="workflow-banner-section workflow-step-actions">
         {{#if @workflow_step_options}}

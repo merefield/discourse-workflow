@@ -33,6 +33,11 @@ require_relative "lib/discourse_workflow/engine"
 #   register_svg_icon "far-map"
 # end
 
+if respond_to?(:register_svg_icon)
+  register_svg_icon "network-wired"
+end
+
+
 after_initialize do
 
   # /lib/locations is autoloaded
@@ -50,6 +55,7 @@ after_initialize do
     ../app/controllers/discourse_workflow/admin/workflow_steps_controller.rb
     ../app/controllers/discourse_workflow/admin/workflow_step_options_controller.rb
     ../app/controllers/discourse_workflow/workflow_action_controller.rb
+    ../app/controllers/discourse_workflow/workflow_visualisation_controller.rb
     ../config/routes.rb
     ../lib/discourse_workflow/topic_extension.rb
     ../lib/discourse_workflow/not_midway_validator.rb
