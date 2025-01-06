@@ -16,7 +16,7 @@ export default class WorkflowButtonsComponent extends Component {
   @action
   showMyModal() {
     this.modal.show(WorkflowVisualisation, {
-      model: { topic_id: this.args.topic_id}
+      model: { topic_id: this.args.topic_id, workflow_name: this.args.workflow_name },
     });
   };
 

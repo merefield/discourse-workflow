@@ -17,30 +17,18 @@ end
 
 require_relative "lib/discourse_workflow/engine"
 
-# register_asset 'stylesheets/common/locations.scss'
-# register_asset 'stylesheets/desktop/locations.scss', :desktop
-# register_asset 'stylesheets/mobile/locations.scss', :mobile
-# register_asset 'lib/leaflet/leaflet.css'
-# register_asset 'lib/leaflet/leaflet.js'
-# register_asset 'lib/leaflet/leaflet.markercluster.js'
-# register_asset 'lib/leaflet/MarkerCluster.css'
-# register_asset 'lib/leaflet/MarkerCluster.Default.css'
-
-# Discourse.top_menu_items.push(:workflows)
-# Discourse.filters.push(:workflows)
-
-# if respond_to?(:register_svg_icon)
-#   register_svg_icon "far-map"
-# end
-
 if respond_to?(:register_svg_icon)
   register_svg_icon "network-wired"
 end
 
 
 after_initialize do
+  reloadable_patch do
+    ListController.prepend(DiscourseWorkflow::ListControllerExtension)
+    TopicQuery.prepend(DiscourseWorkflow::TopicQueryExtension)
+    Topic.prepend(DiscourseWorkflow::TopicExtension)
+  end
 
-  # /lib/locations is autoloaded
   %w(
     ../app/models/discourse_workflow/workflow.rb
     ../app/models/discourse_workflow/workflow_step.rb
@@ -57,12 +45,14 @@ after_initialize do
     ../app/controllers/discourse_workflow/workflow_action_controller.rb
     ../app/controllers/discourse_workflow/workflow_visualisation_controller.rb
     ../config/routes.rb
-    ../lib/discourse_workflow/topic_extension.rb
-    ../lib/discourse_workflow/not_midway_validator.rb
-    ../lib/discourse_workflow/transition.rb
   ).each do |path|
     load File.expand_path(path, __FILE__)
   end
+
+  Discourse.top_menu_items.push(:workflow)
+  Discourse.anonymous_top_menu_items.push(:workflow)
+  Discourse.filters.push(:workflow)
+  Discourse.anonymous_filters.push(:workflow)
 
   SeedFu.fixture_paths << Rails
   .root
@@ -70,13 +60,6 @@ after_initialize do
   .to_s
 
   add_admin_route("admin.discourse_workflow.title", "discourse-workflow", { use_new_show_route: true })
-
-  #    ../app/serializers/discourse_workflow/workflow_option_serializer.rb 
-
-  reloadable_patch { Topic.prepend(DiscourseWorkflow::TopicExtension) }
-
-  # Category.register_custom_field_type('workflow_enabled', :boolean)
-  # Category.register_custom_field_type('workflow_slug', :string)
 
   add_to_class(:category, :workflow_enabled) do
     WorkflowStep.find_by(category_id: self.id)&.step_id == 1 || false
@@ -103,18 +86,6 @@ after_initialize do
     end
   end
   
-
-  # [
-  #   "workflow_enabled",
-  #   "workflow_slug",
-  # ].each do |key|
-  #   Site.preloaded_category_custom_fields << key if Site.respond_to? :preloaded_category_custom_fields
-  # end
-
-  # Topic.register_custom_field_type('workflow_slug', :string)
-  # Topic.register_custom_field_type('workflow_name', :integer)
-  # Topic.register_custom_field_type('workflow_step_slug', :string)
-  # Topic.register_custom_field_type('workflow_step_name', :string)
   add_to_class(:topic, :workflow_slug) do
     DiscourseWorkflow::WorkflowState
       .joins(:workflow)
@@ -193,6 +164,18 @@ after_initialize do
     end
   end
 
+  add_to_serializer(:topic_list_item, :workflow_name, include_condition: -> { object.workflow_name.present? }) do
+    object.workflow_name
+  end
+
+  add_to_serializer(:topic_list_item, :workflow_step_position, include_condition: -> { object.workflow_step_position.present? }) do
+    object.workflow_step_position.to_i
+  end
+
+  add_to_serializer(:topic_list_item, :workflow_step_name, include_condition: -> { object.workflow_step_name.present? }) do
+    object.workflow_step_name
+  end
+
   DiscourseEvent.on(:topic_created) do |*params|
     topic, opts = params
 
@@ -203,46 +186,4 @@ after_initialize do
       end
     end
   end
-
-
-
-  # #TopicList.preloaded_custom_fields << 'workflow_name' if TopicList.respond_to? :preloaded_custom_fields
-  # add_to_serializer(:topic_list_item, :workflow_name, include_condition: -> { object.workflow_name.present? }) do
-  #   object.workflow_name
-  # end
-
-  # #TopicList.preloaded_custom_fields << 'workflow_step_name' if TopicList.respond_to? :preloaded_custom_fields
-  # add_to_serializer(:topic_list_item, :workflow_step_name, include_condition: -> { object.workflow_step_name.present? }) do
-  #   object.workflow_step_name
-  # end
-
-  # require_dependency 'topic_query'
-  # class ::TopicQuery
-  #   def list_workflows
-  #     # @options[:per_page] = SiteSetting.location_map_max_topics
-  #     create_list(:workflows) do |topics|
-  #       topics = topics.joins("INNER JOIN workflows
-  #                              ON workflow.slug = topics.custom_fields->>'workflow_slug'")
-
-  #       Locations::Map.sorted_list_filters.each do |filter|
-  #         topics = filter[:block].call(topics, @options)
-  #       end
-
-  #       topics
-  #     end
-  #   end
-  # end
-
-  # Locations::Map.add_list_filter do |topics, options|
-  #   if options[:category_id]
-  #     category = Category.find(options[:category_id])
-  #   end
-
-  #   if SiteSetting.location_map_filter_closed || (options[:category_id] && category.custom_fields['location_map_filter_closed'])
-  #     topics = topics.where(closed: false)
-  #   end
-
-  #   topics
-  # end
-
 end

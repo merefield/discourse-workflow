@@ -1,5 +1,12 @@
 en:
   js:
+    workflow-name: "Workflow"
+    workflow-step-name:  "Step Name"  
+    workflow-step-position: "Step"
+    filters:
+      workflows:
+        title: "Workflow"
+        help: "topics involved in a workflow"
     discourse_workflow:
       topic_banner:
         title: "Discourse Workflow"
@@ -8,6 +15,7 @@ en:
         step: "%{workflow_step_position}. %{workflow_step_name}"
         actions_intro: "Actions:"
         visualisation_button: "Visualise"
+        visualisation_title: "Workflow Visualisation: %{workflow_name}"
       options:
         ready:
           button_label: "Ready"
