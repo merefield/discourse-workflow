@@ -22,11 +22,16 @@ module DiscourseWorkflow
                 topic.category_id = target_workflow_step.category_id
                 topic.save!
                 workflow_state.update!(workflow_step_id: workflow_step_option.target_step_id)
-                user = User.find(user_id)
-                username = User.find(user_id).username
+                if user_id.present?
+                  user = User.find(user_id)
+                  username = User.find(user_id).username
+                else
+                  user_id = -1
+                  username = 'system'
+                end
                 WorkflowAuditLog.create!(
-                  user_id: user.id,
-                  username: user.username,
+                  user_id: user_id,
+                  username: username,
                   topic_id: topic.id,
                   topic_title: topic.title,
                   workflow_id: workflow_state.workflow_id,
