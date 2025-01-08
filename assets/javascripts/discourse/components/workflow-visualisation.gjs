@@ -34,39 +34,14 @@ export default class WorkflowVisualisationModalComponent extends Component {
       nodes: result.nodes,
       links: result.links
       }
-    // lanes: [
-    //     { name: "Preparers", link: "https://example.com/preparers" },
-    //     { name: "Reviewers", link: "https://example.com/reviewers" },
-    //     { name: "Finalisers", link: "https://example.com/finalisers" },
-    //     { name: "Approvers", link: "https://example.com/approvers" },
-    //     { name: "Completed", link: "https://example.com/completed" }
-    // ],
-    // nodes: [
-    //     { id: 'Step A', lane: 0, active: false },
-    //     { id: 'Step B', lane: 1, active: false },
-    //     { id: 'Step C', lane: 0, active: true },
-    //     { id: 'Step D', lane: 2, active: false },
-    //     { id: 'Step E', lane: 3, active: false },
-    //     { id: 'Step F', lane: 4, active: false },
-
-    // ],
-    // links: [
-    //     { source: 'Step A', target: 'Step B', action: 'start' },
-    //     { source: 'Step B', target: 'Step A', action: 'reject' },
-    //     { source: 'Step B', target: 'Step C', action: 'accept' },
-    //     { source: 'Step C', target: 'Step D', action: 'process' },
-    //     { source: 'Step D', target: 'Step E', action: 'finalize' },
-    //     { source: 'Step E', target: 'Step F', action: 'confirmed' },
-    //     { source: 'Step E', target: 'Step C', action: 'reopended' }
-    // ]
-//};
 
     // Set up the SVG canvas dimensions
     const width = 950;
     const height = 700;
-
     const laneHeight = height / workflowData.lanes.length;
     const nodeSpacing = width / (workflowData.nodes.length + 1);
+    const nodeWidth = nodeSpacing / 2;
+    const nodeHeight = laneHeight / 3;
     
     // Select the SVG container
     const svg = d3
@@ -74,14 +49,6 @@ export default class WorkflowVisualisationModalComponent extends Component {
       .append("svg")
       .attr("width", width)
       .attr("height", height)
-      // .call(d3.zoom().on("zoom", function () {
-      //     svg.attr("transform", d3.event.transform)
-      //  }))
-
-      // svg.append("rect")
-      //   .attr("width", "100%")
-      //   .attr("height", "100%")
-      //   .attr("fill", "pink");
 
       // Draw swim lanes
       const lanes = svg.selectAll('.lane')
@@ -148,12 +115,12 @@ export default class WorkflowVisualisationModalComponent extends Component {
           .append('rect')
           .attr('class', d => d.active ? 'node active' : 'node')
           .attr('fill', d => d.active ? '#ffa500' : '#69b3a2')
-          .attr('width', 120)
-          .attr('height', 90)
+          .attr('width', nodeWidth)
+          .attr('height', nodeHeight)
           .attr('rx', 5)
           .attr('ry', 5)
           .attr('x', (d, i) => nodeSpacing * (i + 1) )
-          .attr('y', d => d.lane * laneHeight + laneHeight / 2 - 45);
+          .attr('y', d => d.lane * laneHeight + laneHeight / 2 - nodeHeight / 2);
 
       // Add labels to nodes
       const label = svg.append('g')
@@ -169,22 +136,25 @@ export default class WorkflowVisualisationModalComponent extends Component {
 
       // Update links layout
       link
-          .attr('d', d => {
-              const sourceIndex = workflowData.nodes.findIndex(node => node.id === d.source);
-              const targetIndex = workflowData.nodes.findIndex(node => node.id === d.target);
-              const sourceX = nodeSpacing * (sourceIndex + 1);
-              const sourceY = workflowData.nodes[sourceIndex].lane * laneHeight + laneHeight / 2;
-              const targetX = nodeSpacing * (targetIndex + 1);
-              const targetY = workflowData.nodes[targetIndex].lane * laneHeight + laneHeight / 2;
+        .attr('d', d => {
+            const sourceIndex = workflowData.nodes.findIndex(node => node.id === d.source);
+            const targetIndex = workflowData.nodes.findIndex(node => node.id === d.target);
+            const sourceX = nodeSpacing * (sourceIndex + 1) + nodeWidth;
+            const sourceTopY = workflowData.nodes[sourceIndex].lane * laneHeight + laneHeight / 2 - nodeHeight/2; 
+            const sourceY = workflowData.nodes[sourceIndex].lane * laneHeight + laneHeight / 2;
+            const targetX = nodeSpacing * (targetIndex + 1);
+            const targetY = workflowData.nodes[targetIndex].lane * laneHeight + laneHeight / 2;
+            const targetBottomY = workflowData.nodes[targetIndex].lane * laneHeight + laneHeight / 2 + nodeHeight/2; 
 
-              // Handle returning links
-              if (sourceIndex > targetIndex) {
-                  const arcHeight = 50 * (sourceIndex - targetIndex); // Adjust arc height dynamically
-                  return `M${sourceX},${sourceY} V${sourceY - arcHeight} H${targetX} V${targetY}`;
-              }
+            // Handle returning links - rotated S shape
+            if (sourceIndex > targetIndex) {
+                const midY = (sourceTopY - targetBottomY) / 2; // Midpoint between source and target nodes
+                return `M${sourceX - nodeWidth/2},${sourceTopY} V${sourceTopY - midY} H${targetX + nodeWidth/2} V${targetBottomY}`;
+            }
 
-              return `M${sourceX},${sourceY} H${(sourceX + targetX) / 2} V${targetY} H${targetX}`;
-          });
+            // Forward links (Z shape)
+            return `M${sourceX},${sourceY} H${(sourceX + targetX) / 2} V${targetY} H${targetX}`;
+        });
 
       linkLabels
           .attr('x', d => {
@@ -207,25 +177,6 @@ export default class WorkflowVisualisationModalComponent extends Component {
 
               return (sourceY + targetY) / 2 - 10;
           });
-
-      // // Drag event handlers
-      // function dragStarted(event, d) {
-      //     if (!event.active) simulation.alphaTarget(0.3).restart();
-      //     d.fx = d.x;
-      //     d.fy = d.y;
-      // }
-
-      // function dragged(event, d) {
-      //     d.fx = event.x;
-      //     d.fy = event.y;
-      // }
-
-      // function dragEnded(event, d) {
-      //     if (!event.active) simulation.alphaTarget(0);
-      //     d.fx = null;
-      //     d.fy = null;
-      // }
-    
   }
 
   get title() {
