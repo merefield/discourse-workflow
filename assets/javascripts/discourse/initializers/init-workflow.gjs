@@ -1,6 +1,7 @@
 import { PLUGIN_NAV_MODE_TOP } from "discourse/lib/admin-plugin-config-nav";
 import { withPluginApi } from "discourse/lib/plugin-api";
 import SortableColumn from "discourse/components/topic-list/header/sortable-column";
+import WorkflowNameLink from "./../components/workflow-name-link";
 
 const WORKFLOW_LIST_ROUTES = ["discovery.workflow"];
 
@@ -18,9 +19,11 @@ const workflowNameHeader = <template>
 
 const workflowNameCell = <template>
   <td class="workflow-name">
-    {{@topic.workflow_name}}
+    <WorkflowNameLink @topic_id={{@topic.id}} @workflow_name={{@topic.workflow_name}} @label={{@topic.workflow_name}}/>
   </td>
 </template>;
+
+// {{@topic.workflow_name}}
 
 const workflowStepPositionHeader = <template>
   <SortableColumn
@@ -36,7 +39,7 @@ const workflowStepPositionHeader = <template>
 
 const workflowStepPositionCell = <template>
   <td class="workflow-step-position">
-    {{@topic.workflow_step_position}}
+    <WorkflowNameLink @topic_id={{@topic.id}} @workflow_name={{@topic.workflow_name}} @label={{@topic.workflow_step_position}}/>
   </td>
 </template>;
 
@@ -54,7 +57,7 @@ const workflowStepNameHeader = <template>
 
 const workflowStepNameCell = <template>
   <td class="workflow-step-name">
-    {{@topic.workflow_step_name}}
+    <WorkflowNameLink @topic_id={{@topic.id}} @workflow_name={{@topic.workflow_name}} @label={{@topic.workflow_step_name}}/>
   </td>
 </template>;
 
