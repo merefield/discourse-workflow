@@ -200,7 +200,7 @@ export default class WorkflowStepOptionsListEditor extends Component {
                   </td>
                   <td class="d-admin-row__overview">
                     <div class="workflow-step-option-list__actions">
-                      this will have actions
+                      {{!-- this may have more actions --}}
                     </div>
                   </td>
                   <td class="d-admin-row__controls">

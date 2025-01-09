@@ -25,7 +25,7 @@ export default class WorkflowButtonsComponent extends Component {
           data: { option },
         })
         .then(() => {
-          this.router.refresh();
+          this.router.transitionTo("/c/" + this.args.category_id);
         })
         .catch((err) =>
         {

@@ -20,6 +20,9 @@ en:
         ready:
           button_label: "Ready"
           confirmation: "Are you sure you want to mark this topic as ready?"
+        submit:
+          button_label: "Submit"
+          confirmation: "Are you sure you want to submit this topic?"
         start:
           button_label: "Start"
           confirmation: "Are you sure you want to start this workflow?"
@@ -75,6 +78,7 @@ en:
               target_position: "Target Position"
               actions:
                 accept: "Accept"
+                submit: "Submit"
                 reject: "Reject"
                 none: "None"
                 start: "Start"

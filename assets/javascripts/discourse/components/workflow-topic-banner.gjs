@@ -42,7 +42,7 @@ export default class WorkflowButtonsComponent extends Component {
         </div>
         <div class="workflow-banner-section workflow-step-actions">
         {{#if @workflow_step_options}}
-          <WorkflowButtons @workflow_step_options={{@workflow_step_options}} @topic_id={{@topic_id}} />
+          <WorkflowButtons @workflow_step_options={{@workflow_step_options}} @topic_id={{@topic_id}} @category_id={{@category_id}}/>
         {{/if}}
         </div>
       </div>
