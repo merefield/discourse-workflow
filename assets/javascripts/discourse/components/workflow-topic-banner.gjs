@@ -7,15 +7,15 @@ import DButton from "discourse/components/d-button";
 import { ajax } from "discourse/lib/ajax";
 import { popupAjaxError } from "discourse/lib/ajax-error";
 import WorkflowButtons from "./workflow-buttons";
-import WorkflowVisualisation from "./workflow-visualisation";
+import WorkflowVisualisationModal from "./workflow-visualisation-modal";
 
 
 export default class WorkflowButtonsComponent extends Component {
   @service modal;
 
   @action
-  showMyModal() {
-    this.modal.show(WorkflowVisualisation, {
+  showVisualisationModal() {
+    this.modal.show(WorkflowVisualisationModal, {
       model: { topic_id: this.args.topic_id, workflow_name: this.args.workflow_name },
     });
   };
@@ -35,7 +35,7 @@ export default class WorkflowButtonsComponent extends Component {
           <DButton
             class="btn-primary"
             @icon="network-wired"
-            @action={{this.showMyModal}}
+            @action={{this.showVisualisationModal}}
             @label="discourse_workflow.topic_banner.visualisation_button"
           />
           </div>

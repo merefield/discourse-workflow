@@ -10,7 +10,7 @@ import { ajax } from "discourse/lib/ajax";
 import { popupAjaxError } from "discourse/lib/ajax-error";
 import { i18n } from "discourse-i18n";
 
-export default class WorkflowVisualisationModalComponent extends Component {
+export default class WorkflowVisualisationComponent extends Component {
 
   ensureD3() {
     return loadScript("/plugins/discourse-workflow/d3/d3.min.js");
@@ -184,13 +184,9 @@ export default class WorkflowVisualisationModalComponent extends Component {
   }
 
   <template>
-    <DModal
-      @title={{this.title}}
-      @closeModal={{@closeModal}}
-      class="workflow-visualisation-modal"
-      {{didInsert this.setup}}
-    >
-      <div id="workflow-visualisation"></div>
-    </DModal>
+    {{#if this.args.showTitle}}
+      <h1>{{this.title}}</h1>
+    {{/if}}
+    <div id="workflow-visualisation" {{didInsert this.setup}}></div>
   </template>
 };

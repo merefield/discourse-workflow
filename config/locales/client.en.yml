@@ -15,7 +15,7 @@ en:
         step: "%{workflow_step_position}. %{workflow_step_name}"
         actions_intro: "Actions:"
         visualisation_button: "Visualise"
-        visualisation_title: "Workflow Visualisation: %{workflow_name}"
+        visualisation_title: "Workflow: %{workflow_name}"
       options:
         ready:
           button_label: "Ready"
