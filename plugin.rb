@@ -3,8 +3,13 @@
 # about: A topic-based workflow engine for Discourse
 # version: 0.0.1
 # authors: Robert Barrow
-# contact_emails: development@pavilion.tech
+# contact_emails: robert@pavilion.tech
 # url: https://github.com/merefield/discourse-workflow
+
+gem 'multipart-post', '2.4.0', { require: false }
+gem 'faraday-multipart', '1.0.4', { require: false }
+gem 'event_stream_parser', '1.0.0', { require: false }
+gem "ruby-openai", '7.0.0', { require: false }
 
 enabled_site_setting :workflow_enabled
 

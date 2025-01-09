@@ -77,7 +77,7 @@ export default {
       ]);
 
       api.addNavigationBarItem({
-        name: "workflows",
+        name: "workflow",
         href: "/workflow"
       });
 

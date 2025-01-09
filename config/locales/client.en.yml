@@ -4,7 +4,7 @@ en:
     workflow-step-name:  "Step Name"  
     workflow-step-position: "Step"
     filters:
-      workflows:
+      workflow:
         title: "Workflow"
         help: "topics involved in a workflow"
     discourse_workflow:
