@@ -160,7 +160,11 @@ export default class WorkflowVisualisationComponent extends Component {
           .attr('x', d => {
               const sourceIndex = workflowData.nodes.findIndex(node => node.id === d.source);
               const targetIndex = workflowData.nodes.findIndex(node => node.id === d.target);
-              const sourceX = nodeSpacing * (sourceIndex + 1);
+              const sourceX = nodeSpacing * (sourceIndex + 1) + nodeWidth / 2;
+              if (sourceIndex > targetIndex) {
+                return sourceX - (nodeWidth / 4);
+              }
+
               const targetX = nodeSpacing * (targetIndex + 1);
               return (sourceX + targetX) / 2;
           })
@@ -172,10 +176,10 @@ export default class WorkflowVisualisationComponent extends Component {
 
               if (sourceIndex > targetIndex) {
                   const arcHeight = 50 * (sourceIndex - targetIndex); // Match arc height for returning links
-                  return sourceY - arcHeight / 2;
+                  return sourceY - laneHeight / 3.333;
               }
 
-              return (sourceY + targetY) / 2 - 10;
+              return sourceY + laneHeight / 4 ;
           });
   }
 
