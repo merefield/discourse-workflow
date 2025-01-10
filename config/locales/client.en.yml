@@ -1,5 +1,10 @@
 en:
   js:
+    topics:
+      bottom:
+        workflow: Currently, there are no more viewable Workflow topics.
+      none:
+        workflow: Currently, there are no viewable Workflow topics.
     workflow-name: "Workflow"
     workflow-step-name:  "Step Name"  
     workflow-step-position: "Step"

@@ -67,9 +67,6 @@ export default {
   initialize(container) {
     const router = container.lookup("service:router");
     const currentUser = container.lookup("service:current-user");
-    if (!currentUser?.admin) {
-      return;
-    }
 
     withPluginApi("1.39.0", (api) => {
       api.addAdminPluginConfigurationNav("discourse-workflow", PLUGIN_NAV_MODE_TOP, [

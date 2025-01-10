@@ -3,7 +3,7 @@ import { action } from "@ember/object";
 import { service } from "@ember/service";
 import AssignActionsDropdown from "./assign-actions-dropdown";
 
-export default class AssignedTopicListColumn extends Component {
+export default class WorkflowNameTopicListColumn extends Component {
   @service taskActions;
   @service router;
 
