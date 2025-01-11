@@ -216,7 +216,7 @@ export default class WorkflowVisualisationComponent extends Component {
   }
 
   <template>
-    {{#if this.args.showTitle}}
+    {{#if @showTitle}}
       <h1>{{this.title}}</h1>
     {{/if}}
     <div id="workflow-visualisation" {{didInsert this.setup}}></div>

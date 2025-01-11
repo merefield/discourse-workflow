@@ -206,7 +206,7 @@ export default class WorkflowStepOptionsListEditor extends Component {
                     <div class="workflow-step-option-list__target_position">
                       <strong>
                         {{this.convertStepIdToPosition
-                          this.args.workflowSteps
+                          @workflowSteps
                           stepOption
                         }}
                       </strong>

@@ -20,7 +20,7 @@ export default class WorkflowButtonsComponent extends Component {
   <template>
     <div class="workflow-action-button">
       <DButton class="btn-transparent" @action={{this.showVisualisationModal}}>
-        {{this.args.label}}
+        {{@label}}
       </DButton>
     </div>
   </template>
