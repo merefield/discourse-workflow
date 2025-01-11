@@ -1,30 +1,19 @@
 import Component from "@glimmer/component";
-import { cached, tracked } from "@glimmer/tracking";
+import { tracked } from "@glimmer/tracking";
 import { Input } from "@ember/component";
 import { on } from "@ember/modifier";
 import { action } from "@ember/object";
-import DBreadcrumbsItem from "discourse/components/d-breadcrumbs-item";
 import didInsert from "@ember/render-modifiers/modifiers/did-insert";
 import didUpdate from "@ember/render-modifiers/modifiers/did-update";
-import { LinkTo } from "@ember/routing";
 import { later } from "@ember/runloop";
 import { service } from "@ember/service";
 import BackButton from "discourse/components/back-button";
+import DBreadcrumbsItem from "discourse/components/d-breadcrumbs-item";
 import DButton from "discourse/components/d-button";
 import Textarea from "discourse/components/d-textarea";
 import DToggleSwitch from "discourse/components/d-toggle-switch";
-import Avatar from "discourse/helpers/bound-avatar-template";
 import { popupAjaxError } from "discourse/lib/ajax-error";
-import Group from "discourse/models/group";
-import I18n from "discourse-i18n";
-import i18n from "discourse-common/helpers/i18n";
-import AdminUser from "admin/models/admin-user";
-import ComboBox from "select-kit/components/combo-box";
-import GroupChooser from "select-kit/components/group-chooser";
-import DTooltip from "float-kit/components/d-tooltip";
-// import AiLlmSelector from "./ai-llm-selector";
-// import AiPersonaToolOptions from "./workflow-tool-options";
-// import AiToolSelector from "./ai-tool-selector";
+import I18n, { i18n } from "discourse-i18n";
 import WorkflowStepListEditor from "./workflow-step-list-editor";
 
 export default class WorkflowEditor extends Component {
@@ -47,7 +36,6 @@ export default class WorkflowEditor extends Component {
 
   @action
   async save() {
-    const isNew = this.args.workflow.isNew;
     this.isSaving = true;
 
     const backupModel = this.args.workflow.workingCopy();
@@ -56,18 +44,10 @@ export default class WorkflowEditor extends Component {
     try {
       await this.args.workflow.save();
       this.#sortWorkflows();
-      // if (isNew && this.args.workflow.rag_uploads.length === 0) {
-      //   this.args.personas.addObject(this.args.workflow);
-      //   this.router.transitionTo(
-      //     "adminPlugins.show.discourse-ai-personas.edit",
-      //     this.args.workflow
-      //   );
-      // } else {
       this.toasts.success({
-        data: { message: I18n.t("admin.discourse_workflow.workflows.saved") },
+        data: { message: i18n("admin.discourse_workflow.workflows.saved") },
         duration: 2000,
       });
-      // }
     } catch (e) {
       this.args.workflow.setProperties(backupModel);
       popupAjaxError(e);
@@ -81,7 +61,7 @@ export default class WorkflowEditor extends Component {
   @action
   delete() {
     return this.dialog.confirm({
-      message: I18n.t("admin.discourse_workflow.workflows.confirm_delete"),
+      message: i18n("admin.discourse_workflow.workflows.confirm_delete"),
       didConfirm: () => {
         return this.args.workflow.destroyRecord().then(() => {
           this.args.workflow_steps.removeObject(this.args.workflow);

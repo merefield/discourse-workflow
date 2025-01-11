@@ -1,26 +1,18 @@
 import Component from "@glimmer/component";
-import { fn, array, hash } from "@ember/helper";
-import { bind } from "discourse-common/utils/decorators";
+import { tracked } from "@glimmer/tracking";
+import { array, fn } from "@ember/helper";
 import { on } from "@ember/modifier";
 import { action } from "@ember/object";
-import { cached, tracked } from "@glimmer/tracking";
+import didInsert from "@ember/render-modifiers/modifiers/did-insert";
 import { LinkTo } from "@ember/routing";
 import { service } from "@ember/service";
-import DBreadcrumbsItem from "discourse/components/d-breadcrumbs-item";
+import DButton from "discourse/components/d-button";
 import DPageSubheader from "discourse/components/d-page-subheader";
-import DToggleSwitch from "discourse/components/d-toggle-switch";
 import concatClass from "discourse/helpers/concat-class";
 import { popupAjaxError } from "discourse/lib/ajax-error";
-import i18n from "discourse-common/helpers/i18n";
-import AdminConfigAreaEmptyList from "admin/components/admin-config-area-empty-list";
-import WorkflowStepEditor from "./workflow-step-editor";
-import categoryLink from "discourse/helpers/category-link";
-import DButton from "discourse/components/d-button";
-import I18n from "discourse-i18n";
-import didInsert from "@ember/render-modifiers/modifiers/did-insert";
-import didUpdate from "@ember/render-modifiers/modifiers/did-update";
+import { bind } from "discourse-common/utils/decorators";
+import { i18n } from "discourse-i18n";
 import WorkflowLinkButton from "./workflow-link-button";
-import WorkflowDeepLinkButton from "./workflow-deep-link-button";
 import WorkflowStepOptionEditor from "./workflow-step-option-editor";
 
 export default class WorkflowStepOptionsListEditor extends Component {
@@ -68,7 +60,6 @@ export default class WorkflowStepOptionsListEditor extends Component {
   @action
   moveUp(option) {
     const options = this.workflowStepOptions;
-    const index = options.indexOf(option);
     if (option.position > 1) {
       const filteredOptions = options.filter(
         (s) => s.position < option.position
@@ -107,7 +98,6 @@ export default class WorkflowStepOptionsListEditor extends Component {
   @action
   moveDown(option) {
     const options = this.workflowStepOptions;
-    const index = options.indexOf(option);
     if (option.position < options.length) {
       const filteredOptions = options.filter(
         (s) => s.position > option.position
@@ -143,9 +133,11 @@ export default class WorkflowStepOptionsListEditor extends Component {
     );
   }
 
+  /* eslint-disable */
   isfirstOption(option, length) {
     return option.position === 1;
   }
+  /* eslint-enable */
 
   islastOption(option, length) {
     return option.position === length;

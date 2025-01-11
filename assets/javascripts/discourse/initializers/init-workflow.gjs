@@ -1,6 +1,6 @@
+import SortableColumn from "discourse/components/topic-list/header/sortable-column";
 import { PLUGIN_NAV_MODE_TOP } from "discourse/lib/admin-plugin-config-nav";
 import { withPluginApi } from "discourse/lib/plugin-api";
-import SortableColumn from "discourse/components/topic-list/header/sortable-column";
 import WorkflowNameLink from "./../components/workflow-name-link";
 
 const WORKFLOW_LIST_ROUTES = ["discovery.workflow"];
@@ -78,7 +78,6 @@ export default {
 
   initialize(container) {
     const router = container.lookup("service:router");
-    const currentUser = container.lookup("service:current-user");
 
     withPluginApi("1.39.0", (api) => {
       api.addAdminPluginConfigurationNav(

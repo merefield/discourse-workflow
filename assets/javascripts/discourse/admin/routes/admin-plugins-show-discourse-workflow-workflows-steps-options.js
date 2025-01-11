@@ -11,7 +11,7 @@ export default class AdminPluginsShowDiscourseWorkflowWorkflowStepOptions extend
     const workflow_id = workflowStep.workflow_id;
     const allWorkflowStepOptions = await this.store.findAll(
       "workflow-step-option",
-      { workflow_step_id: workflowStep.id, workflow_id: workflow_id }
+      { workflow_step_id: workflowStep.id, workflow_id }
     ); // this.modelFor("adminPlugins.show.discourse-workflow-workflows");
     return allWorkflowStepOptions.content;
   }

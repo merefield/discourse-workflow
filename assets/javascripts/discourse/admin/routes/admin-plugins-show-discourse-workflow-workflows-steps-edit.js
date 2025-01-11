@@ -1,7 +1,4 @@
 import DiscourseRoute from "discourse/routes/discourse";
-import WorkflowStep from "../models/workflow-step";
-import Workflow from "../models/workflow";
-import { inject as service } from "@ember/service";
 
 export default class AdminPluginsShowDiscourseWorkflowWorkflowStepsEdit extends DiscourseRoute {
   async model(params) {

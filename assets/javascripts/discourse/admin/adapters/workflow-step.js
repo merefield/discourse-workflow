@@ -7,7 +7,7 @@ export default class Adapter extends RestAdapter {
     if (findArgs) {
       if (typeof findArgs === "object") {
         if (findArgs)
-          return `/admin/plugins/discourse-workflow/workflows/${findArgs.workflow_id}/`;
+          {return `/admin/plugins/discourse-workflow/workflows/${findArgs.workflow_id}/`;}
       } else {
         return `/admin/plugins/discourse-workflow/`;
       }

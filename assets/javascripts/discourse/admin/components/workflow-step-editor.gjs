@@ -1,28 +1,21 @@
 import Component from "@glimmer/component";
-import { fn, hash } from "@ember/helper";
-import not from "truth-helpers/helpers/not";
+import { tracked } from "@glimmer/tracking";
+import { Input } from "@ember/component";
+import { fn } from "@ember/helper";
 import { on } from "@ember/modifier";
 import { action } from "@ember/object";
-import { cached, tracked } from "@glimmer/tracking";
-import { later } from "@ember/runloop";
-import DBreadcrumbsItem from "discourse/components/d-breadcrumbs-item";
-import BackButton from "discourse/components/back-button";
 import didInsert from "@ember/render-modifiers/modifiers/did-insert";
 import didUpdate from "@ember/render-modifiers/modifiers/did-update";
-import { Input } from "@ember/component";
-import Textarea from "discourse/components/d-textarea";
-import CategoryChooser from "select-kit/components/category-chooser";
-import DButton from "discourse/components/d-button";
-import { LinkTo } from "@ember/routing";
+import { later } from "@ember/runloop";
 import { service } from "@ember/service";
-import DPageSubheader from "discourse/components/d-page-subheader";
+import DButton from "discourse/components/d-button";
+import Textarea from "discourse/components/d-textarea";
 import DToggleSwitch from "discourse/components/d-toggle-switch";
-import concatClass from "discourse/helpers/concat-class";
 import { popupAjaxError } from "discourse/lib/ajax-error";
-import i18n from "discourse-common/helpers/i18n";
-import AdminConfigAreaEmptyList from "admin/components/admin-config-area-empty-list";
+import I18n, { i18n } from "discourse-i18n";
+import CategoryChooser from "select-kit/components/category-chooser";
+import not from "truth-helpers/helpers/not";
 import WorkflowBackButton from "./workflow-back-button";
-import I18n from "discourse-i18n";
 import WorkflowStepOptionListEditor from "./workflow-step-option-list-editor";
 
 export default class WorkflowStepEditor extends Component {
@@ -52,7 +45,6 @@ export default class WorkflowStepEditor extends Component {
 
   @action
   async save() {
-    const isNew = this.args.currentWorkflowStep.isNew;
     this.isSaving = true;
 
     const backupModel = this.args.currentWorkflowStep.workingCopy();
@@ -62,7 +54,7 @@ export default class WorkflowStepEditor extends Component {
       this.isSaving = false;
       this.toasts.success({
         data: {
-          message: I18n.t("admin.discourse_workflow.workflows.steps.saved"),
+          message: i18n("admin.discourse_workflow.workflows.steps.saved"),
         },
         duration: 2000,
       });
@@ -79,14 +71,14 @@ export default class WorkflowStepEditor extends Component {
   @action
   delete() {
     return this.dialog.confirm({
-      message: I18n.t(
+      message: i18n(
         "admin.discourse_workflow.workflows.steps.confirm_delete"
       ),
       didConfirm: () => {
         return this.args.currentWorkflowStep.destroyRecord().then(() => {
           this.toasts.success({
             data: {
-              message: I18n.t(
+              message: i18n(
                 "admin.discourse_workflow.workflows.steps.deleted"
               ),
             },

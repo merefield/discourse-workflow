@@ -2,7 +2,7 @@ import DiscourseRoute from "discourse/routes/discourse";
 import { i18n } from "discourse-i18n";
 
 export default class AdminPluginsShowDiscourseWorkflowWorkflow extends DiscourseRoute {
-  async model(params) {
+  async model() {
     return this.store.findAll("workflow");
   }
 

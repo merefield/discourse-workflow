@@ -1,13 +1,9 @@
-import loadScript from "discourse/lib/load-script";
-import DiscourseURL from "discourse/lib/url";
-import { notEmpty, alias } from "@ember/object/computed";
-import { observes } from "discourse-common/utils/decorators";
 import Component from "@ember/component";
-import DModal from "discourse/components/d-modal";
-import didInsert from "@ember/render-modifiers/modifiers/did-insert";
 import { action } from "@ember/object";
+import didInsert from "@ember/render-modifiers/modifiers/did-insert";
 import { ajax } from "discourse/lib/ajax";
 import { popupAjaxError } from "discourse/lib/ajax-error";
+import loadScript from "discourse/lib/load-script";
 import { i18n } from "discourse-i18n";
 
 export default class WorkflowVisualisationComponent extends Component {
@@ -43,7 +39,7 @@ export default class WorkflowVisualisationComponent extends Component {
     const nodeHeight = laneHeight / 3;
 
     // Select the SVG container
-    const svg = d3
+    const svg = window.d3
       .select("#workflow-visualisation")
       .append("svg")
       .attr("width", width)
@@ -113,7 +109,7 @@ export default class WorkflowVisualisationComponent extends Component {
       .text((d) => d.action);
 
     // Add nodes to the SVG
-    const node = svg
+    svg
       .append("g")
       .attr("class", "nodes")
       .selectAll("rect")
@@ -130,7 +126,7 @@ export default class WorkflowVisualisationComponent extends Component {
       .attr("y", (d) => d.lane * laneHeight + laneHeight / 2 - nodeHeight / 2);
 
     // Add labels to nodes
-    const label = svg
+    svg
       .append("g")
       .attr("class", "labels")
       .selectAll("text")
@@ -204,11 +200,8 @@ export default class WorkflowVisualisationComponent extends Component {
         );
         const sourceY =
           workflowData.nodes[sourceIndex].lane * laneHeight + laneHeight / 2;
-        const targetY =
-          workflowData.nodes[targetIndex].lane * laneHeight + laneHeight / 2;
 
         if (sourceIndex > targetIndex) {
-          const arcHeight = 50 * (sourceIndex - targetIndex); // Match arc height for returning links
           return sourceY - laneHeight / 3.333;
         }
 

@@ -1,22 +1,22 @@
 import Component from "@glimmer/component";
-import { action } from "@ember/object";
 import { fn } from "@ember/helper";
+import { action } from "@ember/object";
 import { service } from "@ember/service";
-import { i18n } from "discourse-i18n";
 import DButton from "discourse/components/d-button";
 import { ajax } from "discourse/lib/ajax";
 import { popupAjaxError } from "discourse/lib/ajax-error";
-import Textarea from "discourse/components/d-textarea";
-import { cached, tracked } from "@glimmer/tracking";
+import { i18n } from "discourse-i18n";
 
 export default class WorkflowButtonsComponent extends Component {
   @service dialog;
   @service router;
 
-  @action
-  actOnWorkflow(option) {
-    console.log(`Acting on workflow with slug: ${option}`);
+  workflowActionLabel = (option) => {
+    return `discourse_workflow.options.${option}.button_label`;
+  };
 
+@action
+  actOnWorkflow(option) {
     this.dialog.yesNoConfirm({
       message: i18n(`discourse_workflow.options.${option}.confirmation`),
       didConfirm: () => {
@@ -34,9 +34,7 @@ export default class WorkflowButtonsComponent extends Component {
     });
   }
 
-  workflowActionLabel = (option) => {
-    return `discourse_workflow.options.${option}.button_label`;
-  };
+
 
   <template>
     <div class="workflow-banner-title workflow-buttons-title">

@@ -1,27 +1,22 @@
 import Component from "@glimmer/component";
-import { fn, array, hash } from "@ember/helper";
-import { bind } from "discourse-common/utils/decorators";
+import { tracked } from "@glimmer/tracking";
+import { array, fn } from "@ember/helper";
 import { on } from "@ember/modifier";
 import { action } from "@ember/object";
-import { cached, tracked } from "@glimmer/tracking";
+import didInsert from "@ember/render-modifiers/modifiers/did-insert";
 import { LinkTo } from "@ember/routing";
 import { service } from "@ember/service";
 import DBreadcrumbsItem from "discourse/components/d-breadcrumbs-item";
+import DButton from "discourse/components/d-button";
 import DPageSubheader from "discourse/components/d-page-subheader";
 import DToggleSwitch from "discourse/components/d-toggle-switch";
+import categoryLink from "discourse/helpers/category-link";
 import concatClass from "discourse/helpers/concat-class";
 import { popupAjaxError } from "discourse/lib/ajax-error";
-import i18n from "discourse-common/helpers/i18n";
-import AdminConfigAreaEmptyList from "admin/components/admin-config-area-empty-list";
-import WorkflowStepEditor from "./workflow-step-editor";
-import categoryLink from "discourse/helpers/category-link";
-import DButton from "discourse/components/d-button";
-import I18n from "discourse-i18n";
-import didInsert from "@ember/render-modifiers/modifiers/did-insert";
-import didUpdate from "@ember/render-modifiers/modifiers/did-update";
+import { bind } from "discourse-common/utils/decorators";
+import { i18n } from "discourse-i18n";
 import WorkflowLinkButton from "./workflow-link-button";
-import WorkflowDeepLinkButton from "./workflow-deep-link-button";
-import { sort } from "@ember/object/computed";
+import WorkflowStepEditor from "./workflow-step-editor";
 
 export default class WorkflowStepsListEditor extends Component {
   @service adminPluginNavManager;
@@ -65,7 +60,6 @@ export default class WorkflowStepsListEditor extends Component {
   @action
   moveUp(step) {
     const steps = this.workflowSteps;
-    const index = steps.indexOf(step);
     if (step.position > 1) {
       const filteredSteps = steps.filter((s) => s.position < step.position);
       const previousStep =
@@ -102,7 +96,6 @@ export default class WorkflowStepsListEditor extends Component {
   @action
   moveDown(step) {
     const steps = this.workflowSteps;
-    const index = steps.indexOf(step);
     if (step.position < steps.length) {
       const filteredSteps = steps.filter((s) => s.position > step.position);
       const nextStep =
@@ -133,10 +126,11 @@ export default class WorkflowStepsListEditor extends Component {
       (a, b) => a.position - b.position
     );
   }
-
+  /* eslint-disable */
   isfirstStep(step, length) {
     return step.position === 1;
   }
+  /* eslint-enable */
 
   islastStep(step, length) {
     return step.position === length;
