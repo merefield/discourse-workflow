@@ -3,7 +3,7 @@ require_relative '../plugin_helper'
 
 describe ::DiscourseWorkflow::Transition do
 
-  fab!(:workflow) { 
+  fab!(:workflow) {
     Fabricate(:workflow, name: "Test Workflow", description: "Test Workflow Description")
   }
   fab!(:step_1) {
@@ -21,18 +21,14 @@ describe ::DiscourseWorkflow::Transition do
     Fabricate(:workflow_step_option, workflow_step_id: step_1.id, workflow_option_id: option_1.id, target_step_id: step_2.id)
   }
 
-  fab!(:topic) {
-    Fabricate(:topic)
-  }
+  fab!(:topic)
 
   fab!(:workflow_state) {
     Fabricate(:workflow_state, topic_id: topic.id, workflow_id: workflow.id, workflow_step_id: step_1.id)
   }
 
-  fab!(:user) { 
-    Fabricate(:user)
-  }
- 
+  fab!(:user)
+
   fab!(:transition) {
     DiscourseWorkflow::Transition.new
   }

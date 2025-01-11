@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module DiscourseWorkflow
   class WorkflowStepOptionSerializer < ApplicationSerializer
 
@@ -13,12 +15,5 @@ module DiscourseWorkflow
     def workflow_id
       object.workflow_step.workflow_id
     end
-    # def name
-    #   DiscourseWorkflow::WorkflowStepOption.find_by(id: object.workflow_option_id)&.name
-    # end
-
-    # def slug
-    #   DiscourseWorkflow::WorkflowStepOption.find_by(id: object.workflow_option_id)&.slug
-    # end
   end
 end

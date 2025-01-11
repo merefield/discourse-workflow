@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 Fabricator(:workflow_step, class_name: "DiscourseWorkflow::WorkflowStep") do
   name { sequence(:name) { |i| "This is a test workflow step #{i}" } }
   workflow_id { Fabricate(:workflow).id }

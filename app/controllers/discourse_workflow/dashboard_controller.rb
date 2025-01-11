@@ -1,5 +1,8 @@
+# frozen_string_literal: true
+
 module DiscourseWorkflow
   class WorkflowVisualisationController < ApplicationController
+    requires_plugin ::DiscourseWorkflow::PLUGIN_NAME
 
     def index
       workfow_id = params[:workflow_id]
@@ -7,4 +10,3 @@ module DiscourseWorkflow
     end
   end
 end
-

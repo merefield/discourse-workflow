@@ -1,4 +1,6 @@
 # frozen_string_literal: true
+
+# rubocop:disable Discourse/NoAddReferenceOrAliasesActiveRecordMigration
 class CreateWorkflowStates < ActiveRecord::Migration[7.1]
   def change
     create_table :workflow_states do |t|

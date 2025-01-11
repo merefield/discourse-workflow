@@ -7,7 +7,7 @@ module ::DiscourseWorkflow
     has_many :workflow_step_option
     has_many :workflow_state
 
-   validates :category_id, presence: true
-   validates :name, presence: true
+    validates :category_id, presence: true
+    validates :name, presence: true
   end
 end

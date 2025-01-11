@@ -1,5 +1,8 @@
+# frozen_string_literal: true
+
 module DiscourseWorkflow
   class WorkflowVisualisationController < ApplicationController
+    requires_plugin ::DiscourseWorkflow::PLUGIN_NAME
 
     def network
       topic = Topic.find(params[:topic_id])
@@ -10,7 +13,7 @@ module DiscourseWorkflow
 
         lanes = workflow.workflow_step.order(:position).map do |step|
           {
-            name: Category.find(step.category_id).name, 
+            name: Category.find(step.category_id).name,
             link: "/c/#{step.category_id}"
          }
         end.uniq { |lane| lane[:name] }

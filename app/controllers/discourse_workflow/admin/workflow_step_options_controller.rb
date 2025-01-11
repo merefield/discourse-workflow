@@ -1,4 +1,5 @@
-# app/controllers/discourse_workflow/admin/workflow_step_options_controller.rb
+# frozen_string_literal: true
+
 module DiscourseWorkflow
   module Admin
     class WorkflowStepOptionsController < ::Admin::AdminController
@@ -13,9 +14,9 @@ module DiscourseWorkflow
         else
           @workflow_step_options = WorkflowStepOption.all.order(:position)
         end
-        render_json_dump (
+        render_json_dump(
           { workflow_step_options:
-          ActiveModel::ArraySerializer.new(@workflow_step_options, 
+          ActiveModel::ArraySerializer.new(@workflow_step_options,
           each_serializer: DiscourseWorkflow::WorkflowStepOptionSerializer)
           })
       end
@@ -29,7 +30,7 @@ module DiscourseWorkflow
           render json: {
             workflow_step_option: WorkflowStepOptionSerializer.new(workflow_step_option, root: false),
              },
-          status: :created
+                 status: :created
         else
           render_json_error workflow_step_option
         end
@@ -48,7 +49,7 @@ module DiscourseWorkflow
           render json: {
             workflow_step_option: WorkflowStepOptionSerializer.new(workflow_step_option, root: false),
              },
-          status: :created
+                 status: :created
         else
           render_json_error workflow_step_option
         end
@@ -62,7 +63,7 @@ module DiscourseWorkflow
           render json: {
             workflow_step_option: WorkflowStepOptionSerializer.new(@workflow_step_option, root: false),
              },
-          status: :ok
+                 status: :ok
         else
           render_json_error @workflow_step_option
         end
@@ -81,7 +82,7 @@ module DiscourseWorkflow
       def set_workflow_step
         id = params.dig(:workflow_step_id)
         if id.present?
-            @workflow_step = WorkflowStep.find(id)
+          @workflow_step = WorkflowStep.find(id)
         else
           @workflow_step = nil
         end

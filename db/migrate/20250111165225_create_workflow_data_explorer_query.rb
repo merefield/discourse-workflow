@@ -17,6 +17,7 @@ class CreateWorkflowDataExplorerQuery < ActiveRecord::Migration[7.2]
       :now)
     SQL
   end
+
   def down
     DB.exec <<~SQL
       DELETE FROM data_explorer_queries

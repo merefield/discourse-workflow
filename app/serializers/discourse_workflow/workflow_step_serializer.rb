@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module DiscourseWorkflow
   class WorkflowStepSerializer < ApplicationSerializer
 
@@ -15,7 +17,7 @@ module DiscourseWorkflow
     has_one :category, serializer: CategorySerializer, embed: :object
 
     def category
-      Category.find_by(id: object.category_id) if object.category_id.present?  
+      Category.find_by(id: object.category_id) if object.category_id.present?
     end
   end
 end

@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 Fabricator(:workflow_state, class_name: "DiscourseWorkflow::WorkflowState") do
   topic_id { Fabricate(:topic).id }
   workflow_id { Fabricate(:workflow).id }

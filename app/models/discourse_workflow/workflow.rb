@@ -16,7 +16,6 @@ module ::DiscourseWorkflow
     has_many :workflow_state
 
     scope :ordered, -> { order("lower(name) ASC") }
- 
 
     def ensure_name_ascii
       return if name.blank?
@@ -42,17 +41,17 @@ module ::DiscourseWorkflow
       end
     end
 
-  #  def generate_unique_slug
-  #    base_slug = name.to_s.parameterize(separator: '_')
-  #    slug_candidate = base_slug
-  #    counter = 2
- 
-  #    while Workflow.exists?(slug: slug_candidate)
-  #      slug_candidate = "#{base_slug}_#{counter}"
-  #      counter += 1
-  #    end
- 
-  #    self.slug = slug_candidate
-  #  end
+    #  def generate_unique_slug
+    #    base_slug = name.to_s.parameterize(separator: '_')
+    #    slug_candidate = base_slug
+    #    counter = 2
+
+    #    while Workflow.exists?(slug: slug_candidate)
+    #      slug_candidate = "#{base_slug}_#{counter}"
+    #      counter += 1
+    #    end
+
+    #    self.slug = slug_candidate
+    #  end
   end
 end

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module DiscourseWorkflow
   class Transition
 
@@ -17,7 +19,7 @@ module DiscourseWorkflow
               step_option_name = workflow_step_option.workflow_option.name
               step_option_slug = workflow_step_option.workflow_option.slug
 
-              target_workflow_step = WorkflowStep.find_by(  id: workflow_step_option.target_step_id)
+              target_workflow_step = WorkflowStep.find_by(id: workflow_step_option.target_step_id)
               if target_workflow_step
                 topic.category_id = target_workflow_step.category_id
                 topic.save!
@@ -55,7 +57,7 @@ module DiscourseWorkflow
             end
           end
         end
-      end 
+      end
       success
     end
 

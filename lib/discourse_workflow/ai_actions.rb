@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module DiscourseWorkflow
   class AiActions
 
@@ -12,10 +14,8 @@ module DiscourseWorkflow
     def ai_transition(workflow_state)
       client = OpenAI::Client.new(access_token: SiteSetting.workflow_openai_api_key)
       model_name = SiteSetting.workflow_ai_model
-      byebug
-  
       system_prompt =  SiteSetting.workflow_ai_prompt_system
-      base_user_prompt =  workflow_state.workflow_step.ai_prompt
+      base_user_prompt = workflow_state.workflow_step.ai_prompt
 
       return if !base_user_prompt.present?
 
@@ -24,7 +24,7 @@ module DiscourseWorkflow
       topic = Topic.find(workflow_state.topic_id)
       user_prompt = user_prompt.gsub(/{{topic}}/, topic.first_post.raw)
 
-      messages = [{ "role": "system", "content": system_prompt}]
+      messages = [{ "role": "system", "content": system_prompt }]
       messages << { "role": "user", "content":  user_prompt }
 
       response = client.chat(
@@ -34,12 +34,12 @@ module DiscourseWorkflow
             max_tokens: 8,
             temperature: 0.1,
         })
-  
+
       if response["error"]
         begin
           raise StandardError, response["error"]["message"]
         rescue => e
-          Rails.logger.error ("Workflow: There was a problem: #{e}")
+          Rails.logger.error("Workflow: There was a problem: #{e}")
           # I18n.t('ai_topic_summary.errors.general')
         end
       else

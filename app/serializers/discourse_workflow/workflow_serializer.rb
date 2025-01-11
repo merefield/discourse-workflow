@@ -25,17 +25,5 @@ module DiscourseWorkflow
     def final_category_id
       object.workflow_step.last&.category_id
     end
-
-    # def workflow_steps
-    #   object.workflow_step
-    # end
-
-    # def name
-    #   object.class_instance.name
-    # end
-
-    # def description
-    #   object.class_instance.description
-    # end
   end
 end

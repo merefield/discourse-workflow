@@ -26,7 +26,6 @@ if respond_to?(:register_svg_icon)
   register_svg_icon "network-wired"
 end
 
-
 after_initialize do
   reloadable_patch do
     ListController.prepend(DiscourseWorkflow::ListControllerExtension)
@@ -34,35 +33,15 @@ after_initialize do
     Topic.prepend(DiscourseWorkflow::TopicExtension)
   end
 
-  # %w(
-  #   ../app/models/discourse_workflow/workflow.rb
-  #   ../app/models/discourse_workflow/workflow_step.rb
-  #   ../app/models/discourse_workflow/workflow_option.rb
-  #   ../app/models/discourse_workflow/workflow_step_option.rb
-  #   ../app/models/discourse_workflow/workflow_state.rb
-  #   ../app/models/discourse_workflow/workflow_audit_log.rb
-  #   ../app/serializers/discourse_workflow/workflow_step_option_serializer.rb
-  #   ../app/serializers/discourse_workflow/workflow_step_serializer.rb
-  #   ../app/serializers/discourse_workflow/workflow_serializer.rb
-  #   ../app/controllers/discourse_workflow/admin/workflows_controller.rb
-  #   ../app/controllers/discourse_workflow/admin/workflow_steps_controller.rb
-  #   ../app/controllers/discourse_workflow/admin/workflow_step_options_controller.rb
-  #   ../app/controllers/discourse_workflow/workflow_action_controller.rb
-  #   ../app/controllers/discourse_workflow/workflow_visualisation_controller.rb
-  #   ../config/routes.rb
-  # ).each do |path|
-  #   load File.expand_path(path, __FILE__)
-  # end
-
   Discourse.top_menu_items.push(:workflow)
   Discourse.anonymous_top_menu_items.push(:workflow)
   Discourse.filters.push(:workflow)
   Discourse.anonymous_filters.push(:workflow)
 
   SeedFu.fixture_paths << Rails
-  .root
-  .join("plugins", "discourse-workflow", "db", "fixtures")
-  .to_s
+    .root
+    .join("plugins", "discourse-workflow", "db", "fixtures")
+    .to_s
 
   add_admin_route("admin.discourse_workflow.title", "discourse-workflow", { use_new_show_route: true })
 
@@ -76,10 +55,10 @@ after_initialize do
 
   # prevent non-staff from changing category on a workflow topic
   PostRevisor.track_topic_field(:category_id) do |tc, category_id|
-   if tc.guardian.is_staff?
-    tc.record_change('category_id', tc.topic.category_id, category_id)
-    tc.topic.category_id = category_id
-   else
+    if tc.guardian.is_staff?
+      tc.record_change('category_id', tc.topic.category_id, category_id)
+     tc.topic.category_id = category_id
+    else
       if ::DiscourseWorkflow::WorkflowState.find_by(topic_id: tc.topic.id).present?
         # TODO get this to work and add a translation
         tc.topic.errors.add(:base, :workflow,  message: "you can't change category on a workflow topic unless you are staff")
@@ -90,7 +69,7 @@ after_initialize do
       end
     end
   end
-  
+
   add_to_class(:topic, :workflow_slug) do
     DiscourseWorkflow::WorkflowState
       .joins(:workflow)
@@ -115,7 +94,7 @@ after_initialize do
       .first
       &.slug
   end
-  add_to_class(:topic, :workflow_step_name) do 
+  add_to_class(:topic, :workflow_step_name) do
     DiscourseWorkflow::WorkflowState
       .joins(:workflow_step)
       .where(topic_id: self.id)
@@ -123,7 +102,7 @@ after_initialize do
       .first
       &.name
   end
-  add_to_class(:topic, :workflow_step_position) do 
+  add_to_class(:topic, :workflow_step_position) do
     DiscourseWorkflow::WorkflowState
       .joins(:workflow_step)
       .where(topic_id: self.id)
@@ -131,7 +110,7 @@ after_initialize do
       .first
       &.position
   end
-  add_to_class(:topic, :workflow_step_options) do 
+  add_to_class(:topic, :workflow_step_options) do
     DiscourseWorkflow::WorkflowState
       .joins(workflow_step: { workflow_step_option: :workflow_option })
       .where(topic_id: self.id)
@@ -181,7 +160,7 @@ after_initialize do
     object.workflow_step_name
   end
 
-  DiscourseEvent.on(:topic_created) do |*params|
+  on(:topic_created) do |*params|
     topic, opts = params
 
     if SiteSetting.workflow_enabled

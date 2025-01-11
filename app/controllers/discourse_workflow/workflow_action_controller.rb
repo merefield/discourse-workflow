@@ -1,5 +1,8 @@
+# frozen_string_literal: true
+
 module DiscourseWorkflow
   class WorkflowActionController < ApplicationController
+    requires_plugin ::DiscourseWorkflow::PLUGIN_NAME
 
     def act
       topic = Topic.find(params[:topic_id])
