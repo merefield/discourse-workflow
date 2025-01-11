@@ -34,25 +34,25 @@ after_initialize do
     Topic.prepend(DiscourseWorkflow::TopicExtension)
   end
 
-  %w(
-    ../app/models/discourse_workflow/workflow.rb
-    ../app/models/discourse_workflow/workflow_step.rb
-    ../app/models/discourse_workflow/workflow_option.rb
-    ../app/models/discourse_workflow/workflow_step_option.rb
-    ../app/models/discourse_workflow/workflow_state.rb
-    ../app/models/discourse_workflow/workflow_audit_log.rb
-    ../app/serializers/discourse_workflow/workflow_step_option_serializer.rb
-    ../app/serializers/discourse_workflow/workflow_step_serializer.rb
-    ../app/serializers/discourse_workflow/workflow_serializer.rb
-    ../app/controllers/discourse_workflow/admin/workflows_controller.rb
-    ../app/controllers/discourse_workflow/admin/workflow_steps_controller.rb
-    ../app/controllers/discourse_workflow/admin/workflow_step_options_controller.rb
-    ../app/controllers/discourse_workflow/workflow_action_controller.rb
-    ../app/controllers/discourse_workflow/workflow_visualisation_controller.rb
-    ../config/routes.rb
-  ).each do |path|
-    load File.expand_path(path, __FILE__)
-  end
+  # %w(
+  #   ../app/models/discourse_workflow/workflow.rb
+  #   ../app/models/discourse_workflow/workflow_step.rb
+  #   ../app/models/discourse_workflow/workflow_option.rb
+  #   ../app/models/discourse_workflow/workflow_step_option.rb
+  #   ../app/models/discourse_workflow/workflow_state.rb
+  #   ../app/models/discourse_workflow/workflow_audit_log.rb
+  #   ../app/serializers/discourse_workflow/workflow_step_option_serializer.rb
+  #   ../app/serializers/discourse_workflow/workflow_step_serializer.rb
+  #   ../app/serializers/discourse_workflow/workflow_serializer.rb
+  #   ../app/controllers/discourse_workflow/admin/workflows_controller.rb
+  #   ../app/controllers/discourse_workflow/admin/workflow_steps_controller.rb
+  #   ../app/controllers/discourse_workflow/admin/workflow_step_options_controller.rb
+  #   ../app/controllers/discourse_workflow/workflow_action_controller.rb
+  #   ../app/controllers/discourse_workflow/workflow_visualisation_controller.rb
+  #   ../config/routes.rb
+  # ).each do |path|
+  #   load File.expand_path(path, __FILE__)
+  # end
 
   Discourse.top_menu_items.push(:workflow)
   Discourse.anonymous_top_menu_items.push(:workflow)
