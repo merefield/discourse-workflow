@@ -15,7 +15,7 @@ export default class WorkflowButtonsComponent extends Component {
     return `discourse_workflow.options.${option}.button_label`;
   };
 
-@action
+  @action
   actOnWorkflow(option) {
     this.dialog.yesNoConfirm({
       message: i18n(`discourse_workflow.options.${option}.confirmation`),
@@ -33,8 +33,6 @@ export default class WorkflowButtonsComponent extends Component {
       },
     });
   }
-
-
 
   <template>
     <div class="workflow-banner-title workflow-buttons-title">

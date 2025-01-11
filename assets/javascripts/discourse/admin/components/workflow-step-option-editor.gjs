@@ -66,16 +66,12 @@ export default class WorkflowStepOptionEditor extends Component {
   @action
   delete() {
     return this.dialog.confirm({
-      message: i18n(
-        "admin.discourse_workflow.workflows.steps.confirm_delete"
-      ),
+      message: i18n("admin.discourse_workflow.workflows.steps.confirm_delete"),
       didConfirm: () => {
         return this.args.currentWorkflowStepOption.destroyRecord().then(() => {
           this.toasts.success({
             data: {
-              message: i18n(
-                "admin.discourse_workflow.workflows.steps.deleted"
-              ),
+              message: i18n("admin.discourse_workflow.workflows.steps.deleted"),
             },
             duration: 2000,
           });

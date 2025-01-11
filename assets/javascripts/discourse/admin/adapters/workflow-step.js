@@ -6,8 +6,9 @@ export default class Adapter extends RestAdapter {
   basePath(store, type, findArgs) {
     if (findArgs) {
       if (typeof findArgs === "object") {
-        if (findArgs)
-          {return `/admin/plugins/discourse-workflow/workflows/${findArgs.workflow_id}/`;}
+        if (findArgs) {
+          return `/admin/plugins/discourse-workflow/workflows/${findArgs.workflow_id}/`;
+        }
       } else {
         return `/admin/plugins/discourse-workflow/`;
       }
