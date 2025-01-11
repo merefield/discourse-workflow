@@ -58,6 +58,20 @@ en:
           description: "Description"
           workflow:
             short_title: "Workflow"
+            editing:
+              title: "Editing Existing Workflow: %{workflow_name}"
+            new:
+              title: "Create a New Workflow"
+            step:
+              editing:
+                title: "Editing Workflow Step: %{workflow_step_name}"
+              new:
+                title: "Add a New Workflow Step"
+              option:
+                new:
+                  title: "Add a New Option"
+                editing:
+                  title: "Editing Option at position: %{position}"
           steps:
             position: "ID"
             category: "Category"
