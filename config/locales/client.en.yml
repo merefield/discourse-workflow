@@ -22,27 +22,45 @@ en:
         visualisation_button: "Visualise"
         visualisation_title: "Workflow: %{workflow_name}"
       options:
-        ready:
-          button_label: "Ready"
-          confirmation: "Are you sure you want to mark this topic as ready?"
         submit:
           button_label: "Submit"
           confirmation: "Are you sure you want to submit this topic?"
-        start:
-          button_label: "Start"
-          confirmation: "Are you sure you want to start this workflow?"
         accept:
           button_label: "Accept"
           confirmation: "Are you sure you want to accept this topic?"
         reject:
           button_label: "Reject"
           confirmation: "Are you sure you want to reject this topic?"
+        great:
+          button_label: "Great"
+          confirmation: "Are you sure you want to mark this topic as great?"
+        good:
+          button_label: "Good"
+          confirmation: "Are you sure you want to mark this topic as good?"
+        average:
+          button_label: "Average"
+          confirmation: "Are you sure you want to mark this topic as average?"
+        bad:
+          button_label: "Bad"
+          confirmation: "Are you sure you want to mark this topic as bad?"
+        terrible:
+          button_label: "Terrible"
+          confirmation: "Are you sure you want to mark this topic as terrible?"
         done:
           button_label: "Done"
           confirmation: "Are you sure you want to mark this topic as done?"
+        next:
+          button_label: "Next"
+          confirmation: "Are you sure you want to move this Topic to the next step?"
+        back:
+          button_label: "Back"
+          confirmation: "Are you sure you want to move this Topic back to the previous step?"
         finish:
           button_label: "Finish"
           confirmation: "Are you sure you want to finish this workflow?"
+        reopen:
+          button_label: "Reopen"
+          confirmation: "Are you sure you want to reopen this workflow?"
   admin_js:
     admin:
       discourse_workflow:
@@ -96,13 +114,16 @@ en:
               name: "Name"
               target_position: "Target Position"
               actions:
-                accept: "Accept"
                 submit: "Submit"
+                accept: "Accept"
                 reject: "Reject"
+                great: "Great"
+                good: "Good"
+                average: "Average"
+                bad: "Bad"
+                terrible: "Terrible"
                 none: "None"
-                start: "Start"
                 done: "Done"
-                ready: "Ready"
                 next: "Next"
                 back: "Back"
                 finish: "Finish"
