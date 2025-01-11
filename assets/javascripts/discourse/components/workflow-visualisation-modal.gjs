@@ -5,7 +5,9 @@ import WorkflowVisualisation from "./workflow-visualisation";
 
 export default class WorkflowVisualisationModalComponent extends Component {
   get title() {
-    return i18n("discourse_workflow.topic_banner.visualisation_title", { workflow_name: this.model.workflow_name });
+    return i18n("discourse_workflow.topic_banner.visualisation_title", {
+      workflow_name: this.model.workflow_name,
+    });
   }
 
   <template>
@@ -14,7 +16,7 @@ export default class WorkflowVisualisationModalComponent extends Component {
       @closeModal={{@closeModal}}
       class="workflow-visualisation-modal"
     >
-      <WorkflowVisualisation @model={{@model}}/>
+      <WorkflowVisualisation @model={{@model}} />
     </DModal>
   </template>
-};
+}

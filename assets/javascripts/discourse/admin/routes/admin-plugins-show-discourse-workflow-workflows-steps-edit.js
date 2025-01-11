@@ -10,10 +10,15 @@ export default class AdminPluginsShowDiscourseWorkflowWorkflowStepsEdit extends 
     );
     const id = parseInt(params.step_id, 10);
     const workflowStep = allWorkflowSteps.findBy("id", id);
-  
-    const workflowSteps = await this.store.findAll("workflow-step", { workflow_id: workflowStep.workflow_id });
+
+    const workflowSteps = await this.store.findAll("workflow-step", {
+      workflow_id: workflowStep.workflow_id,
+    });
     workflowStep.set("workflowSteps", workflowSteps.content);
-    const workflow = await this.store.find("workflow", workflowStep.workflow_id);
+    const workflow = await this.store.find(
+      "workflow",
+      workflowStep.workflow_id
+    );
     workflowStep.set("workflow", workflow);
     return workflowStep;
   }
@@ -21,10 +26,9 @@ export default class AdminPluginsShowDiscourseWorkflowWorkflowStepsEdit extends 
   async setupController(controller, model) {
     super.setupController(controller, model);
 
-    const workflowSteps = await this.store.findAll("workflow-step", { workflow_id: this.currentModel.workflow_id });
-    controller.set(
-      "workflowSteps",
-      workflowSteps.content
-    );
+    const workflowSteps = await this.store.findAll("workflow-step", {
+      workflow_id: this.currentModel.workflow_id,
+    });
+    controller.set("workflowSteps", workflowSteps.content);
   }
 }

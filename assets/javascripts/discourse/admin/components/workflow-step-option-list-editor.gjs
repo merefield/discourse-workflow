@@ -29,32 +29,40 @@ export default class WorkflowStepOptionsListEditor extends Component {
   @tracked workflowStepOptions = [];
   @tracked workflowStepOptionsPresent = false;
 
-
   get newStepOption() {
     return this.store.createRecord("workflow-step-option", {
-       workflow_step_id: this.args.workflowStep.id,
-   });
+      workflow_step_id: this.args.workflowStep.id,
+    });
   }
 
   @bind
   loadStepOptions() {
     if (!this.args.currentWorkflowStepOption && this.args.workflowStep.id) {
-      this.store.find("workflow-step-option", { workflow_id: this.args.workflowStep.workflow_id, workflow_step_id: this.args.workflowStep.id }).then((options) => {
-        this.workflowStepOptions = options.content;
-        this.workflowStepOptionsPresent = options.content.length > 0 ? true : false;
-      });
+      this.store
+        .find("workflow-step-option", {
+          workflow_id: this.args.workflowStep.workflow_id,
+          workflow_step_id: this.args.workflowStep.id,
+        })
+        .then((options) => {
+          this.workflowStepOptions = options.content;
+          this.workflowStepOptionsPresent =
+            options.content.length > 0 ? true : false;
+        });
     }
   }
 
   localizedStepOptionName(stepOption) {
-    return i18n(`admin.discourse_workflow.workflows.steps.options.actions.${stepOption.workflow_option.slug}`);
+    return i18n(
+      `admin.discourse_workflow.workflows.steps.options.actions.${stepOption.workflow_option.slug}`
+    );
   }
 
   convertStepIdToPosition(workflowSteps, stepOption) {
     if (!workflowSteps) {
       return;
     }
-    return workflowSteps.find((step) => step.id === stepOption.target_step_id)?.position;
+    return workflowSteps.find((step) => step.id === stepOption.target_step_id)
+      ?.position;
   }
 
   @action
@@ -62,11 +70,18 @@ export default class WorkflowStepOptionsListEditor extends Component {
     const options = this.workflowStepOptions;
     const index = options.indexOf(option);
     if (option.position > 1) {
-      const filteredOptions = options.filter((s) => s.position < option.position);
-      const previousOption = filteredOptions.length > 1
-        ? filteredOptions.reduce((prev, curr) => (prev.position > curr.position ? prev : curr))
-        : filteredOptions[0] || null;
-      const previousPosition = previousOption ? previousOption.position : option.position - 1;
+      const filteredOptions = options.filter(
+        (s) => s.position < option.position
+      );
+      const previousOption =
+        filteredOptions.length > 1
+          ? filteredOptions.reduce((prev, curr) =>
+              prev.position > curr.position ? prev : curr
+            )
+          : filteredOptions[0] || null;
+      const previousPosition = previousOption
+        ? previousOption.position
+        : option.position - 1;
       if (previousOption) {
         try {
           previousOption.set("position", option.position);
@@ -84,7 +99,9 @@ export default class WorkflowStepOptionsListEditor extends Component {
         return;
       }
     }
-    this.workflowStepOptions = this.workflowStepOptions.sort((a, b) => a.position - b.position);
+    this.workflowStepOptions = this.workflowStepOptions.sort(
+      (a, b) => a.position - b.position
+    );
   }
 
   @action
@@ -92,11 +109,18 @@ export default class WorkflowStepOptionsListEditor extends Component {
     const options = this.workflowStepOptions;
     const index = options.indexOf(option);
     if (option.position < options.length) {
-      const filteredOptions = options.filter((s) => s.position > option.position);
-      const nextOption = filteredOptions.length > 1
-        ? filteredOptions.reduce((prev, curr) => (prev.position < curr.position ? prev : curr))
-        : filteredOptions[0] || null;
-      const nextPosition = nextOption ? nextOption.position : option.position + 1;
+      const filteredOptions = options.filter(
+        (s) => s.position > option.position
+      );
+      const nextOption =
+        filteredOptions.length > 1
+          ? filteredOptions.reduce((prev, curr) =>
+              prev.position < curr.position ? prev : curr
+            )
+          : filteredOptions[0] || null;
+      const nextPosition = nextOption
+        ? nextOption.position
+        : option.position + 1;
       if (nextOption) {
         try {
           nextOption.set("position", option.position);
@@ -114,7 +138,9 @@ export default class WorkflowStepOptionsListEditor extends Component {
         return;
       }
     }
-    this.workflowStepOptions = this.workflowStepOptions.sort((a, b) => a.position - b.position);
+    this.workflowStepOptions = this.workflowStepOptions.sort(
+      (a, b) => a.position - b.position
+    );
   }
 
   isfirstOption(option, length) {
@@ -125,10 +151,11 @@ export default class WorkflowStepOptionsListEditor extends Component {
     return option.position === length;
   }
 
-
   <template>
-    <section class="workflow-step-list-editor__current admin-detail pull-left"
-    {{didInsert this.loadStepOptions}}>
+    <section
+      class="workflow-step-list-editor__current admin-detail pull-left"
+      {{didInsert this.loadStepOptions}}
+    >
       {{#if this.currentWorkflowStepOption}}
         <WorkflowStepOptionEditor
           @currentWorkflowStepOption={{this.currentWorkflowStepOption}}
@@ -138,21 +165,28 @@ export default class WorkflowStepOptionsListEditor extends Component {
         />
       {{else}}
         <DPageSubheader
-          @titleLabel={{i18n "admin.discourse_workflow.workflows.steps.options.title"}}
+          @titleLabel={{i18n
+            "admin.discourse_workflow.workflows.steps.options.title"
+          }}
           @descriptionLabel={{i18n
             "admin.discourse_workflow.workflows.steps.description"
           }}
           @learnMoreUrl="https://meta.discourse.org/t/ai-bot-workflows/306099"
-        >
-        </DPageSubheader>
+        />
 
         {{#if this.workflowStepOptionsPresent}}
           <table class="content-list workflow-step-list-editor d-admin-table">
             <thead>
               <tr>
-                <th>{{i18n "admin.discourse_workflow.workflows.steps.options.position"}}</th>
-                <th>{{i18n "admin.discourse_workflow.workflows.steps.options.name"}}</th>
-                <th>{{i18n "admin.discourse_workflow.workflows.steps.options.target_position"}}</th>
+                <th>{{i18n
+                    "admin.discourse_workflow.workflows.steps.options.position"
+                  }}</th>
+                <th>{{i18n
+                    "admin.discourse_workflow.workflows.steps.options.name"
+                  }}</th>
+                <th>{{i18n
+                    "admin.discourse_workflow.workflows.steps.options.target_position"
+                  }}</th>
                 <th></th>
               </tr>
             </thead>
@@ -179,17 +213,24 @@ export default class WorkflowStepOptionsListEditor extends Component {
                   <td class="d-admin-row__overview">
                     <div class="workflow-step-option-list__target_position">
                       <strong>
-                        {{this.convertStepIdToPosition this.args.workflowSteps stepOption}}
+                        {{this.convertStepIdToPosition
+                          this.args.workflowSteps
+                          stepOption
+                        }}
                       </strong>
                     </div>
                   </td>
                   <td class="d-admin-row__overview">
                     <div class="workflow-step-option-list__actions">
-                      {{!-- this may have more actions --}}
+                      {{! this may have more actions }}
                     </div>
                   </td>
                   <td class="d-admin-row__controls">
-                    {{#unless (this.isfirstOption stepOption this.workflowStepOptions.length)}}
+                    {{#unless
+                      (this.isfirstOption
+                        stepOption this.workflowStepOptions.length
+                      )
+                    }}
                       <DButton
                         class="workflow-step-option-list-editor__up_arrow"
                         @icon="arrow-up"
@@ -197,7 +238,11 @@ export default class WorkflowStepOptionsListEditor extends Component {
                         {{on "click" (fn this.moveUp stepOption)}}
                       />
                     {{/unless}}
-                    {{#unless (this.islastOption stepOption this.workflowStepOptions.length)}}
+                    {{#unless
+                      (this.islastOption
+                        stepOption this.workflowStepOptions.length
+                      )
+                    }}
                       <DButton
                         class="workflow-step-option-list-editor__down_arrow"
                         @icon="arrow-down"
@@ -207,20 +252,25 @@ export default class WorkflowStepOptionsListEditor extends Component {
                     {{/unless}}
                     <LinkTo
                       @route="adminPlugins.show.discourse-workflow-workflows.steps.options.edit"
-                      @models={{array @workflowStep.workflow_id @workflowStep.id stepOption}}
+                      @models={{array
+                        @workflowStep.workflow_id
+                        @workflowStep.id
+                        stepOption
+                      }}
                       class="btn btn-text btn-small"
-                    >{{i18n "admin.discourse_workflow.workflows.edit"}} </LinkTo>
+                    >{{i18n "admin.discourse_workflow.workflows.edit"}}
+                    </LinkTo>
                   </td>
                 </tr>
               {{/each}}
             </tbody>
           </table>
         {{/if}}
-          <WorkflowLinkButton
-            @route="adminPlugins.show.discourse-workflow-workflows.steps.options.new"
-            @label="admin.discourse_workflow.workflows.steps.options.new"
-            @model={{@workflowStep}}
-          />
+        <WorkflowLinkButton
+          @route="adminPlugins.show.discourse-workflow-workflows.steps.options.new"
+          @label="admin.discourse_workflow.workflows.steps.options.new"
+          @model={{@workflowStep}}
+        />
       {{/if}}
     </section>
   </template>

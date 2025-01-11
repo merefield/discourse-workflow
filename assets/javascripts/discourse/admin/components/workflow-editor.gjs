@@ -63,10 +63,10 @@ export default class WorkflowEditor extends Component {
       //     this.args.workflow
       //   );
       // } else {
-        this.toasts.success({
-          data: { message: I18n.t("admin.discourse_workflow.workflows.saved") },
-          duration: 2000,
-        });
+      this.toasts.success({
+        data: { message: I18n.t("admin.discourse_workflow.workflows.saved") },
+        duration: 2000,
+      });
       // }
     } catch (e) {
       this.args.workflow.setProperties(backupModel);
@@ -138,9 +138,14 @@ export default class WorkflowEditor extends Component {
       @label="admin.discourse_workflow.workflows.back"
     />
     {{#if @workflow.name}}
-      <h2>{{I18n.t "admin.discourse_workflow.workflows.workflow.editing.title" workflow_name=@workflow.name }}</h2>
+      <h2>{{I18n.t
+          "admin.discourse_workflow.workflows.workflow.editing.title"
+          workflow_name=@workflow.name
+        }}</h2>
     {{else}}
-      <h2>{{I18n.t "admin.discourse_workflow.workflows.workflow.new.title" }}</h2>
+      <h2>{{I18n.t
+          "admin.discourse_workflow.workflows.workflow.new.title"
+        }}</h2>
     {{/if}}
     <form
       class="form-horizontal workflow-editor"
@@ -165,7 +170,9 @@ export default class WorkflowEditor extends Component {
         />
       </div>
       <div class="control-group">
-        <label>{{I18n.t "admin.discourse_workflow.workflows.description"}}</label>
+        <label>{{I18n.t
+            "admin.discourse_workflow.workflows.description"
+          }}</label>
         <Textarea
           class="workflow-editor__description"
           @value={{this.editingModel.description}}

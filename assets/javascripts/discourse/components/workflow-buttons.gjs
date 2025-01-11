@@ -24,36 +24,34 @@ export default class WorkflowButtonsComponent extends Component {
           type: "POST",
           data: { option },
         })
-        .then(() => {
-          this.router.transitionTo("/c/" + this.args.category_id);
-        })
-        .catch((err) =>
-        {
-          popupAjaxError(err)
-        });
+          .then(() => {
+            this.router.transitionTo("/c/" + this.args.category_id);
+          })
+          .catch((err) => {
+            popupAjaxError(err);
+          });
       },
     });
   }
 
   workflowActionLabel = (option) => {
     return `discourse_workflow.options.${option}.button_label`;
-  }
+  };
 
   <template>
     <div class="workflow-banner-title workflow-buttons-title">
       {{i18n "discourse_workflow.topic_banner.actions_intro"}}
     </div>
     <div class="workflow-action-buttons">
-    {{#each @workflow_step_options as |option|}}
-      <div class="workflow-action-button">
-        <DButton
-          class="btn-primary"
-          @action={{fn this.actOnWorkflow option}}
-          @label={{this.workflowActionLabel option}}
-        />
-      </div>
-    {{/each}}
+      {{#each @workflow_step_options as |option|}}
+        <div class="workflow-action-button">
+          <DButton
+            class="btn-primary"
+            @action={{fn this.actOnWorkflow option}}
+            @label={{this.workflowActionLabel option}}
+          />
+        </div>
+      {{/each}}
     </div>
   </template>
 }
-

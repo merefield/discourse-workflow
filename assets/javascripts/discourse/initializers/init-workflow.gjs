@@ -19,7 +19,11 @@ const workflowNameHeader = <template>
 
 const workflowNameCell = <template>
   <td class="workflow-name">
-    <WorkflowNameLink @topic_id={{@topic.id}} @workflow_name={{@topic.workflow_name}} @label={{@topic.workflow_name}}/>
+    <WorkflowNameLink
+      @topic_id={{@topic.id}}
+      @workflow_name={{@topic.workflow_name}}
+      @label={{@topic.workflow_name}}
+    />
   </td>
 </template>;
 
@@ -39,7 +43,11 @@ const workflowStepPositionHeader = <template>
 
 const workflowStepPositionCell = <template>
   <td class="workflow-step-position">
-    <WorkflowNameLink @topic_id={{@topic.id}} @workflow_name={{@topic.workflow_name}} @label={{@topic.workflow_step_position}}/>
+    <WorkflowNameLink
+      @topic_id={{@topic.id}}
+      @workflow_name={{@topic.workflow_name}}
+      @label={{@topic.workflow_step_position}}
+    />
   </td>
 </template>;
 
@@ -57,7 +65,11 @@ const workflowStepNameHeader = <template>
 
 const workflowStepNameCell = <template>
   <td class="workflow-step-name">
-    <WorkflowNameLink @topic_id={{@topic.id}} @workflow_name={{@topic.workflow_name}} @label={{@topic.workflow_step_name}}/>
+    <WorkflowNameLink
+      @topic_id={{@topic.id}}
+      @workflow_name={{@topic.workflow_name}}
+      @label={{@topic.workflow_step_name}}
+    />
   </td>
 </template>;
 
@@ -69,16 +81,20 @@ export default {
     const currentUser = container.lookup("service:current-user");
 
     withPluginApi("1.39.0", (api) => {
-      api.addAdminPluginConfigurationNav("discourse-workflow", PLUGIN_NAV_MODE_TOP, [
-        {
-          label: "admin.discourse_workflow.workflows.title",
-          route: "adminPlugins.show.discourse-workflow-workflows",
-        },
-      ]);
+      api.addAdminPluginConfigurationNav(
+        "discourse-workflow",
+        PLUGIN_NAV_MODE_TOP,
+        [
+          {
+            label: "admin.discourse_workflow.workflows.title",
+            route: "adminPlugins.show.discourse-workflow-workflows",
+          },
+        ]
+      );
 
       api.addNavigationBarItem({
         name: "workflow",
-        href: "/workflow"
+        href: "/workflow",
       });
 
       api.registerValueTransformer(
@@ -109,7 +125,7 @@ export default {
         }
       );
 
-       api.registerValueTransformer(
+      api.registerValueTransformer(
         "topic-list-columns",
         ({ value: columns }) => {
           if (WORKFLOW_LIST_ROUTES.includes(router.currentRouteName)) {

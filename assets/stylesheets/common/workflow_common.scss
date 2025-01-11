@@ -16,7 +16,7 @@
       background-color: $secondary;
       font-size: 0.8em;
     }
-    
+
     .workflow-banner-meta {
       padding: 5px;
       display: grid;
@@ -28,10 +28,10 @@
         display: grid;
         grid-template-columns: 80px 160px 160px;
         min-width: 240px;
-        .workflow-action-buttons{
+        .workflow-action-buttons {
           display: inline-flex;
         }
-        .workflow-action-button{
+        .workflow-action-button {
           margin-bottom: 5px;
           margin-right: 10px;
         }
@@ -62,30 +62,30 @@
     background-color: $primary;
 
     .node {
-        stroke: #333;
-        stroke-width: 1px;
+      stroke: #333;
+      stroke-width: 1px;
     }
     .link {
-        fill: none;
-        stroke: #aaa;
-        stroke-width: 2px;
+      fill: none;
+      stroke: #aaa;
+      stroke-width: 2px;
     }
     .arrowhead {
-        fill: #aaa;
+      fill: #aaa;
     }
     .lane {
-        fill: #f9f9f9;
-        stroke: #ddd;
-        stroke-width: 1px;
+      fill: #f9f9f9;
+      stroke: #ddd;
+      stroke-width: 1px;
     }
     .lane-label {
-        font-size: 14px;
-        fill: #333;
-        font-weight: bold;
+      font-size: 14px;
+      fill: #333;
+      font-weight: bold;
     }
     .link-label {
-        font-size: 12px;
-        fill: #555;
+      font-size: 12px;
+      fill: #555;
     }
   }
 }

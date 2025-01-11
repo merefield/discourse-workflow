@@ -8,7 +8,7 @@ const CREATE_ATTRIBUTES = [
   "category_id",
   "description",
   "ai_enabled",
-  "ai_prompt"
+  "ai_prompt",
 ];
 
 export default class WorkflowStep extends RestModel {
@@ -22,7 +22,9 @@ export default class WorkflowStep extends RestModel {
   // }
 
   static async findAllForWorkflow(workflowId) {
-    const result = await ajax(`discourse_workflow/workflow/${workflowId}/workflow_step.json`);
+    const result = await ajax(
+      `discourse_workflow/workflow/${workflowId}/workflow_step.json`
+    );
     return result.workflow_steps;
   }
 

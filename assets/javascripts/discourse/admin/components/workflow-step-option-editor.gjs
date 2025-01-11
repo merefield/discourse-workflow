@@ -24,7 +24,6 @@ import WorkflowBackButton from "./workflow-back-button";
 import I18n from "discourse-i18n";
 import DropdownSelectBox from "select-kit/components/dropdown-select-box";
 
-
 export default class WorkflowStepOptionEditor extends Component {
   @service adminPluginNavManager;
   @service router;
@@ -37,11 +36,12 @@ export default class WorkflowStepOptionEditor extends Component {
   @tracked editingModel = null;
   @tracked showDelete = false;
 
-
   @action
   updateModel() {
     this.editingModel = this.args.currentWorkflowStepOption.workingCopy();
-    this.showDelete = !this.args.currentWorkflowStepOption.isNew && !this.args.currentWorkflowStepOption.system;
+    this.showDelete =
+      !this.args.currentWorkflowStepOption.isNew &&
+      !this.args.currentWorkflowStepOption.system;
   }
 
   @action
@@ -61,7 +61,9 @@ export default class WorkflowStepOptionEditor extends Component {
       await this.args.currentWorkflowStepOption.save();
       this.isSaving = false;
       this.toasts.success({
-        data: { message: I18n.t("admin.discourse_workflow.workflows.steps.saved") },
+        data: {
+          message: I18n.t("admin.discourse_workflow.workflows.steps.saved"),
+        },
         duration: 2000,
       });
     } catch (e) {
@@ -77,11 +79,17 @@ export default class WorkflowStepOptionEditor extends Component {
   @action
   delete() {
     return this.dialog.confirm({
-      message: I18n.t("admin.discourse_workflow.workflows.steps.confirm_delete"),
+      message: I18n.t(
+        "admin.discourse_workflow.workflows.steps.confirm_delete"
+      ),
       didConfirm: () => {
         return this.args.currentWorkflowStepOption.destroyRecord().then(() => {
           this.toasts.success({
-            data: { message: I18n.t("admin.discourse_workflow.workflows.steps.deleted") },
+            data: {
+              message: I18n.t(
+                "admin.discourse_workflow.workflows.steps.deleted"
+              ),
+            },
             duration: 2000,
           });
           this.router.transitionTo(
@@ -94,10 +102,10 @@ export default class WorkflowStepOptionEditor extends Component {
   }
 
   get availableSteps() {
-     const steps = this.args.workflowSteps || []
-     const filteredSteps = steps
-        .map(({ id, name, description }) => ({ id, name, description }))
-        .filter(step => step.id !== this.args.workflowStep.id);
+    const steps = this.args.workflowSteps || [];
+    const filteredSteps = steps
+      .map(({ id, name, description }) => ({ id, name, description }))
+      .filter((step) => step.id !== this.args.workflowStep.id);
     return filteredSteps;
   }
 
@@ -107,9 +115,14 @@ export default class WorkflowStepOptionEditor extends Component {
       @model={{@currentWorkflowStepOption.workflow_step_id}}
     />
     {{#if @currentWorkflowStepOption.id}}
-      <h2>{{I18n.t "admin.discourse_workflow.workflows.workflow.step.option.editing.title" position=@currentWorkflowStepOption.position }}</h2>
+      <h2>{{I18n.t
+          "admin.discourse_workflow.workflows.workflow.step.option.editing.title"
+          position=@currentWorkflowStepOption.position
+        }}</h2>
     {{else}}
-      <h2>{{I18n.t "admin.discourse_workflow.workflows.workflow.step.option.new.title" }}</h2>
+      <h2>{{I18n.t
+          "admin.discourse_workflow.workflows.workflow.step.option.new.title"
+        }}</h2>
     {{/if}}
     <form
       class="form-horizontal workflow-step-editor"
@@ -129,7 +142,9 @@ export default class WorkflowStepOptionEditor extends Component {
         />
       </div>
       <div class="control-group">
-        <label>{{I18n.t "admin.discourse_workflow.workflows.steps.options.target_step"}}</label>
+        <label>{{I18n.t
+            "admin.discourse_workflow.workflows.steps.options.target_step"
+          }}</label>
         <DropdownSelectBox
           @value={{this.editingModel.target_step_id}}
           @content={{this.availableSteps}}

@@ -37,7 +37,10 @@ export default class WorkflowListEditor extends Component {
     />
     <section class="workflow-list-editor__current admin-detail pull-left">
       {{#if @currentWorkflow}}
-        <WorkflowEditor @workflow={{@currentWorkflow}} @workflows={{@workflows}} />
+        <WorkflowEditor
+          @workflow={{@currentWorkflow}}
+          @workflows={{@workflows}}
+        />
       {{else}}
         {{#if @workflows}}
           <table class="content-list workflow-list-editor d-admin-table">
@@ -45,7 +48,9 @@ export default class WorkflowListEditor extends Component {
               <tr>
                 <th>{{i18n "admin.discourse_workflow.workflows.enabled"}}</th>
                 <th>{{i18n "admin.discourse_workflow.workflows.name"}}</th>
-                <th>{{i18n "admin.discourse_workflow.workflows.description"}}</th>
+                <th>{{i18n
+                    "admin.discourse_workflow.workflows.description"
+                  }}</th>
                 <th></th>
               </tr>
             </thead>
@@ -72,16 +77,17 @@ export default class WorkflowListEditor extends Component {
                     </div>
                   </td>
                   <td class="d-admin-row__overview">
-                      <div class="workflow-list__description">
-                        {{workflow.description}}
-                      </div>
+                    <div class="workflow-list__description">
+                      {{workflow.description}}
+                    </div>
                   </td>
                   <td class="d-admin-row__controls">
                     <LinkTo
                       @route="adminPlugins.show.discourse-workflow-workflows.edit"
                       @model={{workflow}}
                       class="btn btn-text btn-small"
-                    >{{i18n "admin.discourse_workflow.workflows.edit"}} </LinkTo>
+                    >{{i18n "admin.discourse_workflow.workflows.edit"}}
+                    </LinkTo>
                   </td>
                 </tr>
               {{/each}}

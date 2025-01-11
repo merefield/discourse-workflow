@@ -9,25 +9,24 @@ import { popupAjaxError } from "discourse/lib/ajax-error";
 import WorkflowButtons from "./workflow-buttons";
 import WorkflowVisualisationModal from "./workflow-visualisation-modal";
 
-
 export default class WorkflowButtonsComponent extends Component {
   @service modal;
 
   @action
   showVisualisationModal() {
     this.modal.show(WorkflowVisualisationModal, {
-      model: { topic_id: this.args.topic_id, workflow_name: this.args.workflow_name },
+      model: {
+        topic_id: this.args.topic_id,
+        workflow_name: this.args.workflow_name,
+      },
     });
-  };
+  }
 
   <template>
     <div class="workflow-action-button">
-    <DButton
-      class="btn-transparent"
-      @action={{this.showVisualisationModal}}
-    >
-      {{this.args.label}}
-    </DButton>
+      <DButton class="btn-transparent" @action={{this.showVisualisationModal}}>
+        {{this.args.label}}
+      </DButton>
     </div>
   </template>
 }

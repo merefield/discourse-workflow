@@ -37,11 +37,12 @@ export default class WorkflowStepEditor extends Component {
   @tracked editingModel = null;
   @tracked showDelete = false;
 
-
   @action
   updateModel() {
     this.editingModel = this.args.currentWorkflowStep.workingCopy();
-    this.showDelete = !this.args.currentWorkflowStep.isNew && !this.args.currentWorkflowStep.system;
+    this.showDelete =
+      !this.args.currentWorkflowStep.isNew &&
+      !this.args.currentWorkflowStep.system;
   }
 
   @action
@@ -60,7 +61,9 @@ export default class WorkflowStepEditor extends Component {
       await this.args.currentWorkflowStep.save();
       this.isSaving = false;
       this.toasts.success({
-        data: { message: I18n.t("admin.discourse_workflow.workflows.steps.saved") },
+        data: {
+          message: I18n.t("admin.discourse_workflow.workflows.steps.saved"),
+        },
         duration: 2000,
       });
     } catch (e) {
@@ -76,11 +79,17 @@ export default class WorkflowStepEditor extends Component {
   @action
   delete() {
     return this.dialog.confirm({
-      message: I18n.t("admin.discourse_workflow.workflows.steps.confirm_delete"),
+      message: I18n.t(
+        "admin.discourse_workflow.workflows.steps.confirm_delete"
+      ),
       didConfirm: () => {
         return this.args.currentWorkflowStep.destroyRecord().then(() => {
           this.toasts.success({
-            data: { message: I18n.t("admin.discourse_workflow.workflows.steps.deleted") },
+            data: {
+              message: I18n.t(
+                "admin.discourse_workflow.workflows.steps.deleted"
+              ),
+            },
             duration: 2000,
           });
 
@@ -100,7 +109,10 @@ export default class WorkflowStepEditor extends Component {
   }
 
   async toggleField(field, sortWorkflowSteps) {
-    this.args.currentWorkflowStep.set(field, !this.args.currentWorkflowStep[field]);
+    this.args.currentWorkflowStep.set(
+      field,
+      !this.args.currentWorkflowStep[field]
+    );
     this.editingModel.set(field, this.args.currentWorkflowStep[field]);
     if (!this.args.currentWorkflowStep.isNew) {
       try {
@@ -127,9 +139,14 @@ export default class WorkflowStepEditor extends Component {
       @model={{@currentWorkflowStep.workflow_id}}
     />
     {{#if @currentWorkflowStep.id}}
-      <h2>{{I18n.t "admin.discourse_workflow.workflows.workflow.step.editing.title" workflow_step_name=this.editingModel.name }}</h2>
+      <h2>{{I18n.t
+          "admin.discourse_workflow.workflows.workflow.step.editing.title"
+          workflow_step_name=this.editingModel.name
+        }}</h2>
     {{else}}
-      <h2>{{I18n.t "admin.discourse_workflow.workflows.workflow.step.new.title" }}</h2>
+      <h2>{{I18n.t
+          "admin.discourse_workflow.workflows.workflow.step.new.title"
+        }}</h2>
     {{/if}}
     <form
       class="form-horizontal workflow-step-editor"
@@ -146,7 +163,9 @@ export default class WorkflowStepEditor extends Component {
         />
       </div>
       <div class="control-group">
-      <label>{{I18n.t "admin.discourse_workflow.workflows.steps.category"}}</label>
+        <label>{{I18n.t
+            "admin.discourse_workflow.workflows.steps.category"
+          }}</label>
         <CategoryChooser
           @value={{this.editingModel.category_id}}
           @onChangeCategory={{fn (mut this.editingModel.category_id)}}
@@ -154,7 +173,9 @@ export default class WorkflowStepEditor extends Component {
         />
       </div>
       <div class="control-group">
-        <label>{{I18n.t "admin.discourse_workflow.workflows.description"}}</label>
+        <label>{{I18n.t
+            "admin.discourse_workflow.workflows.description"
+          }}</label>
         <Textarea
           class="workflow-editor__description"
           @value={{this.editingModel.description}}
@@ -170,7 +191,9 @@ export default class WorkflowStepEditor extends Component {
         />
       </div>
       <div class="control-group">
-        <label>{{I18n.t "admin.discourse_workflow.workflows.steps.ai_prompt"}}</label>
+        <label>{{I18n.t
+            "admin.discourse_workflow.workflows.steps.ai_prompt"
+          }}</label>
         <Textarea
           class="workflow-editor__ai_prompt"
           @value={{this.editingModel.ai_prompt}}
@@ -205,5 +228,4 @@ export default class WorkflowStepEditor extends Component {
       </div>
     </form>
   </template>
-
-  }
+}

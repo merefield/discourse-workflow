@@ -14,22 +14,18 @@ export default class AdminPluginsShowDiscourseWorkflowWorkflowStepOptionsEdit ex
     super.setupController(controller, model);
 
     const workflowOptions = await this.store.findAll("workflow-option");
-    controller.set(
-      "workflowOptions",
-      workflowOptions.content
-    );
+    controller.set("workflowOptions", workflowOptions.content);
 
-    const workflow_id =  this.router.currentRoute.parent.parent.params.workflow_id;
-    const workflowSteps = await this.store.findAll("workflow-step", { workflow_id: workflow_id });
-    controller.set(
-      "workflowSteps",
-      workflowSteps.content
-    );
+    const workflow_id =
+      this.router.currentRoute.parent.parent.params.workflow_id;
+    const workflowSteps = await this.store.findAll("workflow-step", {
+      workflow_id: workflow_id,
+    });
+    controller.set("workflowSteps", workflowSteps.content);
 
-    const workflowStep = workflowSteps.filter((step) => {return step.id === model.workflow_step_id})[0];
-    controller.set(
-      "workflowStep",
-      workflowStep
-    );
+    const workflowStep = workflowSteps.filter((step) => {
+      return step.id === model.workflow_step_id;
+    })[0];
+    controller.set("workflowStep", workflowStep);
   }
 }
