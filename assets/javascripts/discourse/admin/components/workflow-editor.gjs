@@ -137,6 +137,11 @@ export default class WorkflowEditor extends Component {
       @route="adminPlugins.show.discourse-workflow-workflows"
       @label="admin.discourse_workflow.workflows.back"
     />
+    {{#if @workflow.name}}
+      <h2>{{I18n.t "admin.discourse_workflow.workflows.workflow.editing.title" workflow_name=@workflow.name }}</h2>
+    {{else}}
+      <h2>{{I18n.t "admin.discourse_workflow.workflows.workflow.new.title" }}</h2>
+    {{/if}}
     <form
       class="form-horizontal workflow-editor"
       {{didUpdate this.updateModel @model.id}}
@@ -169,7 +174,6 @@ export default class WorkflowEditor extends Component {
       </div>
       {{#if this.showSteps}}
         <div class="control-group">
-          {{!-- <label>{{I18n.t "admin.discourse_workflow.workflows.steps"}}</label> --}}
           <WorkflowStepListEditor
             class="workflow-editor__steps"
             @workflow={{@workflow}}
@@ -178,13 +182,6 @@ export default class WorkflowEditor extends Component {
           />
         </div>
       {{/if}}
-      {{!-- {{#unless this.editingModel.system}}
-        <AiPersonaToolOptions
-          @persona={{this.editingModel}}
-          @tools={{this.selectedToolNames}}
-          @allTools={{@personas.resultSetMeta.tools}}
-        />
-      {{/unless}} --}}
       <div class="control-group workflow-editor__action_panel">
         <DButton
           class="btn-primary workflow-editor__save"

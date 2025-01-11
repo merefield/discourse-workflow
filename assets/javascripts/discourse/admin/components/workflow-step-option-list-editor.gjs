@@ -24,7 +24,6 @@ import WorkflowDeepLinkButton from "./workflow-deep-link-button";
 import WorkflowStepOptionEditor from "./workflow-step-option-editor";
 
 export default class WorkflowStepOptionsListEditor extends Component {
-  // @service adminPluginNavManager;
   @service store;
   @tracked currentWorkflowStepOption = this.args.currentWorkflowStepOption;
   @tracked workflowStepOptions = [];
@@ -128,10 +127,6 @@ export default class WorkflowStepOptionsListEditor extends Component {
 
 
   <template>
-    {{!-- <DBreadcrumbsItem
-      @path="/admin/plugins/{{this.adminPluginNavManager.currentPlugin.name}}/workflows/steps"
-      @label={{i18n "admin.discourse_workflow.workflows.steps.short_title"}}
-    /> --}}
     <section class="workflow-step-list-editor__current admin-detail pull-left"
     {{didInsert this.loadStepOptions}}>
       {{#if this.currentWorkflowStepOption}}
@@ -149,15 +144,6 @@ export default class WorkflowStepOptionsListEditor extends Component {
           }}
           @learnMoreUrl="https://meta.discourse.org/t/ai-bot-workflows/306099"
         >
-          {{!-- <:actions as |actions|>
-            <actions.Primary
-              @label="admin.discourse_workflow.workflows.steps.new"
-              @route="adminPlugins.show.discourse-workflow-workflows.steps.new"
-              @models={{array @workflow.id}}
-              @icon="plus"
-              class="workflow-step-list-editor__new-button"
-            />
-          </:actions> --}}
         </DPageSubheader>
 
         {{#if this.workflowStepOptionsPresent}}
@@ -193,7 +179,6 @@ export default class WorkflowStepOptionsListEditor extends Component {
                   <td class="d-admin-row__overview">
                     <div class="workflow-step-option-list__target_position">
                       <strong>
-                        {{log this.args.workflowSteps}}
                         {{this.convertStepIdToPosition this.args.workflowSteps stepOption}}
                       </strong>
                     </div>
@@ -235,27 +220,7 @@ export default class WorkflowStepOptionsListEditor extends Component {
             @route="adminPlugins.show.discourse-workflow-workflows.steps.options.new"
             @label="admin.discourse_workflow.workflows.steps.options.new"
             @model={{@workflowStep}}
-            {{!-- @workflow_id={{@workflow.id}} --}}
           />
-          {{!-- <LinkTo
-            @label="admin.discourse_workflow.workflows.steps.new"
-            @route="adminPlugins.show.discourse-workflow-workflows.steps.new"
-            @model={{@workflow.id}}
-            @icon="plus"
-            class="workflow-step-list-editor__new-button"
-          /> --}}
-          {{!-- <WorkflowDeepLinkButton
-            @route="adminPlugins.show.discourse-workflow-workflows.steps.new"
-            @label="admin.discourse_workflow.workflows.steps.new"
-            @models={{array @workflow.id ""}}
-            @workflow_id={{@workflow.id}}
-          /> --}}
-          {{!-- <DButton
-            class="btn-primary workflow-editor__save"
-            @action={{this.newStep}}
-            @disabled={{this.isSaving}}
-          >{{I18n.t "admin.discourse_workflow.workflows.steps.new"}}</DButton> --}}
-
       {{/if}}
     </section>
   </template>

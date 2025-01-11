@@ -60,19 +60,10 @@ export default class WorkflowStepOptionEditor extends Component {
     try {
       await this.args.currentWorkflowStepOption.save();
       this.isSaving = false;
-      // this.#sortPersonas();
-      // if (isNew) {
-      //   this.args.workflow_steps.addObject(this.args.currentWorkflowStepOption);
-      //   this.router.transitionTo(
-      //     "adminPlugins.show.discourse-workflow-workflows.steps.edit",
-      //     this.args.currentWorkflowStepOption
-      //   );
-      // } else {
-        this.toasts.success({
-          data: { message: I18n.t("admin.discourse_workflow.workflows.steps.saved") },
-          duration: 2000,
-        });
-      // }
+      this.toasts.success({
+        data: { message: I18n.t("admin.discourse_workflow.workflows.steps.saved") },
+        duration: 2000,
+      });
     } catch (e) {
       this.args.currentWorkflowStepOption.setProperties(backupModel);
       popupAjaxError(e);
@@ -93,8 +84,6 @@ export default class WorkflowStepOptionEditor extends Component {
             data: { message: I18n.t("admin.discourse_workflow.workflows.steps.deleted") },
             duration: 2000,
           });
-
-          // this.args.workflowSteps.removeObject(this.args.currentWorkflowStepOption);
           this.router.transitionTo(
             "adminPlugins.show.discourse-workflow-workflows.edit",
             this.args.currentWorkflowStepOption.workflow_id
@@ -117,23 +106,19 @@ export default class WorkflowStepOptionEditor extends Component {
       @route="adminPlugins.show.discourse-workflow-workflows.steps.edit"
       @model={{@currentWorkflowStepOption.workflow_step_id}}
     />
+    {{#if @currentWorkflowStepOption.id}}
+      <h2>{{I18n.t "admin.discourse_workflow.workflows.workflow.step.option.editing.title" position=@currentWorkflowStepOption.position }}</h2>
+    {{else}}
+      <h2>{{I18n.t "admin.discourse_workflow.workflows.workflow.step.option.new.title" }}</h2>
+    {{/if}}
     <form
       class="form-horizontal workflow-step-editor"
       {{didUpdate this.updateModel @currentWorkflowStepOption.id}}
       {{didInsert this.updateModel @currentWorkflowStepOption.id}}
     >
-      {{!-- <div class="control-group">
-        <DToggleSwitch
-          class="workflow-editor__enabled"
-          @state={{@model.enabled}}
-          @label="admin.discourse_workflow.workflows.enabled"
-          {{on "click" this.toggleEnabled}}
-        />
-      </div> --}}
       <div class="control-group">
         <label>{{I18n.t "admin.discourse_workflow.workflows.name"}}</label>
         <DropdownSelectBox
-          {{!-- @id={{concat "topic-footer-dropdown-" actionable.id}} --}}
           @value={{this.editingModel.workflow_option_id}}
           @content={{@workflowOptions}}
           @onChange={{fn (mut this.editingModel.workflow_option_id)}}
@@ -142,13 +127,10 @@ export default class WorkflowStepOptionEditor extends Component {
             none="admin.discourse_workflow.workflows.steps.options.select_an_option"
           }}
         />
-                              {{!-- none=actionable.noneItem --}}
-          {{!-- class={{concat-class "topic-footer-dropdown" actionable.classNames}} --}}
       </div>
       <div class="control-group">
         <label>{{I18n.t "admin.discourse_workflow.workflows.steps.options.target_step"}}</label>
         <DropdownSelectBox
-          {{!-- @id={{concat "topic-footer-dropdown-" actionable.id}} --}}
           @value={{this.editingModel.target_step_id}}
           @content={{this.availableSteps}}
           @onChange={{fn (mut this.editingModel.target_step_id)}}
@@ -157,34 +139,7 @@ export default class WorkflowStepOptionEditor extends Component {
             none="admin.discourse_workflow.workflows.steps.options.no_target_step"
           }}
         />
-                              {{!-- none=actionable.noneItem --}}
-          {{!-- class={{concat-class "topic-footer-dropdown" actionable.classNames}} --}}
       </div>
-      {{!-- <div class="control-group">
-      <label>{{I18n.t "admin.discourse_workflow.workflows.steps.category"}}</label>
-        <CategoryChooser
-          @value={{this.editingModel.category_id}}
-          @onChangeCategory={{fn (mut this.editingModel.category_id)}}
-          disabled={{this.editingModel.system}}
-        />
-      </div> --}}
-      <div class="control-group">
-        {{!-- <label>{{I18n.t "admin.discourse_workflow.workflows.steps"}}</label> --}}
-        {{!-- <WorkflowStepListEditor
-          class="workflow-editor__steps"
-          @id={{this.model.id}}
-          @disabled={{this.editingModel.system}}
-          @workflowSteps={{@workflow.workflow_steps}}
-          @onChange={{this.stepsChanged}}
-        /> --}}
-      </div>
-      {{!-- {{#unless this.editingModel.system}}
-        <AiPersonaToolOptions
-          @persona={{this.editingModel}}
-          @tools={{this.selectedToolNames}}
-          @allTools={{@personas.resultSetMeta.tools}}
-        />
-      {{/unless}} --}}
       <div class="control-group workflow-editor__action_panel">
         <DButton
           class="btn-primary workflow-editor__save"
@@ -202,5 +157,4 @@ export default class WorkflowStepOptionEditor extends Component {
       </div>
     </form>
   </template>
-
-  }
+}

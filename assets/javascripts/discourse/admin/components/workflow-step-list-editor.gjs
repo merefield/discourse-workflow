@@ -30,13 +30,6 @@ export default class WorkflowStepsListEditor extends Component {
   @tracked workflowSteps = [];
   @tracked workflowStepsPresent = false;
 
-  // get sortedSteps() {
-  //   return this.workflowSteps.sort((a, b) => {
-  //     // Replace 'name' with the key you want to sort by
-  //     return a.position > b.position;
-  //   });
-  // }
-
   get newStep() {
     return this.store.createRecord("workflow-step", {
        workflow_id: this.args.workflow.id,
@@ -151,17 +144,7 @@ export default class WorkflowStepsListEditor extends Component {
             "admin.discourse_workflow.workflows.steps.description"
           }}
           @learnMoreUrl="https://meta.discourse.org/t/ai-bot-workflows/306099"
-        >
-          {{!-- <:actions as |actions|>
-            <actions.Primary
-              @label="admin.discourse_workflow.workflows.steps.new"
-              @route="adminPlugins.show.discourse-workflow-workflows.steps.new"
-              @models={{array @workflow.id}}
-              @icon="plus"
-              class="workflow-step-list-editor__new-button"
-            />
-          </:actions> --}}
-        </DPageSubheader>
+        />
 
         {{#if this.workflowStepsPresent}}
           <table class="content-list workflow-step-list-editor d-admin-table">
@@ -238,18 +221,6 @@ export default class WorkflowStepsListEditor extends Component {
                         {{on "click" (fn this.moveDown step)}}
                       />
                     {{/unless}}
-                    {{!-- <DButton
-                      class="workflow-editor__ai_enabled"
-                      @icon="arrow-up"
-                      @title="admin.discourse_workflow.workflows.steps.move_up"
-                      {{on "click" (fn this.moveUp  step)}}
-                    />
-                    <DButton
-                      class="workflow-editor__ai_enabled"
-                      @icon="arrow-down"
-                      @title="admin.discourse_workflow.workflows.steps.move_down"
-                      {{on "click" (fn this.moveDown  step)}}
-                    /> --}}
                     <LinkTo
                       @route="adminPlugins.show.discourse-workflow-workflows.steps.edit"
                       @models={{array @workflow.id step}}
@@ -265,27 +236,7 @@ export default class WorkflowStepsListEditor extends Component {
             @route="adminPlugins.show.discourse-workflow-workflows.steps.new"
             @label="admin.discourse_workflow.workflows.steps.new"
             @model={{@workflow}}
-            {{!-- @workflow_id={{@workflow.id}} --}}
           />
-          {{!-- <LinkTo
-            @label="admin.discourse_workflow.workflows.steps.new"
-            @route="adminPlugins.show.discourse-workflow-workflows.steps.new"
-            @model={{@workflow.id}}
-            @icon="plus"
-            class="workflow-step-list-editor__new-button"
-          /> --}}
-          {{!-- <WorkflowDeepLinkButton
-            @route="adminPlugins.show.discourse-workflow-workflows.steps.new"
-            @label="admin.discourse_workflow.workflows.steps.new"
-            @models={{array @workflow.id ""}}
-            @workflow_id={{@workflow.id}}
-          /> --}}
-          {{!-- <DButton
-            class="btn-primary workflow-editor__save"
-            @action={{this.newStep}}
-            @disabled={{this.isSaving}}
-          >{{I18n.t "admin.discourse_workflow.workflows.steps.new"}}</DButton> --}}
-
       {{/if}}
     </section>
   </template>

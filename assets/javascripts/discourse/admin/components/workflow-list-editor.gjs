@@ -39,23 +39,6 @@ export default class WorkflowListEditor extends Component {
       {{#if @currentWorkflow}}
         <WorkflowEditor @workflow={{@currentWorkflow}} @workflows={{@workflows}} />
       {{else}}
-        {{!-- <DPageSubheader
-          @titleLabel={{i18n "discourse_workflow.workflows.short_title"}}
-          @descriptionLabel={{i18n
-            "discourse_workflow.workflows.workflow_description"
-          }}
-          @learnMoreUrl="https://meta.discourse.org/t/ai-bot-workflows/306099"
-        >
-          <:actions as |actions|>
-            <actions.Primary
-              @label="discourse_workflow.workflows.new"
-              @route="adminPlugins.show.discourse-workflows.new"
-              @icon="plus"
-              class="workflow-list-editor__new-button"
-            />
-          </:actions>
-        </DPageSubheader> --}}
-
         {{#if @workflows}}
           <table class="content-list workflow-list-editor d-admin-table">
             <thead>

@@ -59,25 +59,10 @@ export default class WorkflowStepEditor extends Component {
     try {
       await this.args.currentWorkflowStep.save();
       this.isSaving = false;
-      // this.#sortPersonas();
-      // if (isNew) {
-      //   this.args.workflow_steps.addObject(this.args.currentWorkflowStep);
-      //   this.router.transitionTo(
-      //     "adminPlugins.show.discourse-workflow-workflows.steps.edit",
-      //     this.args.currentWorkflowStep
-      //   );
-      // } else {
-        this.toasts.success({
-          data: { message: I18n.t("admin.discourse_workflow.workflows.steps.saved") },
-          duration: 2000,
-        });
-        // if (isNew) {
-        //   this.router.transitionTo(
-        //     "adminPlugins.show.discourse-workflow-workflows.steps.edit",
-        //     this.args.currentWorkflowStep.id
-        //   );
-        // }
-      // }
+      this.toasts.success({
+        data: { message: I18n.t("admin.discourse_workflow.workflows.steps.saved") },
+        duration: 2000,
+      });
     } catch (e) {
       this.args.currentWorkflowStep.setProperties(backupModel);
       popupAjaxError(e);
@@ -141,19 +126,16 @@ export default class WorkflowStepEditor extends Component {
       @route="adminPlugins.show.discourse-workflow-workflows.edit"
       @model={{@currentWorkflowStep.workflow_id}}
     />
+    {{#if @currentWorkflowStep.id}}
+      <h2>{{I18n.t "admin.discourse_workflow.workflows.workflow.step.editing.title" workflow_step_name=this.editingModel.name }}</h2>
+    {{else}}
+      <h2>{{I18n.t "admin.discourse_workflow.workflows.workflow.step.new.title" }}</h2>
+    {{/if}}
     <form
       class="form-horizontal workflow-step-editor"
       {{didUpdate this.updateModel @currentWorkflowStep.id}}
       {{didInsert this.updateModel @currentWorkflowStep.id}}
     >
-      {{!-- <div class="control-group">
-        <DToggleSwitch
-          class="workflow-editor__enabled"
-          @state={{@model.enabled}}
-          @label="admin.discourse_workflow.workflows.enabled"
-          {{on "click" this.toggleEnabled}}
-        />
-      </div> --}}
       <div class="control-group">
         <label>{{I18n.t "admin.discourse_workflow.workflows.name"}}</label>
         <Input
@@ -197,8 +179,6 @@ export default class WorkflowStepEditor extends Component {
       </div>
       {{#if this.showStepOptions}}
         <div class="control-group">
-          {{!-- <label>{{I18n.t "admin.discourse_workflow.workflows.steps"}}</label> --}}
-          {{log @workflowSteps}}
           <WorkflowStepOptionListEditor
             class="workflow-editor__steps_options"
             @workflowStep={{@currentWorkflowStep}}
