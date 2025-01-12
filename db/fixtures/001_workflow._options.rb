@@ -7,12 +7,6 @@ option_fixtures = [
     updated_at: Time.now
   },
   {
-    name: 'Ready',
-    slug: 'ready',
-    created_at: Time.now,
-    updated_at: Time.now
-  },
-  {
     name: 'Submit',
     slug: 'submit',
     created_at: Time.now,
@@ -31,6 +25,36 @@ option_fixtures = [
     updated_at: Time.now
   },
   {
+    name "Great",
+    slug: 'great',
+    created_at: Time.now,
+    updated_at: Time.now
+  },
+  {
+    name: 'Good',
+    slug: 'good',
+    created_at: Time.now,
+    updated_at: Time.now
+  },
+  {
+    name: 'Average',
+    slug: 'average',
+    created_at: Time.now,
+    updated_at: Time.now
+  },
+  {
+    name: 'Poor',
+    slug: 'poor',
+    created_at: Time.now,
+    updated_at: Time.now
+  },
+  {
+    name: 'Terrible',
+    slug: 'terrible',
+    created_at: Time.now,
+    updated_at: Time.now
+  },
+  {
     name: 'Done',
     slug: 'done',
     created_at: Time.now,
@@ -42,6 +66,12 @@ option_fixtures = [
     created_at: Time.now,
     updated_at: Time.now
   },
+  {
+    name: 'Previous',
+    slug: 'previous',
+    created_at: Time.now,
+    updated_at: Time.now
+  }
   {
     name: 'Close',
     slug: 'close',
