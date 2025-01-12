@@ -20,45 +20,47 @@ export default class WorkflowButtonsComponent extends Component {
   }
 
   <template>
-    <div class="workflow-topic-banner">
-      <div class="workflow-banner-border-title">{{i18n
-          "discourse_workflow.topic_banner.title"
-        }}</div>
-      <div class="workflow-banner-meta">
-        <div class="workflow-banner-section workflow-workflow-name">
-          <div class="workflow-banner-title workflow-workflow-name-title">{{i18n
-              "discourse_workflow.topic_banner.workflow_title"
-            }}</div>
-          <div class="workflow-workflow-name-name">{{@workflow_name}}</div>
-        </div>
-        <div class="workflow-banner-section workflow-step-name">
-          <div class="workflow-banner-title workflow-step-name-title">{{i18n
-              "discourse_workflow.topic_banner.step_title"
-            }}</div>
-          <div class="workflow-step-name">{{i18n
-              "discourse_workflow.topic_banner.step"
-              workflow_step_position=@workflow_step_position
-              workflow_step_name=@workflow_step_name
-            }}</div>
-          <div class="workflow-action-button">
-            <DButton
-              class="btn-primary"
-              @icon="network-wired"
-              @action={{this.showVisualisationModal}}
-              @label="discourse_workflow.topic_banner.visualisation_button"
-            />
+    {{#if @workflow_name}}
+      <div class="workflow-topic-banner">
+        <div class="workflow-banner-border-title">{{i18n
+            "discourse_workflow.topic_banner.title"
+          }}</div>
+        <div class="workflow-banner-meta">
+          <div class="workflow-banner-section workflow-workflow-name">
+            <div
+              class="workflow-banner-title workflow-workflow-name-title"
+            >{{i18n "discourse_workflow.topic_banner.workflow_title"}}</div>
+            <div class="workflow-workflow-name-name">{{@workflow_name}}</div>
+          </div>
+          <div class="workflow-banner-section workflow-step-name">
+            <div class="workflow-banner-title workflow-step-name-title">{{i18n
+                "discourse_workflow.topic_banner.step_title"
+              }}</div>
+            <div class="workflow-step-name">{{i18n
+                "discourse_workflow.topic_banner.step"
+                workflow_step_position=@workflow_step_position
+                workflow_step_name=@workflow_step_name
+              }}</div>
+            <div class="workflow-action-button">
+              <DButton
+                class="btn-primary"
+                @icon="network-wired"
+                @action={{this.showVisualisationModal}}
+                @label="discourse_workflow.topic_banner.visualisation_button"
+              />
+            </div>
+          </div>
+          <div class="workflow-banner-section workflow-step-actions">
+            {{#if @workflow_step_options}}
+              <WorkflowButtons
+                @workflow_step_options={{@workflow_step_options}}
+                @topic_id={{@topic_id}}
+                @category_id={{@category_id}}
+              />
+            {{/if}}
           </div>
         </div>
-        <div class="workflow-banner-section workflow-step-actions">
-          {{#if @workflow_step_options}}
-            <WorkflowButtons
-              @workflow_step_options={{@workflow_step_options}}
-              @topic_id={{@topic_id}}
-              @category_id={{@category_id}}
-            />
-          {{/if}}
-        </div>
       </div>
-    </div>
+    {{/if}}
   </template>
 }
