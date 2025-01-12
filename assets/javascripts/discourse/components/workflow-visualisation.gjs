@@ -163,9 +163,9 @@ export default class WorkflowVisualisationComponent extends Component {
 
       // Handle returning links - rotated S shape
       if (sourceIndex > targetIndex) {
-        const midY = (sourceTopY - targetBottomY) / 2; // Midpoint between source and target nodes
+        const midY = (sourceIndex > (targetIndex + 1)) ? (targetBottomY + laneHeight / 5) : (sourceTopY - (sourceTopY - targetBottomY) / 2); // Midpoint between source and target nodes
         return `M${sourceX - nodeWidth / 2},${sourceTopY} V${
-          sourceTopY - midY
+          midY
         } H${targetX + nodeWidth / 2} V${targetBottomY}`;
       }
 
