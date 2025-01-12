@@ -25,7 +25,7 @@ option_fixtures = [
     updated_at: Time.now
   },
   {
-    name "Great",
+    name: "Great",
     slug: 'great',
     created_at: Time.now,
     updated_at: Time.now
@@ -71,7 +71,7 @@ option_fixtures = [
     slug: 'previous',
     created_at: Time.now,
     updated_at: Time.now
-  }
+  },
   {
     name: 'Close',
     slug: 'close',
