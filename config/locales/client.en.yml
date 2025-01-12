@@ -25,6 +25,9 @@ en:
         submit:
           button_label: "Submit"
           confirmation: "Are you sure you want to submit this topic?"
+        start:
+          button_label: "Start"
+          confirmation: "Are you sure you want to start this workflow?"
         accept:
           button_label: "Accept"
           confirmation: "Are you sure you want to accept this topic?"
