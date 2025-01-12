@@ -55,3 +55,16 @@ module ::DiscourseWorkflow
     #  end
   end
 end
+
+# == Schema Information
+#
+# Table name: workflows
+#
+#  id          :bigint           not null, primary key
+#  slug        :string
+#  name        :string
+#  description :text
+#  enabled     :boolean          default(TRUE)
+#  created_at  :datetime         not null
+#  updated_at  :datetime         not null
+#

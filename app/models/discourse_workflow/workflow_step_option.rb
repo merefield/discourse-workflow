@@ -7,3 +7,26 @@ module ::DiscourseWorkflow
     belongs_to :workflow_option
   end
 end
+
+# == Schema Information
+#
+# Table name: workflow_step_options
+#
+#  id                 :bigint           not null, primary key
+#  position           :integer
+#  workflow_step_id   :bigint
+#  workflow_option_id :bigint
+#  target_step_id     :bigint
+#  created_at         :datetime         not null
+#  updated_at         :datetime         not null
+#
+# Indexes
+#
+#  index_workflow_step_options_on_workflow_option_id  (workflow_option_id)
+#  index_workflow_step_options_on_workflow_step_id    (workflow_step_id)
+#
+# Foreign Keys
+#
+#  fk_rails_...  (workflow_option_id => workflow_options.id)
+#  fk_rails_...  (workflow_step_id => workflow_steps.id)
+#
