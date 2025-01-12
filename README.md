@@ -36,6 +36,8 @@ These are defined for each step when setting up the Workflow.  Actors can choose
 
 A new Topic Discovery filter "Workflows" on the homepage gives a list of Workflow intances (special workflow topics)
 
+You should keep Workflow Categories and ideally tags distinct, so you can also use those to filter for all wofklow instances that are at a particular stage, or have a specific tag.
+
 ## Audit trail
 
 A bundled Data Explorer query provides a basic audit report of journey a worklfow instance has taken.
@@ -60,7 +62,7 @@ The workflow plugin is not bundled with a Workflow, you have to create one.
 
 The screens to create one are in the Admin -> Plugins -> Discourse Workflow.
 
-First create a new Workflow by hitting the button, save it, then populate it with Steps by Editing the workflow.  Each Step, once created, can have be Edited to add Options, taken from a list of pre-defined Options.
+First create a new Workflow by hitting the button, save it, then populate it with Steps by Editing the workflow.  Each Step, once created, can be Edited to add Options, taken from a list of pre-defined Options.
 
 You can change the label of an Option in Admin -> Customize -> Text.
 
