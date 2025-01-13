@@ -24,7 +24,7 @@ module DiscourseWorkflow
 
       workflow_state = DiscourseWorkflow::WorkflowState.find_by(topic_id: post.topic.id)
 
-      data = { 
+      data = {
         topic_id: post.topic_id,
         user_id: post.user.id,
         username: post.user.username,
