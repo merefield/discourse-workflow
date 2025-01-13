@@ -1,5 +1,21 @@
 en:
   js:
+    user_menu:
+      no_workflow_notifications_title: "You don’t have any workflow notifications yet"
+      no_workflow_notifications_body: >
+        You will be notified in this panel when a Topic enters a workflow state for which you are Watching the First Post of the Category. Notifications will also be sent to your email when you haven’t logged in for a while.
+        <br><br>
+        For more, see your <a href='%{preferencesUrl}'>notification preferences</a>.
+      tabs:
+        workflow_notifications: "Workflow notifications"
+        workflow_notifications_with_unread:
+          one: "Workflow notifications - %{count} unread notification"
+          other: "Workflow notifications - %{count} unread notifications"
+    notifications:
+      workflow_topic_arrival_label: "Arrival in: %{workflow_name}"
+      workflow_topic_arrival_description: "Author: %{username}, step: %{workflow_step_name}"
+      titles:
+        workflow_topic_arrival: "A topic titled %{topic_title} has arrived in step: %{workflow_step_name} of the workflow: %{workflow_name}, authored by %{username}"
     topics:
       bottom:
         workflow: Currently, there are no more viewable Workflow topics.

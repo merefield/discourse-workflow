@@ -52,10 +52,19 @@ module DiscourseWorkflow
                   step_option_name: step_option_name,
                   step_option_slug: step_option_slug
                 )
+
                 success = true
               end
+
             end
           end
+        end
+        if topic.category_id != starting_category_id
+          opts = {
+            topic_id: topic.id
+          }
+          job_class = ::Jobs::WorkflowTopicArrivalNotifier
+          job_class.perform_async(opts.as_json)
         end
       end
       success

@@ -31,6 +31,7 @@ after_initialize do
     ListController.prepend(DiscourseWorkflow::ListControllerExtension)
     TopicQuery.prepend(DiscourseWorkflow::TopicQueryExtension)
     Topic.prepend(DiscourseWorkflow::TopicExtension)
+    Notification.singleton_class.prepend(DiscourseWorkflow::NotificationExtension)
   end
 
   Discourse.top_menu_items.push(:workflow)
@@ -169,5 +170,10 @@ after_initialize do
         DiscourseWorkflow::WorkflowState.create!(topic_id: topic.id, workflow_id: workflow_step.workflow_id, workflow_step_id: workflow_step.id)
       end
     end
+  end
+
+  on(:post_alerter_after_save_post) do |post, new_record, notified|
+    next if !new_record
+    DiscourseWorkflow::PostNotificationHandler.new(post, notified).handle
   end
 end
