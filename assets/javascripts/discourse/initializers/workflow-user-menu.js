@@ -2,11 +2,10 @@ import { withPluginApi } from "discourse/lib/plugin-api";
 import { formatUsername } from "discourse/lib/utilities";
 import getURL from "discourse-common/lib/get-url";
 import { i18n } from "discourse-i18n";
-import slugifyChannel from "discourse/plugins/chat/discourse/lib/slugify-channel";
 
 export default {
   name: "workflow-user-menu",
-  initialize(container) {
+  initialize() {
     withPluginApi("1.3.0", (api) => {
       if (api.registerNotificationTypeRenderer) {
         api.registerNotificationTypeRenderer(
