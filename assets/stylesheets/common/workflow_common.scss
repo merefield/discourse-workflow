@@ -1,9 +1,9 @@
 body.workflow-topic {
-  &:not(.staff){
+  &:not(.staff) {
     .edit-category__wrapper {
       display: none;
     }
- }
+  }
 }
 
 .regular {
