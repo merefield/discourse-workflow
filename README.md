@@ -32,9 +32,11 @@ You can hide Topics within a Category from specific groups in the normal way.
 
 These are defined for each step when setting up the Workflow.  Actors can choose to take any available action as each Option is presented as a button on the Topic.
 
+Actions on a Topic are captured in a Small Action Post to help users understand the journey of the Topic.
+
 ## Dashboard
 
-A new Topic Discovery filter "Workflows" on the homepage gives a list of Workflow intances (special workflow topics)
+A new Topic Discovery filter "Workflows" on the homepage gives a list of Workflow instances (special workflow topics)
 
 You should keep Workflow Categories and ideally tags distinct, so you can also use those to filter for all wofklow instances that are at a particular stage, or have a specific tag.
 
@@ -67,3 +69,8 @@ First create a new Workflow by hitting the button, save it, then populate it wit
 You can change the label of an Option in Admin -> Customize -> Text.
 
 I've seeded the system with a good range of Options, but if you wish to change the text on each one, go ahead.
+
+# Tips
+
+- Consider making all worklow steps for a particular workflow a Subcategory within a single Category.  Whilst this isn't necessary it will allow you to simply filter for that Category using existing Discourse Category drop-down in the Discovery list to see all the workflow instances for that specific workflow.
+- In the new Workflow Discovery list you can click on Workflow Name, Position or Step to visualise where that instance is along its path.
