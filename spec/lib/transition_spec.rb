@@ -36,4 +36,8 @@ describe ::DiscourseWorkflow::Transition do
   it "creates an audit log entry" do
     expect { transition.transition(user.id, topic, option_1.slug) }.to change { ::DiscourseWorkflow::WorkflowAuditLog.count }.by(1)
   end
+
+  it "updates the topic with a small action Post" do
+    expect { transition.transition(user.id, topic, option_1.slug) }.to change { ::Post.where(topic_id: topic.id).count }.by(1)
+  end
 end
