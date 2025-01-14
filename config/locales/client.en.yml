@@ -136,6 +136,7 @@ en:
               target_position: "Target Position"
               actions:
                 submit: "Submit"
+                start : "Start"
                 accept: "Accept"
                 reject: "Reject"
                 great: "Great"
