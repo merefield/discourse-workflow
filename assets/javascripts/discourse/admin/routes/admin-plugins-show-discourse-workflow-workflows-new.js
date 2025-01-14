@@ -10,7 +10,7 @@ export default class AdminPluginsShowDiscourseWorkflowWorkflowNew extends Discou
     super.setupController(controller, model);
     controller.set(
       "allWorkflows",
-      this.modelFor("adminPlugins.show.discourse-workflows")
+      this.modelFor("adminPlugins.show.discourse-workflow-workflows")
     );
   }
 }

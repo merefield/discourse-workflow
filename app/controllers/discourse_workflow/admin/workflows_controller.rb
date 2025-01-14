@@ -31,6 +31,7 @@ module DiscourseWorkflow
         #byebug
         workflow = Workflow.new(workflow_params)
         workflow.save!
+        render json: WorkflowSerializer.new(workflow)
       end
 
       def update

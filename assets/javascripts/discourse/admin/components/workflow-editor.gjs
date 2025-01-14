@@ -48,6 +48,10 @@ export default class WorkflowEditor extends Component {
         data: { message: i18n("admin.discourse_workflow.workflows.saved") },
         duration: 2000,
       });
+      this.router.transitionTo(
+        "adminPlugins.show.discourse-workflow-workflows",
+        this.store.findAll("workflow")
+      );
     } catch (e) {
       this.args.workflow.setProperties(backupModel);
       popupAjaxError(e);
@@ -64,9 +68,9 @@ export default class WorkflowEditor extends Component {
       message: i18n("admin.discourse_workflow.workflows.confirm_delete"),
       didConfirm: () => {
         return this.args.workflow.destroyRecord().then(() => {
-          this.args.workflow_steps.removeObject(this.args.workflow);
           this.router.transitionTo(
-            "adminPlugins.show.discourse-workflows.index"
+            "adminPlugins.show.discourse-workflow-workflows",
+            this.store.findAll("workflow")
           );
         });
       },

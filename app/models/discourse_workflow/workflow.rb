@@ -4,12 +4,9 @@ module ::DiscourseWorkflow
   class Workflow < ActiveRecord::Base
     self.table_name = 'workflows'
 
-    # before_validation :generate_unique_slug
-
-    before_validation :ensure_slug
+    before_validation :generate_unique_slug
 
     validate :ensure_name_ascii
-    # validate :ensure_slug
     validates :slug, presence: true, uniqueness: true
 
     has_many :workflow_step, dependent: :destroy
@@ -24,35 +21,18 @@ module ::DiscourseWorkflow
       end
     end
 
-    def duplicate_slug?
-      Workflow.where(slug: self.slug).where.not(id: self.id).any?
-    end
+    def generate_unique_slug
+      base_slug = name.to_s.parameterize(separator: '_')
+      slug_candidate = base_slug
+      counter = 2
 
-    def ensure_slug
-      return if name.blank?
-
-      self.name.strip
-
-      # auto slug
-      self.slug = Slug.for(name, "")
-      if duplicate_slug?
-        errors.add(:slug, I18n.t("workflow.errors.is_already_in_use"))
-        self.slug = ""
+      while Workflow.exists?(slug: slug_candidate)
+        slug_candidate = "#{base_slug}_#{counter}"
+        counter += 1
       end
+
+      self.slug = slug_candidate
     end
-
-    #  def generate_unique_slug
-    #    base_slug = name.to_s.parameterize(separator: '_')
-    #    slug_candidate = base_slug
-    #    counter = 2
-
-    #    while Workflow.exists?(slug: slug_candidate)
-    #      slug_candidate = "#{base_slug}_#{counter}"
-    #      counter += 1
-    #    end
-
-    #    self.slug = slug_candidate
-    #  end
   end
 end
 
