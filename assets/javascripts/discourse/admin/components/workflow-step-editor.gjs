@@ -58,6 +58,10 @@ export default class WorkflowStepEditor extends Component {
         },
         duration: 2000,
       });
+      this.router.transitionTo(
+        "adminPlugins.show.discourse-workflow-workflows.edit",
+        this.args.currentWorkflowStep.workflow_id
+      );
     } catch (e) {
       this.args.currentWorkflowStep.setProperties(backupModel);
       popupAjaxError(e);
