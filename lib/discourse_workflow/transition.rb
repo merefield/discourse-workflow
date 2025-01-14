@@ -53,6 +53,18 @@ module DiscourseWorkflow
                   step_option_slug: step_option_slug
                 )
 
+                Post.create!(
+                  user_id: user_id,
+                  topic_id: topic.id,
+                  raw: I18n.t('discourse_workflow..topic_transition_action_description',
+                    workflow_step_name: workflow_state.workflow_step.name,
+                    username: username,
+                    step_option_name: step_option_name
+                  ),
+                  post_type: Post.types[:small_action],
+                  action_code: 'workflow_transition'
+                )
+
                 success = true
               end
 

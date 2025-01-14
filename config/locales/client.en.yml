@@ -16,6 +16,8 @@ en:
       workflow_topic_arrival_description: "Author: %{username}, step: %{workflow_step_name}"
       titles:
         workflow_topic_arrival: "A topic titled %{topic_title} has arrived in step: %{workflow_step_name} of the workflow: %{workflow_name}, authored by %{username}"
+    action_codes:
+      workflow_transition: "acted upon topic in a workflow %{when}"
     topics:
       bottom:
         workflow: Currently, there are no more viewable Workflow topics.

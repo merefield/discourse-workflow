@@ -2,6 +2,7 @@ en:
   site_settings:
     workflow_enabled: "Enable the workflow plugin"
   discourse_workflow:
+    topic_transition_action_description: 'Moved to step: "%{workflow_step_name}" with action: "%{step_option_name}" by @%{username}'
     errors:
       no_midway_error: "You cannot create a Topic midway through a workflow and this Category is part of a workflow."
     options:

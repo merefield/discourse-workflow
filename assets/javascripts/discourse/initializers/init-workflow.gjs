@@ -137,6 +137,8 @@ export default {
           return columns;
         }
       );
+
+      api.addPostSmallActionIcon("workflow_transition", "network-wired");
     });
   },
 };
