@@ -2,10 +2,10 @@ import Component from "@glimmer/component";
 import { action } from "@ember/object";
 import { service } from "@ember/service";
 import DButton from "discourse/components/d-button";
+import bodyClass from "discourse/helpers/body-class";
 import { i18n } from "discourse-i18n";
 import WorkflowButtons from "./workflow-buttons";
 import WorkflowVisualisationModal from "./workflow-visualisation-modal";
-import bodyClass from "discourse/helpers/body-class";
 
 export default class WorkflowButtonsComponent extends Component {
   @service modal;
