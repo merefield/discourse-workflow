@@ -5,6 +5,7 @@ import DButton from "discourse/components/d-button";
 import { i18n } from "discourse-i18n";
 import WorkflowButtons from "./workflow-buttons";
 import WorkflowVisualisationModal from "./workflow-visualisation-modal";
+import bodyClass from "discourse/helpers/body-class";
 
 export default class WorkflowButtonsComponent extends Component {
   @service modal;
@@ -21,6 +22,7 @@ export default class WorkflowButtonsComponent extends Component {
 
   <template>
     {{#if @workflow_name}}
+      {{bodyClass "workflow-topic"}}
       <div class="workflow-topic-banner">
         <div class="workflow-banner-border-title">{{i18n
             "discourse_workflow.topic_banner.title"
