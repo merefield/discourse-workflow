@@ -46,7 +46,7 @@ export default class WorkflowButtonsComponent extends Component {
             <div class="workflow-action-button">
               <DButton
                 class="btn-primary"
-                @icon="network-wired"
+                @icon="right-left"
                 @action={{this.showVisualisationModal}}
                 @label="discourse_workflow.topic_banner.visualisation_button"
               />

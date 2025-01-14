@@ -12,7 +12,7 @@ export default {
           "workflow_topic_arrival",
           (NotificationItemBase) => {
             return class extends NotificationItemBase {
-              icon = "network-wired";
+              icon = "right-left";
               linkTitle = i18n("notifications.titles.workflow_topic_arrival", {
                 username: formatUsername(this.notification.data.username),
                 topic_title: this.notification.data.topic_title,
@@ -61,7 +61,7 @@ export default {
             }
 
             get icon() {
-              return "network-wired";
+              return "right-left";
             }
 
             get count() {

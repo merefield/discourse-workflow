@@ -138,7 +138,7 @@ export default {
         }
       );
 
-      api.addPostSmallActionIcon("workflow_transition", "network-wired");
+      api.addPostSmallActionIcon("workflow_transition", "right-left");
     });
   },
 };

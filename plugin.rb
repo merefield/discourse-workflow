@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 # name: discourse-workflow
 # about: A topic-based workflow engine for Discourse
-# version: 0.0.3
+# version: 0.0.4
 # authors: Robert Barrow
 # contact_emails: robert@pavilion.tech
 # url: https://github.com/merefield/discourse-workflow
@@ -23,7 +23,7 @@ end
 require_relative "lib/discourse_workflow/engine"
 
 if respond_to?(:register_svg_icon)
-  register_svg_icon "network-wired"
+  register_svg_icon "right-left"
 end
 
 after_initialize do
