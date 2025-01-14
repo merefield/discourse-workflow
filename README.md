@@ -28,7 +28,7 @@ Those that have Reply access can comment on the Workflow item just as they can f
 
 You can hide Topics within a Category from specific groups in the normal way.
 
-## Actions aka Options
+## Actions via Options
 
 These are defined for each step when setting up the Workflow.  Actors can choose to take any available action as each Option is presented as a button on the Topic.
 
@@ -74,3 +74,11 @@ I've seeded the system with a good range of Options, but if you wish to change t
 
 - Consider making all worklow steps for a particular workflow a Subcategory within a single Category.  Whilst this isn't necessary it will allow you to simply filter for that Category using existing Discourse Category drop-down in the Discovery list to see all the workflow instances for that specific workflow.
 - In the new Workflow Discovery list you can click on Workflow Name, Position or Step to visualise where that instance is along its path.
+
+# AI actions
+
+You can leverage AI to handle a step.  You need a valid Open AI key added to Workflow settings.  You must enable AI on the step.  You must also write a prompt that must include {{options}} to let the AI know what options it has and {{topic}} to include the content.
+
+Example prompt:
+
+"your options are {{options}}. if the following text states it is delicious, please accept, otherwise reject. {{topic}} answer with one word from those options"
