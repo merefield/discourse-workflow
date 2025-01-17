@@ -1,6 +1,5 @@
 import Component from "@ember/component";
 import { action } from "@ember/object";
-import { service } from "@ember/service";
 import didInsert from "@ember/render-modifiers/modifiers/did-insert";
 import { ajax } from "discourse/lib/ajax";
 import { popupAjaxError } from "discourse/lib/ajax-error";
