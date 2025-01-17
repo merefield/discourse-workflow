@@ -1,5 +1,6 @@
 import Component from "@ember/component";
 import { action } from "@ember/object";
+import { service } from "@ember/service";
 import didInsert from "@ember/render-modifiers/modifiers/did-insert";
 import { ajax } from "discourse/lib/ajax";
 import { popupAjaxError } from "discourse/lib/ajax-error";
@@ -42,8 +43,7 @@ export default class WorkflowVisualisationComponent extends Component {
     const svg = window.d3
       .select("#workflow-visualisation")
       .append("svg")
-      .attr("width", width)
-      .attr("height", height);
+      .attr("viewBox", `0 0 ${width} ${height}`);
 
     // Draw swim lanes
     const lanes = svg
@@ -58,7 +58,8 @@ export default class WorkflowVisualisationComponent extends Component {
       .attr("x", 0)
       .attr("y", (d, i) => i * laneHeight)
       .attr("width", width)
-      .attr("height", laneHeight);
+      .attr("height", laneHeight)
+      .style("stroke-width", width / 200);
 
     lanes
       .append("a")
@@ -66,8 +67,9 @@ export default class WorkflowVisualisationComponent extends Component {
       .attr("target", "_blank")
       .append("text")
       .attr("class", "lane-label")
-      .attr("x", 10)
+      .attr("x", width / 100)
       .attr("y", (d, i) => i * laneHeight + laneHeight / 2)
+      .style("font-size", `${height / 40}px`)
       .text((d) => d.name);
 
     // Define arrow marker
@@ -75,15 +77,16 @@ export default class WorkflowVisualisationComponent extends Component {
       .append("defs")
       .append("marker")
       .attr("id", "arrowhead")
-      .attr("viewBox", "0 -5 10 10")
+      .attr("viewBox", `0 -${width / 200} ${width / 100} ${width / 100}`)
       .attr("refX", 10)
       .attr("refY", 0)
-      .attr("markerWidth", 6)
-      .attr("markerHeight", 6)
-      .attr("orient", "auto")
+      .attr("markerWidth", width / 150)
+      .attr("markerHeight", width / 150)
+      .attr("orient", "auto-start-reverse")
       .append("path")
-      .attr("d", "M0,-5L10,0L0,5")
-      .attr("class", "arrowhead");
+      .attr("d", `M0,-${width / 200}L${width / 100},0L0,${width / 200}`)
+      .attr("class", "arrowhead")
+      .attr("z-index", 100);
 
     // Add links to the SVG
     const link = svg
@@ -93,6 +96,7 @@ export default class WorkflowVisualisationComponent extends Component {
       .data(workflowData.links)
       .enter()
       .append("path")
+      .style("stroke-width", width / 400)
       .attr("class", "link")
       .attr("marker-end", "url(#arrowhead)");
 
@@ -106,6 +110,7 @@ export default class WorkflowVisualisationComponent extends Component {
       .append("text")
       .attr("class", "link-label")
       .attr("text-anchor", "middle")
+      .style("font-size", `${height / 50}px`)
       .text((d) => d.action);
 
     // Add nodes to the SVG
@@ -118,10 +123,11 @@ export default class WorkflowVisualisationComponent extends Component {
       .append("rect")
       .attr("class", (d) => (d.active ? "node active" : "node"))
       .attr("fill", (d) => (d.active ? "#ffa500" : "#69b3a2"))
+      .style("stroke-width", width / 400)
       .attr("width", nodeWidth)
       .attr("height", nodeHeight)
-      .attr("rx", 5)
-      .attr("ry", 5)
+      .attr("rx", width / 200)
+      .attr("ry", width / 200)
       .attr("x", (d, i) => nodeSpacing * (i + 1))
       .attr("y", (d) => d.lane * laneHeight + laneHeight / 2 - nodeHeight / 2);
 
@@ -134,8 +140,9 @@ export default class WorkflowVisualisationComponent extends Component {
       .enter()
       .append("text")
       .attr("text-anchor", "middle")
-      .attr("x", (d, i) => nodeSpacing * (i + 1) + 60)
-      .attr("y", (d) => d.lane * laneHeight + laneHeight / 2 + 5)
+      .attr("x", (d, i) => nodeSpacing * (i + 1) + nodeWidth / 2)
+      .attr("y", (d) => d.lane * laneHeight + laneHeight / 2 + height / 200)
+      .style("font-size", `${height / 50}px`)
       .text((d) => d.id);
 
     // Update links layout

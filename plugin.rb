@@ -14,7 +14,8 @@ gem "ruby-openai", '7.0.0', { require: false }
 enabled_site_setting :workflow_enabled
 
 register_asset 'stylesheets/common/workflow_common.scss'
-# register_asset 'stylesheets/mobile/chatbot_mobile.scss', :mobile
+register_asset 'stylesheets/desktop/workflow_desktop.scss', :desktop
+register_asset 'stylesheets/mobile/workflow_mobile.scss', :mobile
 
 module ::DiscourseWorkflow
   PLUGIN_NAME = "discourse-workflow"
