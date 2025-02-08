@@ -4,7 +4,7 @@ module DiscourseWorkflow
   class AiActions
 
     def transition_all
-      WorkflowState.each do |workflow_state|
+      WorkflowState.all.each do |workflow_state|
         if workflow_state.workflow_step.ai_enabled && workflow_state.workflow_step.workflow_step_option.count > 0
           ai_transition(workflow_state)
         end
