@@ -2,6 +2,8 @@
 
 A workflow tool for Discourse!
 
+Discuss the plugin here: https://meta.discourse.org/t/discourse-workflow/347110?u=merefield
+
 # Summary
 
 A plugin which provides a secure workflow framework for Topics which are passed along a customisable set of steps until the worklfow is complete.  Some branching and looping is supported.
