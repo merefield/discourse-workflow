@@ -77,15 +77,12 @@ export default {
     const router = container.lookup("service:router");
 
     withPluginApi("1.39.0", (api) => {
-      api.addAdminPluginConfigurationNav(
-        "discourse-workflow",
-        [
-          {
-            label: "admin.discourse_workflow.workflows.title",
-            route: "adminPlugins.show.discourse-workflow-workflows",
-          },
-        ]
-      );
+      api.addAdminPluginConfigurationNav("discourse-workflow", [
+        {
+          label: "admin.discourse_workflow.workflows.title",
+          route: "adminPlugins.show.discourse-workflow-workflows",
+        },
+      ]);
 
       api.addNavigationBarItem({
         name: "workflow",
