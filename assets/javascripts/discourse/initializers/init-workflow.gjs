@@ -1,5 +1,4 @@
 import SortableColumn from "discourse/components/topic-list/header/sortable-column";
-import { PLUGIN_NAV_MODE_TOP } from "discourse/lib/admin-plugin-config-nav";
 import { withPluginApi } from "discourse/lib/plugin-api";
 import WorkflowNameLink from "./../components/workflow-name-link";
 
@@ -26,8 +25,6 @@ const workflowNameCell = <template>
     />
   </td>
 </template>;
-
-// {{@topic.workflow_name}}
 
 const workflowStepPositionHeader = <template>
   <SortableColumn
@@ -82,7 +79,6 @@ export default {
     withPluginApi("1.39.0", (api) => {
       api.addAdminPluginConfigurationNav(
         "discourse-workflow",
-        PLUGIN_NAV_MODE_TOP,
         [
           {
             label: "admin.discourse_workflow.workflows.title",
