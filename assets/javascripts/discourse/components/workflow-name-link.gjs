@@ -22,7 +22,7 @@ export default class WorkflowButtonsComponent extends Component {
       <DButton
         class="btn-transparent"
         @action={{this.showVisualisationModal}}
-        @icon={{this.args.icon}}
+        @icon={{@icon}}
       >
         {{@label}}
       </DButton>
