@@ -90,15 +90,12 @@ export default {
         href: "/workflow",
       });
 
-      api.registerValueTransformer(
-        "topic-list-item-class",
-        ({ value }) => {
-          if (WORKFLOW_LIST_ROUTES.includes(router.currentRouteName)) {
-            value.push("workflow-list");
-          }
-          return value;
+      api.registerValueTransformer("topic-list-item-class", ({ value }) => {
+        if (WORKFLOW_LIST_ROUTES.includes(router.currentRouteName)) {
+          value.push("workflow-list");
         }
-      );
+        return value;
+      });
 
       if (!mobileView) {
         api.registerValueTransformer(
