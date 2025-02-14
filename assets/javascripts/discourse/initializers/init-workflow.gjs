@@ -92,7 +92,7 @@ export default {
 
       api.registerValueTransformer(
         "topic-list-item-class",
-        ({ value, context }) => {
+        ({ value }) => {
           if (WORKFLOW_LIST_ROUTES.includes(router.currentRouteName)) {
             value.push("workflow-list");
           }
