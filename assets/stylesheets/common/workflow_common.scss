@@ -5,6 +5,11 @@
       padding-left: 0px;
     }
   }
+
+  td.workflow-step-position .workflow-action-button {
+    justify-content: center;
+    display: flex;
+  }
 }
 
 body.workflow-topic {
