@@ -19,7 +19,11 @@ export default class WorkflowButtonsComponent extends Component {
 
   <template>
     <div class="workflow-action-button">
-      <DButton class="btn-transparent" @action={{this.showVisualisationModal}}>
+      <DButton
+        class="btn-transparent"
+        @action={{this.showVisualisationModal}}
+        @icon={{@icon}}
+      >
         {{@label}}
       </DButton>
     </div>

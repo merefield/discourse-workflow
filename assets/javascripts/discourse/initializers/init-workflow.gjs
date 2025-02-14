@@ -75,6 +75,7 @@ export default {
 
   initialize(container) {
     const router = container.lookup("service:router");
+    const mobileView = container.lookup("service:site").mobileView;
 
     withPluginApi("1.39.0", (api) => {
       api.addAdminPluginConfigurationNav("discourse-workflow", [
@@ -89,47 +90,56 @@ export default {
         href: "/workflow",
       });
 
-      api.registerValueTransformer(
-        "topic-list-columns",
-        ({ value: columns }) => {
-          if (WORKFLOW_LIST_ROUTES.includes(router.currentRouteName)) {
-            columns.add("workflow-name", {
-              header: workflowNameHeader,
-              item: workflowNameCell,
-              after: "activity",
-            });
-          }
-          return columns;
+      api.registerValueTransformer("topic-list-item-class", ({ value }) => {
+        if (WORKFLOW_LIST_ROUTES.includes(router.currentRouteName)) {
+          value.push("workflow-list");
         }
-      );
+        return value;
+      });
 
-      api.registerValueTransformer(
-        "topic-list-columns",
-        ({ value: columns }) => {
-          if (WORKFLOW_LIST_ROUTES.includes(router.currentRouteName)) {
-            columns.add("workflow-step-position", {
-              header: workflowStepPositionHeader,
-              item: workflowStepPositionCell,
-              after: "workflow-name",
-            });
+      if (!mobileView) {
+        api.registerValueTransformer(
+          "topic-list-columns",
+          ({ value: columns }) => {
+            if (WORKFLOW_LIST_ROUTES.includes(router.currentRouteName)) {
+              columns.add("workflow-name", {
+                header: workflowNameHeader,
+                item: workflowNameCell,
+                after: "activity",
+              });
+            }
+            return columns;
           }
-          return columns;
-        }
-      );
+        );
 
-      api.registerValueTransformer(
-        "topic-list-columns",
-        ({ value: columns }) => {
-          if (WORKFLOW_LIST_ROUTES.includes(router.currentRouteName)) {
-            columns.add("workflow-step-name", {
-              header: workflowStepNameHeader,
-              item: workflowStepNameCell,
-              after: "workflow-step-position",
-            });
+        api.registerValueTransformer(
+          "topic-list-columns",
+          ({ value: columns }) => {
+            if (WORKFLOW_LIST_ROUTES.includes(router.currentRouteName)) {
+              columns.add("workflow-step-position", {
+                header: workflowStepPositionHeader,
+                item: workflowStepPositionCell,
+                after: "workflow-name",
+              });
+            }
+            return columns;
           }
-          return columns;
-        }
-      );
+        );
+
+        api.registerValueTransformer(
+          "topic-list-columns",
+          ({ value: columns }) => {
+            if (WORKFLOW_LIST_ROUTES.includes(router.currentRouteName)) {
+              columns.add("workflow-step-name", {
+                header: workflowStepNameHeader,
+                item: workflowStepNameCell,
+                after: "workflow-step-position",
+              });
+            }
+            return columns;
+          }
+        );
+      }
 
       api.addPostSmallActionIcon("workflow_transition", "right-left");
     });

@@ -1,3 +1,17 @@
+.topic-list {
+  .workflow-after-title .workflow-action-button {
+    font-size: 0.8em;
+    button {
+      padding-left: 0px;
+    }
+  }
+
+  td.workflow-step-position .workflow-action-button {
+    justify-content: center;
+    display: flex;
+  }
+}
+
 body.workflow-topic {
   &:not(.staff) {
     .edit-category__wrapper {
