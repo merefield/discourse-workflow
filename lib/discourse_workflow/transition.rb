@@ -56,7 +56,7 @@ module DiscourseWorkflow
                 Post.create!(
                   user_id: user_id,
                   topic_id: topic.id,
-                  raw: I18n.t('discourse_workflow..topic_transition_action_description',
+                  raw: I18n.t('discourse_workflow.topic_transition_action_description',
                     workflow_step_name: workflow_state.workflow_step.name,
                     username: username,
                     step_option_name: step_option_name
