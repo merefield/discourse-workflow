@@ -6,13 +6,18 @@ export default class AdminPluginsShowDiscourseWorkflowWorkflowStepsNew extends D
     const workflow = this.modelFor(
       "adminPlugins.show.discourse-workflow-workflows-steps"
     );
+
+    const sortedSteps = [...workflow.workflow_steps].sort(
+      (a, b) => a.position - b.position
+    );
+
     // Create a new workflow step record
+    // Asign a default position to be the last existing step + 1
     const record = this.store.createRecord("workflow-step", {
       workflow_id: workflow.id,
       position:
-        workflow.workflow_steps.length > 0
-          ? workflow.workflow_steps[workflow.workflow_steps.length - 1]
-              .position + 1
+        sortedSteps.length > 0
+          ? sortedSteps[workflow.workflow_steps.length - 1].position + 1
           : 1,
     });
 

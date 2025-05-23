@@ -60,7 +60,8 @@ export default class WorkflowStepEditor extends Component {
       });
       this.router.transitionTo(
         "adminPlugins.show.discourse-workflow-workflows.edit",
-        this.args.currentWorkflowStep.workflow_id
+        this.args.currentWorkflowStep.workflow_id,
+        { queryParams: { refresh: true } }
       );
     } catch (e) {
       this.args.currentWorkflowStep.setProperties(backupModel);
@@ -88,7 +89,8 @@ export default class WorkflowStepEditor extends Component {
           // this.args.currentWorkflowSteps.removeObject(this.args.currentWorkflowStep);
           this.router.transitionTo(
             "adminPlugins.show.discourse-workflow-workflows.edit",
-            this.args.currentWorkflowStep.workflow_id
+            this.args.currentWorkflowStep.workflow_id,
+            { queryParams: { refresh: true } }
           );
         });
       },
