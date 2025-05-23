@@ -80,6 +80,9 @@ en:
         finish:
           button_label: "Finish"
           confirmation: "Are you sure you want to finish this workflow?"
+        close:
+          button_label: "Close"
+          confirmation: "Are you sure you want to close this workflow?"
         reopen:
           button_label: "Reopen"
           confirmation: "Are you sure you want to reopen this workflow?"
