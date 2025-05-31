@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 # name: discourse-workflow
 # about: A topic-based workflow engine for Discourse
-# version: 0.0.14
+# version: 0.0.15
 # authors: Robert Barrow
 # contact_emails: robert@pavilion.tech
 # url: https://github.com/merefield/discourse-workflow
