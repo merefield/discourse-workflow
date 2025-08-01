@@ -17,8 +17,7 @@ class ::Jobs::WorkflowDataExplorerQueriesCompleteness < ::Jobs::Scheduled
         -- int :workflow_id = 1
         -- int :num_of_days_history = 14
 
-        SELECT 
-            cob_date as "COB DATE",
+        SELECT cob_date as "COB DATE",
             w.name as "Workflow",
             wstp.name as "Step",
             wstt.count as "Count"
@@ -40,7 +39,9 @@ class ::Jobs::WorkflowDataExplorerQueriesCompleteness < ::Jobs::Scheduled
       SQL
     end
 
-    if !::DiscourseDataExplorer::Query.exists?(name: "Workflow Audit Log (default)")
+    if !::DiscourseDataExplorer::Query.exists?(
+         name: "Workflow Audit Log (default)"
+       )
       query_sql = <<~SQL
         -- [params]
         -- int :workflow_id = 1
