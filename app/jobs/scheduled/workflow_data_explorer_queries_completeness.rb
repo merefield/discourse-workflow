@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 class ::Jobs::WorkflowDataExplorerQueriesCompleteness < ::Jobs::Scheduled
   sidekiq_options retry: false
 

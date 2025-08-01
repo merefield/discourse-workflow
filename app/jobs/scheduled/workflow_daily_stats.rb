@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class ::Jobs::WorkflowDailyStats < ::Jobs::Scheduled
   sidekiq_options retry: false
 
