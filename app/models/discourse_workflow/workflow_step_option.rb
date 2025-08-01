@@ -14,11 +14,11 @@ end
 #
 #  id                 :bigint           not null, primary key
 #  position           :integer
-#  workflow_step_id   :bigint
-#  workflow_option_id :bigint
-#  target_step_id     :bigint
 #  created_at         :datetime         not null
 #  updated_at         :datetime         not null
+#  target_step_id     :bigint
+#  workflow_option_id :bigint
+#  workflow_step_id   :bigint
 #
 # Indexes
 #
