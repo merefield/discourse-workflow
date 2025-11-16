@@ -75,7 +75,6 @@ export default {
 
   initialize(container) {
     const router = container.lookup("service:router");
-    const mobileView = container.lookup("service:site").mobileView;
 
     withPluginApi("1.39.0", (api) => {
       api.addAdminPluginConfigurationNav("discourse-workflow", [
