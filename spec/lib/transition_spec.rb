@@ -13,9 +13,7 @@ describe ::DiscourseWorkflow::Transition do
     Fabricate(:workflow_step, workflow_id: workflow.id, name: "Step 2", description: "Step 2 Description")
   }
 
-  fab!(:option_1) {
-    Fabricate(:workflow_option)
-  }
+  fab!(:option_1, :workflow_option)
 
   fab!(:step_option_1) {
     Fabricate(:workflow_step_option, workflow_step_id: step_1.id, workflow_option_id: option_1.id, target_step_id: step_2.id)
