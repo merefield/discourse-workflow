@@ -17,7 +17,7 @@ module DiscourseWorkflow
         steps = workflow.workflow_steps.order(:position).includes(workflow_step_options: :workflow_option)
 
         # Build a hash of category_id => category to avoid N+1 queries
-        category_ids = steps.map(&:category_id).uniq
+        category_ids = steps.map(&:category_id).compact.uniq
         categories_by_id = Category.where(id: category_ids).index_by(&:id)
 
         # Build a hash of step_id => step for quick lookups in links
@@ -34,6 +34,9 @@ module DiscourseWorkflow
           }
         end.compact.uniq { |lane| lane[:name] }
 
+        # Build lane name to index hash for efficient lookups
+        lane_index_by_name = lanes.each_with_index.to_h { |lane, idx| [lane[:name], idx] }
+
         # Nodes: one per step
         nodes = steps.map do |step|
           category = categories_by_id[step.category_id]
@@ -43,7 +46,7 @@ module DiscourseWorkflow
 
           {
             id: step.name,
-            lane: lanes.find_index { |lane| lane[:name] == category_name },
+            lane: lane_index_by_name[category_name],
             active: step.id == workflow_state.workflow_step_id
           }
         end.compact
