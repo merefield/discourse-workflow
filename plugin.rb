@@ -109,16 +109,6 @@ after_initialize do
     step = workflow_state&.workflow_step
     return [] unless step
 
-    # assuming:
-    # class WorkflowStep < ActiveRecord::Base
-    #   has_many :workflow_step_options
-    # end
-    #
-    # class WorkflowStepOption < ActiveRecord::Base
-    #   belongs_to :workflow_step
-    #   belongs_to :workflow_option
-    # end
-
     step
       .workflow_step_options
       .includes(:workflow_option)
