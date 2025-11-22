@@ -4,10 +4,16 @@ module DiscourseWorkflow
   module TopicExtension
     extend ActiveSupport::Concern
 
-    prepended { validates_with NotMidwayValidator, on: :create }
+    prepended do
+      has_one :workflow_state,
+              class_name: "DiscourseWorkflow::WorkflowState",
+              foreign_key: :topic_id
+
+      validates_with NotMidwayValidator, on: :create
+    end
 
     def is_workflow_topic?
-      WorkflowState.exists?(topic_id: self.id)
+      workflow_state.present?
     end
   end
 end
