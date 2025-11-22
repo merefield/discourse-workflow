@@ -5,7 +5,7 @@ module DiscourseWorkflow
     def transition_all
       DiscourseWorkflow::WorkflowState
         .includes(
-          :topic,
+          topic: :first_post,
           workflow_step: {
             workflow_step_options: :workflow_option
           }
