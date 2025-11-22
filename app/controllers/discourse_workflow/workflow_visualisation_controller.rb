@@ -16,9 +16,16 @@ module DiscourseWorkflow
         # Preload steps + options (and their workflow_option) to avoid extra queries when iterating
         steps = workflow.workflow_steps.order(:position).includes(workflow_step_options: :workflow_option)
 
+        # Build a hash of category_id => category to avoid N+1 queries
+        category_ids = steps.map(&:category_id).uniq
+        categories_by_id = Category.where(id: category_ids).index_by(&:id)
+
+        # Build a hash of step_id => step for quick lookups in links
+        steps_by_id = steps.index_by(&:id)
+
         # Lanes: unique categories in order of step position
         lanes = steps.map do |step|
-          category = Category.find(step.category_id)
+          category = categories_by_id[step.category_id]
           {
             name: category.name,
             link: "/c/#{step.category_id}"
@@ -27,7 +34,7 @@ module DiscourseWorkflow
 
         # Nodes: one per step
         nodes = steps.map do |step|
-          category_name = Category.find(step.category_id).name
+          category_name = categories_by_id[step.category_id].name
 
           {
             id: step.name,
@@ -41,7 +48,7 @@ module DiscourseWorkflow
 
         steps.each do |step|
           step.workflow_step_options.each do |option|
-            target_step = DiscourseWorkflow::WorkflowStep.find(option.target_step_id)
+            target_step = steps_by_id[option.target_step_id]
 
             links << {
               source: step.name,
