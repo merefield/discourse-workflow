@@ -31,14 +31,19 @@ module DiscourseWorkflow
           }
         end.compact.uniq { |lane| lane[:name] }
 
+        # Build lane name to index hash for efficient lookups
+        lane_index_by_name = lanes.each_with_index.to_h { |lane, idx| [lane[:name], idx] }
+
         # Nodes: one per step
         nodes = steps.map do |step|
           category = categories_by_id[step.category_id]
           next unless category
 
+          category_name = category.name
+
           {
             id: step.name,
-            lane: lanes.find_index { |lane| lane[:name] == category.name },
+            lane: lane_index_by_name[category_name],
             active: step.id == workflow_state.workflow_step_id
           }
         end.compact
@@ -46,9 +51,13 @@ module DiscourseWorkflow
         # Links: from each step via its options
         links = []
 
+        # Build a hash of step_id => step to avoid N+1 queries
+        steps_by_id = steps.index_by(&:id)
+
         steps.each do |step|
           step.workflow_step_options.each do |option|
-            target_step = DiscourseWorkflow::WorkflowStep.find(option.target_step_id)
+            target_step = steps_by_id[option.target_step_id]
+            next unless target_step
 
             links << {
               source: step.name,
