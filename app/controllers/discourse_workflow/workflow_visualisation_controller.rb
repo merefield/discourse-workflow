@@ -13,8 +13,8 @@ module DiscourseWorkflow
 
         raise Discourse::NotFound unless workflow
 
-        # Preload steps + options to avoid extra queries when iterating
-        steps = workflow.workflow_steps.order(:position).includes(:workflow_step_options)
+        # Preload steps + options (and their workflow_option) to avoid extra queries when iterating
+        steps = workflow.workflow_steps.order(:position).includes(workflow_step_options: :workflow_option)
 
         # Lanes: unique categories in order of step position
         lanes = steps.map do |step|
