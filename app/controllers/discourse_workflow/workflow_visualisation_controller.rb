@@ -17,7 +17,7 @@ module DiscourseWorkflow
         steps = workflow.workflow_steps.order(:position).includes(workflow_step_options: :workflow_option)
 
         # Build category lookup hash to avoid N+1 queries
-        category_ids = steps.map(&:category_id).uniq
+        category_ids = steps.map(&:category_id).compact.uniq
         categories_by_id = Category.where(id: category_ids).index_by(&:id)
 
         # Lanes: unique categories in order of step position
