@@ -41,7 +41,6 @@ module DiscourseWorkflow
             user     = User.find(user_id)
             username = user.username
           else
-            # stick with your -1/system idiom, but avoid double find
             user     = nil
             user_id  = -1
             username = "system"
