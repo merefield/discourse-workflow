@@ -33,7 +33,6 @@ module DiscourseWorkflow
       # get option slugs for this step
       options =
         step.workflow_step_options
-            .includes(:workflow_option)
             .map { |o| o.workflow_option&.slug }
             .compact
 
