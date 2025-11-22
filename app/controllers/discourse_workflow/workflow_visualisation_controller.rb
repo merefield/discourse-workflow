@@ -30,8 +30,8 @@ module DiscourseWorkflow
           category_name = Category.find(step.category_id).name
 
           {
-            id:    step.name,
-            lane:  lanes.find_index { |lane| lane[:name] == category_name },
+            id: step.name,
+            lane: lanes.find_index { |lane| lane[:name] == category_name },
             active: step.id == workflow_state.workflow_step_id
           }
         end

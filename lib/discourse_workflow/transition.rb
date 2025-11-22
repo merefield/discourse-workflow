@@ -48,37 +48,37 @@ module DiscourseWorkflow
           end
 
           WorkflowAuditLog.create!(
-            user_id:                user_id,
-            username:               username,
-            topic_id:               topic.id,
-            topic_title:            topic.title,
-            workflow_id:            workflow_state.workflow_id,
-            workflow_name:          workflow_state.workflow.name,
-            starting_step_id:       starting_step_id,
-            starting_step_name:     starting_step_name,
-            ending_step_id:         workflow_state.workflow_step_id,
-            ending_step_name:       workflow_state.workflow_step.name,
-            starting_category_id:   starting_category_id,
+            user_id: user_id,
+            username: username,
+            topic_id: topic.id,
+            topic_title: topic.title,
+            workflow_id: workflow_state.workflow_id,
+            workflow_name: workflow_state.workflow.name,
+            starting_step_id: starting_step_id,
+            starting_step_name: starting_step_name,
+            ending_step_id: workflow_state.workflow_step_id,
+            ending_step_name: workflow_state.workflow_step.name,
+            starting_category_id: starting_category_id,
             starting_category_name: starting_category_name,
-            ending_category_id:     topic.category_id,
-            ending_category_name:   topic.category&.name,
-            starting_position:      starting_position,
-            ending_position:        workflow_state.workflow_step.position,
-            step_option_id:         step_option_id,
-            step_option_name:       step_option_name,
-            step_option_slug:       step_option_slug
+            ending_category_id: topic.category_id,
+            ending_category_name: topic.category&.name,
+            starting_position: starting_position,
+            ending_position: workflow_state.workflow_step.position,
+            step_option_id: step_option_id,
+            step_option_name: step_option_name,
+            step_option_slug: step_option_slug
           )
 
           Post.create!(
-            user_id:    user_id,
-            topic_id:   topic.id,
-            raw:        I18n.t(
+            user_id: user_id,
+            topic_id: topic.id,
+            raw: I18n.t(
                           "discourse_workflow.topic_transition_action_description",
                           workflow_step_name: workflow_state.workflow_step.name,
-                          username:           username,
-                          step_option_name:   step_option_name
+                          username: username,
+                          step_option_name: step_option_name
                         ),
-            post_type:  Post.types[:small_action],
+            post_type: Post.types[:small_action],
             action_code: "workflow_transition"
           )
 
