@@ -9,8 +9,8 @@ module ::DiscourseWorkflow
     validate :ensure_name_ascii
     validates :slug, presence: true, uniqueness: true
 
-    has_many :workflow_step, dependent: :destroy
-    has_many :workflow_state
+    has_many :workflow_steps, dependent: :destroy
+    has_many :workflow_states
 
     scope :ordered, -> { order("lower(name) ASC") }
 

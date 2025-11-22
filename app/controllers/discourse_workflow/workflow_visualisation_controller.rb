@@ -9,28 +9,40 @@ module DiscourseWorkflow
 
       if topic.present?
         workflow_state = DiscourseWorkflow::WorkflowState.find_by(topic_id: topic.id)
-        workflow = workflow_state.workflow
+        workflow       = workflow_state&.workflow
 
-        lanes = workflow.workflow_step.order(:position).map do |step|
+        raise Discourse::NotFound unless workflow
+
+        # Preload steps + options (and their workflow_option) to avoid extra queries when iterating
+        steps = workflow.workflow_steps.order(:position).includes(workflow_step_options: :workflow_option)
+
+        # Lanes: unique categories in order of step position
+        lanes = steps.map do |step|
+          category = Category.find(step.category_id)
           {
-            name: Category.find(step.category_id).name,
+            name: category.name,
             link: "/c/#{step.category_id}"
-         }
+          }
         end.uniq { |lane| lane[:name] }
 
-        nodes = workflow.workflow_step.order(:position).map do |step|
+        # Nodes: one per step
+        nodes = steps.map do |step|
+          category_name = Category.find(step.category_id).name
+
           {
-             id: step.name,
-             lane: lanes.find_index { |lane| lane[:name] == Category.find(step.category_id).name },
-             active: step.id == workflow_state.workflow_step_id
+            id: step.name,
+            lane: lanes.find_index { |lane| lane[:name] == category_name },
+            active: step.id == workflow_state.workflow_step_id
           }
         end
 
+        # Links: from each step via its options
         links = []
 
-        workflow.workflow_step.order(:position).each do |step|
-          step.workflow_step_option.each do |option|
-            target_step = WorkflowStep.find(option.target_step_id)
+        steps.each do |step|
+          step.workflow_step_options.each do |option|
+            target_step = DiscourseWorkflow::WorkflowStep.find(option.target_step_id)
+
             links << {
               source: step.name,
               target: target_step.name,
@@ -44,34 +56,8 @@ module DiscourseWorkflow
           nodes: nodes,
           links: links
         }
-
-        #   const workflowData = {
-        # lanes: [
-        #     { name: "Preparers", link: "https://example.com/preparers" },
-        #     { name: "Reviewers", link: "https://example.com/reviewers" },
-        #     { name: "Finalisers", link: "https://example.com/finalisers" },
-        #     { name: "Approvers", link: "https://example.com/approvers" },
-        #     { name: "Completed", link: "https://example.com/completed" }
-        # ],
-        # nodes: [
-        #     { id: 'Step A', lane: 0, active: false },
-        #     { id: 'Step B', lane: 1, active: false },
-        #     { id: 'Step C', lane: 0, active: true },
-        #     { id: 'Step D', lane: 2, active: false },
-        #     { id: 'Step E', lane: 3, active: false },
-        #     { id: 'Step F', lane: 4, active: false },
-
-        # ],
-        # links: [
-        #     { source: 'Step A', target: 'Step B', action: 'start' },
-        #     { source: 'Step B', target: 'Step A', action: 'reject' },
-        #     { source: 'Step B', target: 'Step C', action: 'accept' },
-        #     { source: 'Step C', target: 'Step D', action: 'process' },
-        #     { source: 'Step D', target: 'Step E', action: 'finalize' },
-        #     { source: 'Step E', target: 'Step F', action: 'confirmed' },
-        #     { source: 'Step E', target: 'Step C', action: 'reopended' }
-        # ]
-
+      else
+        raise Discourse::NotFound
       end
     end
   end
