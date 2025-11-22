@@ -4,27 +4,32 @@ module DiscourseWorkflow
   class AiActions
     def transition_all
       DiscourseWorkflow::WorkflowState
-        .includes(:topic, workflow_step: { workflow_step_options: :workflow_option })
+        .includes(
+          :topic,
+          workflow_step: {
+            workflow_step_options: :workflow_option
+          }
+        )
         .find_each do |workflow_state|
+          step = workflow_state.workflow_step
+          next unless step
 
-        step = workflow_state.workflow_step
-        next unless step
+          # skip if AI not enabled or no options
+          next unless step.ai_enabled
+          next if step.workflow_step_options.empty?
 
-        # skip if AI not enabled or no options
-        next unless step.ai_enabled
-        next if step.workflow_step_options.empty?
-
-        ai_transition(workflow_state)
-      end
+          ai_transition(workflow_state)
+        end
     end
 
     def ai_transition(workflow_state)
-      step  = workflow_state.workflow_step
+      step = workflow_state.workflow_step
       topic = workflow_state.topic
       return unless step && topic
 
-      client        = OpenAI::Client.new(access_token: SiteSetting.workflow_openai_api_key)
-      model_name    = SiteSetting.workflow_ai_model
+      client =
+        OpenAI::Client.new(access_token: SiteSetting.workflow_openai_api_key)
+      model_name = SiteSetting.workflow_ai_model
       system_prompt = SiteSetting.workflow_ai_prompt_system
       base_user_prompt = step.ai_prompt
 
@@ -32,9 +37,7 @@ module DiscourseWorkflow
 
       # get option slugs for this step
       options =
-        step.workflow_step_options
-            .map { |o| o.workflow_option&.slug }
-            .compact
+        step.workflow_step_options.map { |o| o.workflow_option&.slug }.compact
 
       return if options.empty?
 
@@ -43,17 +46,18 @@ module DiscourseWorkflow
 
       messages = [
         { role: "system", content: system_prompt },
-        { role: "user",   content: user_prompt }
+        { role: "user", content: user_prompt }
       ]
 
-      response = client.chat(
-        parameters: {
-          model:       model_name,
-          messages:    messages,
-          max_tokens:  8,
-          temperature: 0.1
-        }
-      )
+      response =
+        client.chat(
+          parameters: {
+            model: model_name,
+            messages: messages,
+            max_tokens: 8,
+            temperature: 0.1
+          }
+        )
 
       if response["error"]
         begin
