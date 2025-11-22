@@ -45,6 +45,7 @@ module DiscourseWorkflow
         steps.each do |step|
           step.workflow_step_options.each do |option|
             target_step = steps_by_id[option.target_step_id]
+            next unless target_step # Skip if target step is not in this workflow
 
             links << {
               source: step.name,
