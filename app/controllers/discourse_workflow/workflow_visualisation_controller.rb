@@ -23,22 +23,25 @@ module DiscourseWorkflow
         # Lanes: unique categories in order of step position
         lanes = steps.map do |step|
           category = categories_by_id[step.category_id]
+          next unless category
+
           {
             name: category.name,
             link: "/c/#{step.category_id}"
           }
-        end.uniq { |lane| lane[:name] }
+        end.compact.uniq { |lane| lane[:name] }
 
         # Nodes: one per step
         nodes = steps.map do |step|
-          category_name = categories_by_id[step.category_id].name
+          category = categories_by_id[step.category_id]
+          next unless category
 
           {
             id: step.name,
-            lane: lanes.find_index { |lane| lane[:name] == category_name },
+            lane: lanes.find_index { |lane| lane[:name] == category.name },
             active: step.id == workflow_state.workflow_step_id
           }
-        end
+        end.compact
 
         # Links: from each step via its options
         links = []
