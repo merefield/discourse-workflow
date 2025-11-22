@@ -16,12 +16,9 @@ module DiscourseWorkflow
         # Preload steps + options (and their workflow_option) to avoid extra queries when iterating
         steps = workflow.workflow_steps.order(:position).includes(workflow_step_options: :workflow_option)
 
-        # Build a hash of category_id => category to avoid N+1 queries
-        category_ids = steps.filter_map(&:category_id).uniq
+        # Build category lookup hash to avoid N+1 queries
+        category_ids = steps.map(&:category_id).compact.uniq
         categories_by_id = Category.where(id: category_ids).index_by(&:id)
-
-        # Build a hash of step_id => step for quick lookups in links
-        steps_by_id = steps.index_by(&:id)
 
         # Lanes: unique categories in order of step position
         lanes = steps.map do |step|
