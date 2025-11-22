@@ -54,6 +54,9 @@ module DiscourseWorkflow
         # Links: from each step via its options
         links = []
 
+        # Build a hash of step_id => step to avoid N+1 queries
+        steps_by_id = steps.index_by(&:id)
+
         steps.each do |step|
           step.workflow_step_options.each do |option|
             target_step = steps_by_id[option.target_step_id]
