@@ -4,7 +4,7 @@ module DiscourseWorkflow
   class AiActions
     def transition_all
       DiscourseWorkflow::WorkflowState
-        .includes(workflow_step: { workflow_step_options: :workflow_option }, :topic)
+        .includes(:topic, workflow_step: { workflow_step_options: :workflow_option })
         .find_each do |workflow_state|
 
         step = workflow_state.workflow_step
