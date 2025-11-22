@@ -41,7 +41,6 @@ module DiscourseWorkflow
             user     = User.find(user_id)
             username = user.username
           else
-            user     = nil
             user_id  = -1
             username = "system"
           end
