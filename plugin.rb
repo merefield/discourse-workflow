@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 # name: discourse-workflow
 # about: A topic-based workflow engine for Discourse
-# version: 0.0.17
+# version: 0.1.0
 # authors: Robert Barrow
 # contact_emails: robert@pavilion.tech
 # url: https://github.com/merefield/discourse-workflow
@@ -149,11 +149,15 @@ after_initialize do
   add_to_serializer(
     :topic_view,
     :workflow_step_options,
-    include_condition: -> { object.topic.workflow_step_options.present? }
+    include_condition: -> {
+      @workflow_step_options ||= object.topic.workflow_step_options
+      @workflow_step_options.present?
+    }
   ) do
     begin
       scope.ensure_can_create_topic_on_category!(self.category_id)
-      object.topic.workflow_step_options
+      @workflow_step_options ||= object.topic.workflow_step_options
+      @workflow_step_options
     rescue Discourse::InvalidAccess
       nil
     end
