@@ -16,8 +16,7 @@ export default class AdminPluginsShowDiscourseWorkflowWorkflowStepOptionsEdit ex
     const workflowOptions = await this.store.findAll("workflow-option");
     controller.set("workflowOptions", workflowOptions.content);
 
-    const workflow_id =
-      this.router.currentRoute.parent.parent.params.workflow_id;
+    const workflow_id = model.workflow_id;
     const workflowSteps = await this.store.findAll("workflow-step", {
       workflow_id,
     });

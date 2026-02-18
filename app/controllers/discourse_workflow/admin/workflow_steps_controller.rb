@@ -94,7 +94,19 @@ module DiscourseWorkflow
       end
 
       def workflow_step_params
-        params.require(:workflow_step).permit(:workflow_id, :position, :name, :description, :category_id, :ai_enabled, :ai_prompt, :other_attributes...)
+        params
+          .require(:workflow_step)
+          .permit(
+            :workflow_id,
+            :position,
+            :name,
+            :description,
+            :category_id,
+            :ai_enabled,
+            :ai_prompt,
+            :overdue_days,
+            :other_attributes...,
+          )
       end
 
       def ensure_admin

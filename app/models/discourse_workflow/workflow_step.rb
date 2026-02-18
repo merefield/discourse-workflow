@@ -9,6 +9,12 @@ module ::DiscourseWorkflow
 
     validates :category_id, presence: true
     validates :name, presence: true
+    validates :overdue_days,
+              numericality: {
+                only_integer: true,
+                greater_than_or_equal_to: 0,
+                allow_nil: true,
+              }
   end
 end
 
@@ -25,6 +31,7 @@ end
 #  description :text
 #  ai_enabled  :boolean          default(FALSE)
 #  ai_prompt   :text
+#  overdue_days :integer
 #  created_at  :datetime         not null
 #  updated_at  :datetime         not null
 #

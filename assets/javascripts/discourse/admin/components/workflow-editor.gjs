@@ -22,7 +22,6 @@ export default class WorkflowEditor extends Component {
   @service store;
   @service dialog;
   @service toasts;
-  @service siteSettings;
 
   @tracked isSaving = false;
   @tracked editingModel = null;
@@ -104,6 +103,39 @@ export default class WorkflowEditor extends Component {
     return this.args.workflow.id > 0;
   }
 
+  validationWarningMessage(warning) {
+    const code = warning.code;
+
+    if (code === "duplicate_step_positions") {
+      return i18n(
+        "admin.discourse_workflow.workflows.validation.duplicate_step_positions",
+        {
+          positions: (warning.positions || []).join(", "),
+        }
+      );
+    }
+
+    if (code === "orphan_target_steps") {
+      return i18n(
+        "admin.discourse_workflow.workflows.validation.orphan_target_steps",
+        {
+          count: (warning.option_ids || []).length,
+        }
+      );
+    }
+
+    if (code === "missing_option_labels") {
+      return i18n(
+        "admin.discourse_workflow.workflows.validation.missing_option_labels",
+        {
+          slugs: (warning.slugs || []).join(", "),
+        }
+      );
+    }
+
+    return code;
+  }
+
   #sortWorkflows() {
     const sorted = this.args.workflows.toArray().sort((a, b) => {
       return a.name.localeCompare(b.name);
@@ -136,6 +168,18 @@ export default class WorkflowEditor extends Component {
       {{didUpdate this.updateModel @model.id}}
       {{didInsert this.updateModel @model.id}}
     >
+      {{#if @workflow.validation_warnings.length}}
+        <div class="control-group workflow-editor__validation-warnings">
+          <label>{{i18n
+              "admin.discourse_workflow.workflows.validation.title"
+            }}</label>
+          <ul>
+            {{#each @workflow.validation_warnings as |warning|}}
+              <li>{{this.validationWarningMessage warning}}</li>
+            {{/each}}
+          </ul>
+        </div>
+      {{/if}}
       <div class="control-group">
         <DToggleSwitch
           class="workflow-editor__enabled"
@@ -162,6 +206,19 @@ export default class WorkflowEditor extends Component {
           @value={{this.editingModel.description}}
           disabled={{this.editingModel.system}}
         />
+      </div>
+      <div class="control-group">
+        <label>{{I18n.t
+            "admin.discourse_workflow.workflows.overdue_days"
+          }}</label>
+        <Input
+          class="workflow-editor__overdue-days"
+          @type="number"
+          min="0"
+          @value={{this.editingModel.overdue_days}}
+          disabled={{this.editingModel.system}}
+        />
+        <p>{{i18n "admin.discourse_workflow.workflows.overdue_days_help"}}</p>
       </div>
       {{#if this.showSteps}}
         <div class="control-group">

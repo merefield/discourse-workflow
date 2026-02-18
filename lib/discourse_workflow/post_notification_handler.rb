@@ -21,8 +21,10 @@ module DiscourseWorkflow
       return false if post.topic.blank?
       return false if post.topic.private_message?
       return false if !post.topic.is_workflow_topic?
+      return false if !post.is_first_post?
 
       workflow_state = DiscourseWorkflow::WorkflowState.find_by(topic_id: post.topic.id)
+      return false if workflow_state.blank?
 
       data = {
         topic_id: post.topic_id,
@@ -33,7 +35,12 @@ module DiscourseWorkflow
         topic_title: post.topic.title
       }
 
-      ::CategoryUser.where(notification_level: WATCHING_FIRST_POST).each do |category_user|
+      ::CategoryUser
+        .where(
+          notification_level: WATCHING_FIRST_POST,
+          category_id: post.topic.category_id,
+        )
+        .each do |category_user|
         # PostAlerter.create_notification handles many edge cases, such as
         # muting, ignoring, double notifications etc.
         user = category_user.user

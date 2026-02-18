@@ -38,4 +38,13 @@ describe ::DiscourseWorkflow::Transition do
   it "updates the topic with a small action Post" do
     expect { transition.transition(user.id, topic, option_1.slug) }.to change { ::Post.where(topic_id: topic.id).count }.by(1)
   end
+
+  it "writes a transition action that includes from and to step names" do
+    transition.transition(user.id, topic, option_1.slug)
+
+    small_action_post =
+      Post.where(topic_id: topic.id, post_type: Post.types[:small_action]).order(:id).last
+    expect(small_action_post.raw).to include(step_1.name)
+    expect(small_action_post.raw).to include(step_2.name)
+  end
 end

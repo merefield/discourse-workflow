@@ -43,8 +43,8 @@ option_fixtures = [
     updated_at: Time.now
   },
   {
-    name: 'Poor',
-    slug: 'poor',
+    name: 'Bad',
+    slug: 'bad',
     created_at: Time.now,
     updated_at: Time.now
   },
@@ -67,8 +67,8 @@ option_fixtures = [
     updated_at: Time.now
   },
   {
-    name: 'Previous',
-    slug: 'previous',
+    name: 'Back',
+    slug: 'back',
     created_at: Time.now,
     updated_at: Time.now
   },
