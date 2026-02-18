@@ -70,7 +70,7 @@ Resolution order is `step -> workflow -> global`. A value of `0` means overdue b
 
 ### AI actions
 
-You can leverage AI to handle a step. You need a valid OpenAI key in settings, AI enabled on the step, and a prompt including both `{{options}}` and `{{topic}}`.
+You can leverage AI to handle a step. You need `workflow_openai_api_key`, AI enabled on the step, and a prompt including both `{{options}}` and `{{topic}}`. You can also tune behavior with `workflow_ai_model` and `workflow_ai_prompt_system`.
 
 Example prompt:
 
