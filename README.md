@@ -143,22 +143,27 @@ Status legend:
 - `Planned`: supported by architecture direction but not shipped yet
 - `Missing`: not yet represented as a first-class capability
 
-| Area        | Capability                                                    | Status      | Notes                                                              |
-| ----------- | ------------------------------------------------------------- | ----------- | ------------------------------------------------------------------ |
-| Definition  | Workflow definitions (steps/options mapped to categories)     | Implemented | Core admin CRUD is available                                       |
-| Runtime     | Topic transitions with audit posts                            | Implemented | Transition actions are logged in-topic                             |
-| Discovery   | Workflow list with quick filters and step filtering           | Implemented | `/workflow` includes semantic quick filters                        |
-| SLA         | Overdue thresholds (step -> workflow -> global, `0` disables) | Implemented | Includes overdue list indicator                                    |
-| Permissions | Native Discourse category permissions for acting/commenting   | Implemented | Transition authority still aligns with category create access      |
-| Permissions | Step/action-level transition permissions                      | Partial     | Not yet first-class as separate policy from category create access |
-| Validation  | Transition preconditions (required tags/fields/checks)        | Planned     | Intended as optional guardrails before transitions                 |
-| SLA         | Escalation/reminder notifications                             | Partial     | Overdue visibility exists; automated escalation is next            |
-| Ownership   | Discourse Assign integration                                  | Planned     | Target is step-entry assignment and auditable ownership changes    |
-| Operations  | Bulk workflow transitions from list views                     | Missing     | High-volume queue operation not yet first-class                    |
-| Reporting   | Built-in workflow analytics dashboards                        | Partial     | Data Explorer support exists; admin-native reporting is next       |
-| Lifecycle   | Import/export/version workflow definitions                    | Missing     | Useful for staging->production promotion and rollback              |
-| Integration | Event hooks / webhooks / automation integration               | Planned     | Transition and step events are good integration points             |
-| AI          | Guardrailed AI-assisted transitions                           | Partial     | Present but should tighten confidence/fallback/audit behavior      |
+Permissioning principle:
+
+- The plugin intentionally reuses core Discourse category permissions as the default and preferred model.
+- Finer-grained step/action permission controls are lower priority so the workflow system stays simple to operate, easy for admins to reason about, and close to standard Discourse behavior.
+
+| Area        | Capability                                                    | Status      | Notes                                                                      |
+| ----------- | ------------------------------------------------------------- | ----------- | -------------------------------------------------------------------------- |
+| Definition  | Workflow definitions (steps/options mapped to categories)     | Implemented | Core admin CRUD is available                                               |
+| Runtime     | Topic transitions with audit posts                            | Implemented | Transition actions are logged in-topic                                     |
+| Discovery   | Workflow list with quick filters and step filtering           | Implemented | `/workflow` includes semantic quick filters                                |
+| SLA         | Overdue thresholds (step -> workflow -> global, `0` disables) | Implemented | Includes overdue list indicator                                            |
+| Permissions | Native Discourse category permissions for acting/commenting   | Implemented | Transition authority still aligns with category create access              |
+| Permissions | Step/action-level transition permissions                      | Partial     | Deliberately lower priority to preserve simple, core-aligned permissioning |
+| Validation  | Transition preconditions (required tags/fields/checks)        | Planned     | Intended as optional guardrails before transitions                         |
+| SLA         | Escalation/reminder notifications                             | Partial     | Overdue visibility exists; automated escalation is next                    |
+| Ownership   | Discourse Assign integration                                  | Planned     | Target is step-entry assignment and auditable ownership changes            |
+| Operations  | Bulk workflow transitions from list views                     | Missing     | High-volume queue operation not yet first-class                            |
+| Reporting   | Built-in workflow analytics dashboards                        | Partial     | Data Explorer support exists; admin-native reporting is next               |
+| Lifecycle   | Import/export/version workflow definitions                    | Missing     | Useful for staging->production promotion and rollback                      |
+| Integration | Event hooks / webhooks / automation integration               | Planned     | Transition and step events are good integration points                     |
+| AI          | Guardrailed AI-assisted transitions                           | Partial     | Present but should tighten confidence/fallback/audit behavior              |
 
 ### Priority Roadmap
 
@@ -166,3 +171,4 @@ Status legend:
 2. Add escalation automation (reminders/alerts) on top of existing overdue thresholds.
 3. Add first-class reporting and assignment integration for operational workflows.
 4. Add definition lifecycle tooling (import/export/versioning) for safe environment promotion.
+5. Keep advanced step/action permission granularity as a lower-priority enhancement to avoid unnecessary complexity versus native Discourse permissioning.
