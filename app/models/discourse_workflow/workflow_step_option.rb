@@ -2,7 +2,7 @@
 
 module ::DiscourseWorkflow
   class WorkflowStepOption < ActiveRecord::Base
-    self.table_name = 'workflow_step_options'
+    self.table_name = "workflow_step_options"
     belongs_to :workflow_step
     belongs_to :workflow_option
   end
@@ -16,7 +16,7 @@ end
 #  position           :integer
 #  created_at         :datetime         not null
 #  updated_at         :datetime         not null
-#  target_step_id     :integer
+#  target_step_id     :bigint
 #  workflow_option_id :bigint
 #  workflow_step_id   :bigint
 #
