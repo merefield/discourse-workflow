@@ -5,7 +5,6 @@
 # core. Used for notifying users that their chat message
 # has been quoted in a post.
 module DiscourseWorkflow
-
   WATCHING_FIRST_POST = 4
 
   class PostNotificationHandler
@@ -23,7 +22,8 @@ module DiscourseWorkflow
       return false if !post.topic.is_workflow_topic?
       return false if !post.is_first_post?
 
-      workflow_state = DiscourseWorkflow::WorkflowState.find_by(topic_id: post.topic.id)
+      workflow_state =
+        DiscourseWorkflow::WorkflowState.find_by(topic_id: post.topic.id)
       return false if workflow_state.blank?
 
       data = {
@@ -38,7 +38,7 @@ module DiscourseWorkflow
       ::CategoryUser
         .where(
           notification_level: WATCHING_FIRST_POST,
-          category_id: post.topic.category_id,
+          category_id: post.topic.category_id
         )
         .each do |category_user|
           # PostAlerter.create_notification handles many edge cases, such as
@@ -47,7 +47,7 @@ module DiscourseWorkflow
           user.notifications.create!(
             notification_type: ::Notification.types[:workflow_topic_arrival],
             high_priority: true,
-            data: data.to_json,
+            data: data.to_json
           )
         end
     end
