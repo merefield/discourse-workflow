@@ -16,7 +16,7 @@ end
 #  position           :integer
 #  created_at         :datetime         not null
 #  updated_at         :datetime         not null
-#  target_step_id     :bigint
+#  target_step_id     :integer
 #  workflow_option_id :bigint
 #  workflow_step_id   :bigint
 #

@@ -22,18 +22,18 @@ end
 #
 # Table name: workflow_steps
 #
-#  id          :bigint           not null, primary key
-#  workflow_id :bigint
-#  category_id :bigint
-#  position    :integer
-#  slug        :string
-#  name        :string
-#  description :text
-#  ai_enabled  :boolean          default(FALSE)
-#  ai_prompt   :text
+#  id           :bigint           not null, primary key
+#  ai_enabled   :boolean          default(FALSE)
+#  ai_prompt    :text
+#  description  :text
+#  name         :string
 #  overdue_days :integer
-#  created_at  :datetime         not null
-#  updated_at  :datetime         not null
+#  position     :integer
+#  slug         :string
+#  created_at   :datetime         not null
+#  updated_at   :datetime         not null
+#  category_id  :bigint
+#  workflow_id  :bigint
 #
 # Indexes
 #

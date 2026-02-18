@@ -103,12 +103,12 @@ end
 #
 # Table name: workflows
 #
-#  id          :bigint           not null, primary key
-#  slug        :string
-#  name        :string
-#  description :text
-#  enabled     :boolean          default(TRUE)
+#  id           :bigint           not null, primary key
+#  description  :text
+#  enabled      :boolean          default(TRUE)
+#  name         :string
 #  overdue_days :integer
-#  created_at  :datetime         not null
-#  updated_at  :datetime         not null
+#  slug         :string
+#  created_at   :datetime         not null
+#  updated_at   :datetime         not null
 #
