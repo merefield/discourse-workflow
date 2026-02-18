@@ -9,6 +9,12 @@ module ::DiscourseWorkflow
 
     validates :category_id, presence: true
     validates :name, presence: true
+    validates :overdue_days,
+              numericality: {
+                only_integer: true,
+                greater_than_or_equal_to: 0,
+                allow_nil: true,
+              }
   end
 end
 
@@ -16,17 +22,18 @@ end
 #
 # Table name: workflow_steps
 #
-#  id          :bigint           not null, primary key
-#  workflow_id :bigint
-#  category_id :bigint
-#  position    :integer
-#  slug        :string
-#  name        :string
-#  description :text
-#  ai_enabled  :boolean          default(FALSE)
-#  ai_prompt   :text
-#  created_at  :datetime         not null
-#  updated_at  :datetime         not null
+#  id           :bigint           not null, primary key
+#  ai_enabled   :boolean          default(FALSE)
+#  ai_prompt    :text
+#  description  :text
+#  name         :string
+#  overdue_days :integer
+#  position     :integer
+#  slug         :string
+#  created_at   :datetime         not null
+#  updated_at   :datetime         not null
+#  category_id  :bigint
+#  workflow_id  :bigint
 #
 # Indexes
 #

@@ -1,5 +1,7 @@
 import SortableColumn from "discourse/components/topic-list/header/sortable-column";
+import { addDiscoveryQueryParam } from "discourse/controllers/discovery/list";
 import { withPluginApi } from "discourse/lib/plugin-api";
+import { i18n } from "discourse-i18n";
 import WorkflowNameLink from "./../components/workflow-name-link";
 
 const WORKFLOW_LIST_ROUTES = ["discovery.workflow"];
@@ -70,13 +72,46 @@ const workflowStepNameCell = <template>
   </td>
 </template>;
 
+const workflowOverdueHeader = <template>
+  <th class="topic-list-data workflow-overdue-column">
+    {{i18n "workflow-overdue"}}
+  </th>
+</template>;
+
+const workflowOverdueCell = <template>
+  <td class="workflow-overdue">
+    {{#if @topic.workflow_overdue}}
+      <span class="workflow-overdue-indicator">{{i18n
+          "discourse_workflow.overdue_indicator"
+        }}</span>
+    {{/if}}
+  </td>
+</template>;
+
 export default {
   name: "discourse-workflow-initializer",
 
   initialize(container) {
     const router = container.lookup("service:router");
 
-    withPluginApi("1.39.0", (api) => {
+    addDiscoveryQueryParam("my_categories", {
+      replace: true,
+      refreshModel: true,
+    });
+    addDiscoveryQueryParam("overdue_days", {
+      replace: true,
+      refreshModel: true,
+    });
+    addDiscoveryQueryParam("overdue", {
+      replace: true,
+      refreshModel: true,
+    });
+    addDiscoveryQueryParam("workflow_step_position", {
+      replace: true,
+      refreshModel: true,
+    });
+
+    withPluginApi((api) => {
       api.addAdminPluginConfigurationNav("discourse-workflow", [
         {
           label: "admin.discourse_workflow.workflows.title",
@@ -132,6 +167,20 @@ export default {
               header: workflowStepNameHeader,
               item: workflowStepNameCell,
               after: "workflow-step-position",
+            });
+          }
+          return columns;
+        }
+      );
+
+      api.registerValueTransformer(
+        "topic-list-columns",
+        ({ value: columns }) => {
+          if (WORKFLOW_LIST_ROUTES.includes(router.currentRouteName)) {
+            columns.add("workflow-overdue", {
+              header: workflowOverdueHeader,
+              item: workflowOverdueCell,
+              after: "workflow-step-name",
             });
           }
           return columns;

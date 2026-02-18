@@ -12,19 +12,16 @@ import DButton from "discourse/components/d-button";
 import Textarea from "discourse/components/d-textarea";
 import DToggleSwitch from "discourse/components/d-toggle-switch";
 import { popupAjaxError } from "discourse/lib/ajax-error";
+import CategoryChooser from "discourse/select-kit/components/category-chooser";
+import not from "discourse/truth-helpers/helpers/not";
 import I18n, { i18n } from "discourse-i18n";
-import CategoryChooser from "select-kit/components/category-chooser";
-import not from "truth-helpers/helpers/not";
 import WorkflowBackButton from "./workflow-back-button";
 import WorkflowStepOptionListEditor from "./workflow-step-option-list-editor";
 
 export default class WorkflowStepEditor extends Component {
-  @service adminPluginNavManager;
   @service router;
-  @service store;
   @service dialog;
   @service toasts;
-  @service siteSettings;
 
   @tracked isSaving = false;
   @tracked editingModel = null;
@@ -175,6 +172,21 @@ export default class WorkflowStepEditor extends Component {
           @value={{this.editingModel.description}}
           disabled={{this.editingModel.system}}
         />
+      </div>
+      <div class="control-group">
+        <label>{{I18n.t
+            "admin.discourse_workflow.workflows.steps.overdue_days"
+          }}</label>
+        <Input
+          class="workflow-step-editor__overdue-days"
+          @type="number"
+          min="0"
+          @value={{this.editingModel.overdue_days}}
+          disabled={{this.editingModel.system}}
+        />
+        <p>{{i18n
+            "admin.discourse_workflow.workflows.steps.overdue_days_help"
+          }}</p>
       </div>
       <div class="control-group">
         <DToggleSwitch

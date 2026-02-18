@@ -4,7 +4,7 @@ import { i18n } from "discourse-i18n";
 export default class AdminPluginsShowDiscourseWorkflowWorkflowStepOptions extends DiscourseRoute {
   async model(params) {
     const workflowSteps = this.modelFor(
-      "admin.plugins.show.discourse-workflow.workflows.steps"
+      "adminPlugins.show.discourse-workflow-workflows-steps"
     );
     const id = parseInt(params.step_id, 10);
     const workflowStep = workflowSteps.findBy("id", id);

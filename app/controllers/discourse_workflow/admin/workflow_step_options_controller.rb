@@ -42,7 +42,11 @@ module DiscourseWorkflow
           if WorkflowStepOption.count == 0 || WorkflowStepOption.where(workflow_step_id: workflow_step_option.workflow_step_id).count == 0
             workflow_step_option.position = 1
           else
-            workflow_step_option.position = WorkflowStepOption..where(workflow_step_id: workflow_step_option.workflow_step_id).maximum(:position) + 1
+            workflow_step_option.position =
+              WorkflowStepOption
+                .where(workflow_step_id: workflow_step_option.workflow_step_id)
+                .maximum(:position)
+                .to_i + 1
           end
         end
         if workflow_step_option.save

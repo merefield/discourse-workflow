@@ -1,6 +1,6 @@
 import RestModel from "discourse/models/rest";
 
-const CREATE_ATTRIBUTES = ["name", "description", "enabled"];
+const CREATE_ATTRIBUTES = ["name", "description", "enabled", "overdue_days"];
 
 export default class Workflow extends RestModel {
   updateProperties() {

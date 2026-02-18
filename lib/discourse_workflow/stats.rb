@@ -10,7 +10,7 @@ module DiscourseWorkflow
       ::DiscourseWorkflow::WorkflowStat.where(cob_date: current_date).destroy_all
 
       Workflow.all.each do |workflow|
-        workflow.workflow_state.each do |state|
+        workflow.workflow_states.each do |state|
           stat = ::DiscourseWorkflow::WorkflowStat.find_or_initialize_by(
             cob_date: current_date,
             workflow_id: workflow.id,

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 # name: discourse-workflow
 # about: A topic-based workflow engine for Discourse
-# version: 0.1.0
+# version: 0.2.0
 # authors: Robert Barrow
 # contact_emails: robert@pavilion.tech
 # url: https://github.com/merefield/discourse-workflow
@@ -116,6 +116,64 @@ after_initialize do
       .map { |wso| wso.workflow_option.slug }
   end
 
+  add_to_class(:topic, :workflow_step_actions) do
+    step = workflow_state&.workflow_step
+    return [] unless step
+
+    step_options =
+      step
+        .workflow_step_options
+        .includes(:workflow_option)
+        .order(:position)
+
+    target_steps =
+      DiscourseWorkflow::WorkflowStep
+        .where(id: step_options.map(&:target_step_id).compact.uniq)
+        .index_by(&:id)
+
+    step_options.map do |workflow_step_option|
+      option = workflow_step_option.workflow_option
+      target_step = target_steps[workflow_step_option.target_step_id]
+
+      {
+        slug: option&.slug,
+        option_name: option&.name,
+        target_step_name: target_step&.name,
+        target_step_position: target_step&.position
+      }
+    end
+  end
+
+  add_to_class(:topic, :workflow_step_entered_at) do
+    workflow_state&.updated_at
+  end
+
+  add_to_class(:topic, :workflow_overdue_days_threshold) do
+    state = workflow_state
+    return nil if state.blank?
+
+    step_overdue_days = state.workflow_step&.overdue_days
+    workflow_overdue_days = state.workflow&.overdue_days
+
+    if !step_overdue_days.nil?
+      step_overdue_days.to_i
+    elsif !workflow_overdue_days.nil?
+      workflow_overdue_days.to_i
+    else
+      SiteSetting.workflow_overdue_days_default.to_i
+    end
+  end
+
+  add_to_class(:topic, :workflow_overdue) do
+    threshold_days = workflow_overdue_days_threshold
+    return false if threshold_days.blank? || threshold_days <= 0
+
+    entered_at = workflow_step_entered_at
+    return false if entered_at.blank?
+
+    entered_at <= threshold_days.days.ago
+  end
+
   add_to_serializer(
     :topic_view,
     :workflow_slug,
@@ -154,14 +212,39 @@ after_initialize do
       @workflow_step_options.present?
     }
   ) do
+    @workflow_step_options ||= object.topic.workflow_step_options
+    @workflow_step_options
+  end
+
+  add_to_serializer(
+    :topic_view,
+    :workflow_step_actions,
+    include_condition: -> {
+      @workflow_step_actions ||= object.topic.workflow_step_actions
+      @workflow_step_actions.present?
+    }
+  ) do
+    @workflow_step_actions ||= object.topic.workflow_step_actions
+  end
+
+  add_to_serializer(
+    :topic_view,
+    :workflow_can_act,
+    include_condition: -> { object.topic.workflow_name.present? }
+  ) do
     begin
-      scope.ensure_can_create_topic_on_category!(self.category_id)
-      @workflow_step_options ||= object.topic.workflow_step_options
-      @workflow_step_options
+      scope.ensure_can_create_topic_on_category!(object.topic.category_id)
+      true
     rescue Discourse::InvalidAccess
-      nil
+      false
     end
   end
+
+  add_to_serializer(
+    :topic_view,
+    :workflow_step_entered_at,
+    include_condition: -> { object.topic.workflow_step_entered_at.present? }
+  ) { object.topic.workflow_step_entered_at }
 
   add_to_serializer(
     :topic_list_item,
@@ -181,15 +264,24 @@ after_initialize do
     include_condition: -> { object.workflow_step_name.present? }
   ) { object.workflow_step_name }
 
+  add_to_serializer(
+    :topic_list_item,
+    :workflow_overdue,
+    include_condition: -> { object.workflow_name.present? }
+  ) { object.workflow_overdue }
+
   on(:topic_created) do |*params|
     topic, opts = params
 
     if SiteSetting.workflow_enabled
       workflow_step =
-        DiscourseWorkflow::WorkflowStep.find_by(
-          category_id: topic.category_id,
-          position: 1
-        )
+        DiscourseWorkflow::WorkflowStep
+          .joins(:workflow)
+          .find_by(
+            category_id: topic.category_id,
+            position: 1,
+            workflows: { enabled: true }
+          )
       if workflow_step
         DiscourseWorkflow::WorkflowState.create!(
           topic_id: topic.id,

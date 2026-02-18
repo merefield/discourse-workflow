@@ -7,6 +7,7 @@ const CREATE_ATTRIBUTES = [
   "name",
   "category_id",
   "description",
+  "overdue_days",
   "ai_enabled",
   "ai_prompt",
 ];

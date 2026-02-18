@@ -26,6 +26,7 @@ en:
     workflow-name: "Workflow"
     workflow-step-name:  "Step Name"  
     workflow-step-position: "Step"
+    workflow-overdue: "Overdue"
     filters:
       workflow:
         title: "Workflow"
@@ -37,9 +38,22 @@ en:
         step_title: "Step:"
         workflow_title: "Workflow:"
         step: "%{workflow_step_position}. %{workflow_step_name}"
+        step_age_less_than_day: "In this step for less than a day"
+        step_age_days:
+          one: "In this step for %{count} day"
+          other: "In this step for %{count} days"
         actions_intro: "Actions:"
+        transition_target: "-> %{target_step_name}"
+        blocked_reason_create_permission: "You can reply in this step, but only users with topic creation permission in this category can transition it."
         visualisation_button: "Visualise"
         visualisation_title: "Workflow: %{workflow_name}"
+      quick_filters:
+        my_categories: "My Categories"
+        overdue: "Overdue"
+        step_placeholder: "Step #"
+        apply_step: "Step = X"
+        clear: "Clear"
+      overdue_indicator: "Overdue"
       options:
         submit:
           button_label: "Submit"
@@ -99,6 +113,8 @@ en:
           enabled: "Enabled"
           name: "Name"
           description: "Description"
+          overdue_days: "Overdue Days Override"
+          overdue_days_help: "Blank uses the global default. 0 disables overdue behavior for this workflow."
           workflow:
             short_title: "Workflow"
             editing:
@@ -120,6 +136,8 @@ en:
             category: "Category"
             ai_enabled: "AI Enabled"
             ai_prompt: "AI Prompt"
+            overdue_days: "Step Overdue Days Override"
+            overdue_days_help: "Blank uses workflow/global defaults. 0 disables overdue behavior for this step."
             title: "Steps"
             new: "Add a New Step"
             none: "No steps have been added yet."
@@ -161,3 +179,8 @@ en:
           edit: "Edit"
           delete: "Delete"
           confirm_delete: "Are you sure you want to delete this workflow?"
+          validation:
+            title: "Validation Warnings"
+            duplicate_step_positions: "Duplicate step positions detected: %{positions}"
+            orphan_target_steps: "Some step options target missing steps (%{count} option entries affected)"
+            missing_option_labels: "Missing option button labels for slugs: %{slugs}"

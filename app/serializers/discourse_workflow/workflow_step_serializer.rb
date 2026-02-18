@@ -10,10 +10,14 @@ module DiscourseWorkflow
               :slug,
               :name,
               :description,
+              :overdue_days,
               :ai_enabled,
               :ai_prompt
 
-    has_many :workflow_step_option, serializer: WorkflowStepOptionSerializer, embed: :object, key: :workflow_step_options
+    has_many :workflow_step_options,
+             serializer: WorkflowStepOptionSerializer,
+             embed: :object,
+             key: :workflow_step_options
     has_one :category, serializer: CategorySerializer, embed: :object
 
     def category

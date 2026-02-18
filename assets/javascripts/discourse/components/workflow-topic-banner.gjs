@@ -20,6 +20,24 @@ export default class WorkflowButtonsComponent extends Component {
     });
   }
 
+  get stepAgeLabel() {
+    if (!this.args.workflow_step_entered_at) {
+      return null;
+    }
+
+    const enteredAt = new Date(this.args.workflow_step_entered_at);
+    const elapsedMs = Date.now() - enteredAt.getTime();
+    const elapsedDays = Math.floor(elapsedMs / (1000 * 60 * 60 * 24));
+
+    if (elapsedDays < 1) {
+      return i18n("discourse_workflow.topic_banner.step_age_less_than_day");
+    }
+
+    return i18n("discourse_workflow.topic_banner.step_age_days", {
+      count: elapsedDays,
+    });
+  }
+
   <template>
     {{#if @workflow_name}}
       {{bodyClass "workflow-topic"}}
@@ -43,23 +61,32 @@ export default class WorkflowButtonsComponent extends Component {
                 workflow_step_position=@workflow_step_position
                 workflow_step_name=@workflow_step_name
               }}</div>
-            <div class="workflow-action-button">
-              <DButton
-                class="btn-primary"
-                @icon="right-left"
-                @action={{this.showVisualisationModal}}
-                @label="discourse_workflow.topic_banner.visualisation_button"
-              />
-            </div>
+            {{#if this.stepAgeLabel}}
+              <div class="workflow-step-age-badge">{{this.stepAgeLabel}}</div>
+            {{/if}}
           </div>
           <div class="workflow-banner-section workflow-step-actions">
-            {{#if @workflow_step_options}}
+            {{#if @workflow_step_actions}}
               <WorkflowButtons
-                @workflow_step_options={{@workflow_step_options}}
+                @workflow_step_actions={{@workflow_step_actions}}
+                @workflow_can_act={{@workflow_can_act}}
                 @topic_id={{@topic_id}}
                 @category_id={{@category_id}}
               />
             {{/if}}
+            {{#unless @workflow_can_act}}
+              <div class="workflow-actions-blocked-reason">{{i18n
+                  "discourse_workflow.topic_banner.blocked_reason_create_permission"
+                }}</div>
+            {{/unless}}
+          </div>
+          <div class="workflow-action-button">
+            <DButton
+              class="btn-primary"
+              @icon="right-left"
+              @action={{this.showVisualisationModal}}
+              @label="discourse_workflow.topic_banner.visualisation_button"
+            />
           </div>
         </div>
       </div>

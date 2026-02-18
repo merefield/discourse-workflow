@@ -60,6 +60,7 @@ module DiscourseWorkflow
             :name,
             :description,
             :enabled,
+            :overdue_days,
           )
 
         permitted
