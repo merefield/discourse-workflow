@@ -41,15 +41,15 @@ module DiscourseWorkflow
           category_id: post.topic.category_id,
         )
         .each do |category_user|
-        # PostAlerter.create_notification handles many edge cases, such as
-        # muting, ignoring, double notifications etc.
-        user = category_user.user
-        user.notifications.create!(
-          notification_type: ::Notification.types[:workflow_topic_arrival],
-          high_priority: true,
-          data: data.to_json,
-        )
-      end
+          # PostAlerter.create_notification handles many edge cases, such as
+          # muting, ignoring, double notifications etc.
+          user = category_user.user
+          user.notifications.create!(
+            notification_type: ::Notification.types[:workflow_topic_arrival],
+            high_priority: true,
+            data: data.to_json,
+          )
+        end
     end
   end
 end
