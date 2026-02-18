@@ -9,6 +9,7 @@ Discuss the plugin here: https://meta.discourse.org/t/discourse-workflow/347110?
 A plugin which provides a secure workflow framework for Topics which are passed along a customizable set of steps until the workflow is complete. Some branching and looping is supported.
 
 If you are new to the terminology, see:
+
 - Workflow: https://en.wikipedia.org/wiki/Workflow
 - Business process: https://en.wikipedia.org/wiki/Business_process
 
@@ -100,7 +101,7 @@ You can hide Topics within a Category from specific groups in the normal way.
 
 ## Actions via Options
 
-These are defined for each step when setting up the Workflow.  Actors can choose to take any available action as each Option is presented as a button on the Topic.
+These are defined for each step when setting up the Workflow. Actors can choose to take any available action as each Option is presented as a button on the Topic.
 
 Actions on a Topic are captured in a Small Action Post to help users understand the journey of the Topic.
 
@@ -135,48 +136,33 @@ This is also accessible from the workflow fields on the Workflow Discovery Dashb
 
 ## Roadmap Themes
 
-- Step-level permissions and ownership: Keep category-based permissions as the default model, with optional finer-grained transition authorization where needed.
-  - Current Discourse-native behavior already supports comment/review without transition: users with `Reply` (but not `Create`) can participate without acting on workflow transitions.
-  - The gap appears when teams need to separate "can create new topics in this category" from "can transition existing workflow topics in this step."
-  - Some workflows also need action-level control (for example, allow `accept` but restrict `reject`) without restructuring category permissions.
-  - This should remain an advanced option layered on top of existing Discourse permissions, not a replacement.
-- Transition preconditions: Allow workflows to require conditions before transition (for example required tags, required fields, checklists, or validation rules).
-  - Why include this: many process steps depend on information completeness, and without guardrails topics can move forward with missing required data.
-  - Possible enhancement: define per-step transition rules using existing Discourse primitives (tags, topic custom fields, checklist completion, post template markers).
-  - Possible enhancement: return clear validation feedback in the action UI so users know exactly what must be completed before transition.
-  - Possible enhancement: support staff bypass/audit options for urgent exceptions without removing the default guardrails.
-- SLA and escalation workflows: Track time-in-step, surface ageing items, and support reminder/escalation notifications for stalled work.
-  - Why include this: operational teams need visibility into ageing work items and service commitments, not only current position in the workflow.
-  - Possible enhancement: persist timestamps for step entry/exit and compute time-in-step and overall cycle time.
-  - Possible enhancement: provide configurable thresholds per step (warning, breach) and notify responsible users/groups using Discourse notifications.
-  - Possible enhancement: expose SLA filters and badges in workflow topic lists so moderators can triage overdue items quickly.
-- Assignment integration: Deeper alignment with Discourse Assign to support queue ownership, automatic assignment on arrival, and reassignment patterns.
-  - Why include this: transitions and ownership are often coupled, and manual re-assignment at each step is repetitive and error-prone.
-  - Possible enhancement: auto-assign to a user/group when entering a step, with optional round-robin or fallback assignee behavior.
-  - Possible enhancement: support assignment rules per step while preserving existing Assign plugin UX and permissions.
-  - Possible enhancement: record assignment changes alongside workflow transition logs for a complete operational audit trail.
-- Bulk workflow operations: Support bulk transition and related moderation actions from workflow list views for high-volume operations.
-  - Why include this: high-volume queues become inefficient if every transition must be performed topic-by-topic.
-  - Possible enhancement: allow bulk selection in workflow discovery and apply a permitted transition action to all selected topics.
-  - Possible enhancement: include dry-run previews showing how many selected topics are eligible vs blocked by permissions/preconditions.
-  - Possible enhancement: combine with existing bulk moderation operations (tag, assign, close) for operational batching.
-- First-class reporting: Provide built-in workflow analytics (throughput, lead time, bottlenecks, reopen rates) beyond Data Explorer defaults.
-  - Why include this: Data Explorer is powerful but not always accessible or intuitive for non-technical admins.
-  - Possible enhancement: add an admin report screen with key workflow KPIs per period and per step.
-  - Possible enhancement: provide trend charts for throughput, average step duration, and backlog ageing using existing stats tables.
-  - Possible enhancement: include exportable CSV views so teams can share metrics externally without writing custom SQL.
-- Definition lifecycle tooling: Import/export and version workflow definitions to improve change control across environments.
-  - Why include this: workflows often need promotion across staging/production and controlled rollback when process definitions change.
-  - Possible enhancement: export/import workflow definitions as JSON including steps, options, and transition mappings.
-  - Possible enhancement: store definition versions and show effective history for auditability and safer iterative changes.
-  - Possible enhancement: validate imported definitions against current category/tag/site settings before applying.
-- Event hooks and automations: Add automation/webhook hooks for step entry, step exit, and transitions to integrate with broader Discourse workflows.
-  - Why include this: workflow transitions are high-value events that often need to trigger actions outside the plugin itself.
-  - Possible enhancement: publish plugin events (step_entered, step_exited, transition_performed) with stable payloads.
-  - Possible enhancement: provide first-class integration points for Discourse Automation recipes and outbound webhooks.
-  - Possible enhancement: support idempotency keys/audit references so downstream systems can process events safely.
-- Guardrailed AI transitions: Improve reliability with stricter option parsing, confidence/fallback handling, and stronger audit visibility for AI-driven actions.
-  - Why include this: AI-assisted routing is useful, but incorrect transitions can be costly without safeguards and observability.
-  - Possible enhancement: enforce strict option matching/parsing and reject responses that do not map cleanly to configured transition slugs.
-  - Possible enhancement: add confidence thresholds and optional human-review fallback for low-confidence decisions.
-  - Possible enhancement: log prompts, model outputs, and selected transitions in a dedicated audit stream (with privacy controls).
+Status legend:
+
+- `Implemented`: shipped and production-usable
+- `Partial`: available in a limited form; still needs first-class completion
+- `Planned`: supported by architecture direction but not shipped yet
+- `Missing`: not yet represented as a first-class capability
+
+| Area        | Capability                                                    | Status      | Notes                                                              |
+| ----------- | ------------------------------------------------------------- | ----------- | ------------------------------------------------------------------ |
+| Definition  | Workflow definitions (steps/options mapped to categories)     | Implemented | Core admin CRUD is available                                       |
+| Runtime     | Topic transitions with audit posts                            | Implemented | Transition actions are logged in-topic                             |
+| Discovery   | Workflow list with quick filters and step filtering           | Implemented | `/workflow` includes semantic quick filters                        |
+| SLA         | Overdue thresholds (step -> workflow -> global, `0` disables) | Implemented | Includes overdue list indicator                                    |
+| Permissions | Native Discourse category permissions for acting/commenting   | Implemented | Transition authority still aligns with category create access      |
+| Permissions | Step/action-level transition permissions                      | Partial     | Not yet first-class as separate policy from category create access |
+| Validation  | Transition preconditions (required tags/fields/checks)        | Planned     | Intended as optional guardrails before transitions                 |
+| SLA         | Escalation/reminder notifications                             | Partial     | Overdue visibility exists; automated escalation is next            |
+| Ownership   | Discourse Assign integration                                  | Planned     | Target is step-entry assignment and auditable ownership changes    |
+| Operations  | Bulk workflow transitions from list views                     | Missing     | High-volume queue operation not yet first-class                    |
+| Reporting   | Built-in workflow analytics dashboards                        | Partial     | Data Explorer support exists; admin-native reporting is next       |
+| Lifecycle   | Import/export/version workflow definitions                    | Missing     | Useful for staging->production promotion and rollback              |
+| Integration | Event hooks / webhooks / automation integration               | Planned     | Transition and step events are good integration points             |
+| AI          | Guardrailed AI-assisted transitions                           | Partial     | Present but should tighten confidence/fallback/audit behavior      |
+
+### Priority Roadmap
+
+1. Add transition preconditions and clearer per-action validation feedback.
+2. Add escalation automation (reminders/alerts) on top of existing overdue thresholds.
+3. Add first-class reporting and assignment integration for operational workflows.
+4. Add definition lifecycle tooling (import/export/versioning) for safe environment promotion.
