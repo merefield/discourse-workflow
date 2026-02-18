@@ -1,6 +1,6 @@
 import WorkflowTopicBanner from "../../components/workflow-topic-banner";
 
-export default <template>
+<template>
   <WorkflowTopicBanner
     @workflow_step_options={{@outletArgs.model.workflow_step_options}}
     @workflow_step_actions={{@outletArgs.model.workflow_step_actions}}
@@ -12,4 +12,4 @@ export default <template>
     @topic_id={{@outletArgs.model.id}}
     @category_id={{@outletArgs.model.category_id}}
   />
-</template>;
+</template>

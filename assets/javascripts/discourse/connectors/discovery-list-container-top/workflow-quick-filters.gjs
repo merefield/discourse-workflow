@@ -38,7 +38,10 @@ export default class WorkflowQuickFiltersConnector extends Component {
   }
 
   get currentLocation() {
-    return this.router.currentURL || `${window.location.pathname}${window.location.search}`;
+    return (
+      this.router.currentURL ||
+      `${window.location.pathname}${window.location.search}`
+    );
   }
 
   get currentPathname() {
@@ -120,9 +123,11 @@ export default class WorkflowQuickFiltersConnector extends Component {
     };
     const currentParams = this.currentSearchParams;
     const unchanged =
-      (currentParams.get("my_categories") || null) === queryParams.my_categories &&
+      (currentParams.get("my_categories") || null) ===
+        queryParams.my_categories &&
       (currentParams.get("overdue") || null) === queryParams.overdue &&
-      (currentParams.get("overdue_days") || null) === queryParams.overdue_days &&
+      (currentParams.get("overdue_days") || null) ===
+        queryParams.overdue_days &&
       (currentParams.get("workflow_step_position") || null) ===
         queryParams.workflow_step_position;
 
@@ -210,7 +215,8 @@ export default class WorkflowQuickFiltersConnector extends Component {
 
   @action
   syncStepPositionFromUrl() {
-    this.stepPosition = this.currentSearchParams.get("workflow_step_position") || "";
+    this.stepPosition =
+      this.currentSearchParams.get("workflow_step_position") || "";
   }
 
   <template>
@@ -243,7 +249,9 @@ export default class WorkflowQuickFiltersConnector extends Component {
           type="number"
           min="1"
           value={{this.stepPosition}}
-          placeholder={{i18n "discourse_workflow.quick_filters.step_placeholder"}}
+          placeholder={{i18n
+            "discourse_workflow.quick_filters.step_placeholder"
+          }}
           {{on "input" this.updateStepPosition}}
         />
         <DButton
