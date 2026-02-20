@@ -135,8 +135,8 @@ body.workflow-topic {
   }
 }
 
-.workflow-quick-filters.workflow-quick-filters--kanban-active ~
-  .discovery-topics-list {
+.workflow-quick-filters.workflow-quick-filters--kanban-active
+  ~ .discovery-topics-list {
   .topic-list,
   .load-more,
   .topic-list-bottom {
@@ -271,9 +271,7 @@ body.workflow-kanban-view {
     box-shadow: 0 1px 2px color-mix(in srgb, var(--primary) 10%, transparent);
     cursor: grab;
     user-select: none;
-    transition:
-      transform 100ms ease,
-      box-shadow 100ms ease,
+    transition: transform 100ms ease, box-shadow 100ms ease,
       border-color 100ms ease;
   }
 

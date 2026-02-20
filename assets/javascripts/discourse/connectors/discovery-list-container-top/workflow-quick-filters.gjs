@@ -370,7 +370,8 @@ export default class WorkflowQuickFiltersConnector extends Component {
         queryParams.overdue_days &&
       (currentParams.get("workflow_step_position") || null) ===
         queryParams.workflow_step_position &&
-      (currentParams.get("workflow_view") || null) === queryParams.workflow_view;
+      (currentParams.get("workflow_view") || null) ===
+        queryParams.workflow_view;
 
     if (unchanged) {
       return;
@@ -544,7 +545,9 @@ export default class WorkflowQuickFiltersConnector extends Component {
         return;
       }
 
-      const topic = topicCollection.find((candidate) => Number(candidate.id) === topicId);
+      const topic = topicCollection.find(
+        (candidate) => Number(candidate.id) === topicId
+      );
       if (!topic) {
         return;
       }
@@ -722,7 +725,9 @@ export default class WorkflowQuickFiltersConnector extends Component {
                     <span class="workflow-kanban__step-position">
                       {{column.position}}
                     </span>
-                    <span class="workflow-kanban__step-name">{{column.name}}</span>
+                    <span
+                      class="workflow-kanban__step-name"
+                    >{{column.name}}</span>
                     <span class="workflow-kanban__topic-count">
                       {{column.topic_count_label}}
                     </span>
