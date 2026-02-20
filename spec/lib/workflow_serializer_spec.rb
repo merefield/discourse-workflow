@@ -30,6 +30,21 @@ describe DiscourseWorkflow::WorkflowSerializer do
     expect(serializer.workflow_steps_count).to eq(2)
     expect(serializer.starting_category_id).to eq(category_1.id)
     expect(serializer.final_category_id).to eq(category_2.id)
+    expect(serializer.kanban_compatible).to eq(false)
     expect { serializer.as_json }.not_to raise_error
+  end
+
+  it "serializes kanban compatibility when the workflow graph is compatible" do
+    option = Fabricate(:workflow_option, slug: "next", name: "Next")
+    Fabricate(
+      :workflow_step_option,
+      workflow_step_id: step_1.id,
+      workflow_option_id: option.id,
+      target_step_id: step_2.id,
+    )
+
+    serializer = described_class.new(workflow, scope: Guardian.new(admin))
+
+    expect(serializer.kanban_compatible).to eq(true)
   end
 end

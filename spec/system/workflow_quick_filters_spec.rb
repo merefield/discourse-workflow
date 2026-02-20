@@ -6,6 +6,7 @@ RSpec.describe "Workflow quick filters", type: :system do
   fab!(:workflow) { Fabricate(:workflow, name: "Quick Filter Workflow") }
   fab!(:category_1, :category)
   fab!(:category_2, :category)
+  fab!(:category_3, :category)
   fab!(:step_1) do
     Fabricate(
       :workflow_step,
@@ -20,6 +21,32 @@ RSpec.describe "Workflow quick filters", type: :system do
       workflow_id: workflow.id,
       category_id: category_2.id,
       position: 2,
+    )
+  end
+  fab!(:step_3) do
+    Fabricate(
+      :workflow_step,
+      workflow_id: workflow.id,
+      category_id: category_3.id,
+      position: 3,
+    )
+  end
+  fab!(:next_option) { Fabricate(:workflow_option, slug: "next", name: "Next") }
+  fab!(:finish_option) { Fabricate(:workflow_option, slug: "finish", name: "Finish") }
+  fab!(:step_transition) do
+    Fabricate(
+      :workflow_step_option,
+      workflow_step_id: step_1.id,
+      workflow_option_id: next_option.id,
+      target_step_id: step_2.id,
+    )
+  end
+  fab!(:step_transition_2) do
+    Fabricate(
+      :workflow_step_option,
+      workflow_step_id: step_2.id,
+      workflow_option_id: finish_option.id,
+      target_step_id: step_3.id,
     )
   end
   fab!(:topic_1) { Fabricate(:topic_with_op, category: category_1, user: user) }
@@ -46,8 +73,10 @@ RSpec.describe "Workflow quick filters", type: :system do
     SiteSetting.workflow_enabled = true
     category_1.set_permissions(everyone: :full, staff: :full)
     category_2.set_permissions(everyone: :readonly, staff: :full)
+    category_3.set_permissions(everyone: :readonly, staff: :full)
     category_1.save!
     category_2.save!
+    category_3.save!
     topic_2.update_columns(category_id: category_2.id)
     workflow_state_1.update_columns(updated_at: 5.days.ago)
     sign_in(user)
@@ -172,5 +201,84 @@ RSpec.describe "Workflow quick filters", type: :system do
     expect(
       page,
     ).to have_no_css("tr[data-topic-id='#{topic_2.id}'] .workflow-overdue-indicator")
+  end
+
+  it "shows kanban toggle only when the current list is a single compatible workflow" do
+    workflow_discovery_page.visit_workflow
+
+    expect(workflow_discovery_page).to have_workflow_view_toggle
+  end
+
+  it "toggles between workflow list and kanban board view" do
+    workflow_discovery_page.visit_workflow
+    expect(page).to have_css(".topic-list")
+    expect(page).to have_no_css(".workflow-kanban")
+
+    workflow_discovery_page.toggle_workflow_view
+
+    expect(page).to have_current_path(
+      %r{/workflow\?.*workflow_view=kanban},
+      url: true,
+    )
+    expect(workflow_discovery_page).to have_kanban_board
+    expect(workflow_discovery_page).to have_kanban_column_for_step(1)
+    expect(workflow_discovery_page).to have_kanban_column_for_step(2)
+    expect(workflow_discovery_page).to have_kanban_column_for_step(3)
+    expect(workflow_discovery_page).to have_kanban_card_for_topic(topic_1.id)
+    expect(workflow_discovery_page).to have_kanban_card_for_topic(topic_2.id)
+    expect(page).to have_no_css(".topic-list")
+    expect(page).to have_css(".workflow-quick-filters__workflow-view.btn-primary")
+
+    workflow_discovery_page.toggle_workflow_view
+
+    expect(page).to have_current_path("/workflow", url: false)
+    expect(page).to have_css(".topic-list")
+    expect(page).to have_no_css(".workflow-kanban")
+    expect(page).to have_css(".workflow-quick-filters__workflow-view.btn-default")
+  end
+
+  it "supports drag-drop transitions with legal and illegal column highlighting" do
+    workflow_discovery_page.visit_workflow
+    workflow_discovery_page.toggle_workflow_view
+
+    expect(workflow_discovery_page).to have_kanban_card_for_topic_in_step(topic_1.id, 1)
+    expect(workflow_discovery_page).to have_kanban_card_for_topic_in_step(topic_2.id, 2)
+
+    workflow_discovery_page.start_drag_on_kanban_card(topic_1.id)
+
+    expect(workflow_discovery_page).to have_kanban_legal_drop_target_for_step(2)
+    expect(workflow_discovery_page).to have_kanban_illegal_drop_target_for_step(3)
+
+    workflow_discovery_page.end_drag_on_kanban_card(topic_1.id)
+    workflow_discovery_page.drag_kanban_card_to_step(topic_1.id, 3)
+
+    expect(workflow_discovery_page).to have_kanban_card_for_topic_in_step(topic_1.id, 1)
+
+    workflow_discovery_page.drag_kanban_card_to_step(topic_1.id, 2)
+
+    expect(workflow_discovery_page).to have_no_kanban_card_for_topic_in_step(topic_1.id, 1)
+    expect(workflow_discovery_page).to have_kanban_card_for_topic_in_step(topic_1.id, 2)
+  end
+
+  it "does not show kanban toggle when the workflow list includes multiple workflows" do
+    other_workflow = Fabricate(:workflow, name: "Second Workflow")
+    other_step =
+      Fabricate(
+        :workflow_step,
+        workflow_id: other_workflow.id,
+        category_id: category_1.id,
+        position: 1,
+      )
+    other_topic = Fabricate(:topic_with_op, category: category_1, user: user)
+    Fabricate(
+      :workflow_state,
+      topic_id: other_topic.id,
+      workflow_id: other_workflow.id,
+      workflow_step_id: other_step.id,
+    )
+
+    workflow_discovery_page.visit_workflow
+
+    expect(workflow_discovery_page).to have_no_workflow_view_toggle
   end
 end

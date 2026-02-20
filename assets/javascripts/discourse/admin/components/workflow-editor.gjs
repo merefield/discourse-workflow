@@ -220,6 +220,31 @@ export default class WorkflowEditor extends Component {
         />
         <p>{{i18n "admin.discourse_workflow.workflows.overdue_days_help"}}</p>
       </div>
+      {{#if @workflow.id}}
+        <div class="control-group">
+          <label>{{i18n
+              "admin.discourse_workflow.workflows.kanban_compatibility.label"
+            }}</label>
+          <p>
+            {{#if @workflow.kanban_compatible}}
+              <span class="workflow-editor__kanban-compatible">
+                {{i18n
+                  "admin.discourse_workflow.workflows.kanban_compatibility.compatible"
+                }}
+              </span>
+            {{else}}
+              <span class="workflow-editor__kanban-incompatible">
+                {{i18n
+                  "admin.discourse_workflow.workflows.kanban_compatibility.incompatible"
+                }}
+              </span>
+            {{/if}}
+          </p>
+          <p>{{i18n
+              "admin.discourse_workflow.workflows.kanban_compatibility.help"
+            }}</p>
+        </div>
+      {{/if}}
       {{#if this.showSteps}}
         <div class="control-group">
           <WorkflowStepListEditor

@@ -110,6 +110,10 @@ export default {
       replace: true,
       refreshModel: true,
     });
+    addDiscoveryQueryParam("workflow_view", {
+      replace: true,
+      refreshModel: false,
+    });
 
     withPluginApi((api) => {
       api.addAdminPluginConfigurationNav("discourse-workflow", [

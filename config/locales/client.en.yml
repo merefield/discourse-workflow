@@ -52,7 +52,16 @@ en:
         overdue: "Overdue"
         step_placeholder: "Step #"
         apply_step: "Step = X"
+        kanban_view: "Kanban"
+        list_view: "List"
         clear: "Clear"
+      kanban:
+        title: "Workflow Kanban"
+        workflow_name: "Workflow: %{workflow_name}"
+        empty_step: "No topics in this step"
+        topic_count:
+          one: "%{count} topic"
+          other: "%{count} topics"
       overdue_indicator: "Overdue"
       options:
         submit:
@@ -115,6 +124,11 @@ en:
           description: "Description"
           overdue_days: "Overdue Days Override"
           overdue_days_help: "Blank uses the global default. 0 disables overdue behavior for this workflow."
+          kanban_compatibility:
+            label: "Kanban Compatibility"
+            compatible: "Compatible"
+            incompatible: "Not compatible"
+            help: "Kanban view requires one start step, unique positions, valid step targets, and reachability from the start step. Backward/cyclic paths are supported."
           workflow:
             short_title: "Workflow"
             editing:

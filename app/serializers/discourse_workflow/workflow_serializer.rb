@@ -9,6 +9,7 @@ module DiscourseWorkflow
               :description,
               :enabled,
               :overdue_days,
+              :kanban_compatible,
               :workflow_steps_count,
               :starting_category_id,
               :final_category_id,
@@ -33,6 +34,10 @@ module DiscourseWorkflow
 
     def validation_warnings
       object.validation_warnings
+    end
+
+    def kanban_compatible
+      object.kanban_compatible?
     end
   end
 end

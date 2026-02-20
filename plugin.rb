@@ -174,6 +174,76 @@ after_initialize do
     entered_at <= threshold_days.days.ago
   end
 
+  add_to_class(:topic_list, :workflow_kanban_workflow) do
+    return @workflow_kanban_workflow if defined?(@workflow_kanban_workflow)
+
+    workflow_ids =
+      topics
+        .map { |topic| topic.workflow_state&.workflow_id }
+        .compact
+        .uniq
+
+    @workflow_kanban_workflow =
+      if workflow_ids.length == 1
+        DiscourseWorkflow::Workflow
+          .includes(workflow_steps: { workflow_step_options: :workflow_option })
+          .find_by(id: workflow_ids.first)
+      end
+  end
+
+  add_to_class(:topic_list, :workflow_kanban_compatible) do
+    workflow = workflow_kanban_workflow
+    workflow.present? && workflow.kanban_compatible?
+  end
+
+  add_to_class(:topic_list, :workflow_kanban_steps) do
+    return [] if !workflow_kanban_compatible
+
+    workflow_kanban_workflow
+      .workflow_steps
+      .order(:position)
+      .map do |step|
+        {
+          id: step.id,
+          position: step.position,
+          name: step.name,
+        }
+      end
+  end
+
+  add_to_class(:topic_list, :workflow_kanban_transitions) do
+    return [] if !workflow_kanban_compatible
+
+    workflow = workflow_kanban_workflow
+    steps = workflow.workflow_steps.to_a
+    steps_by_id = steps.index_by(&:id)
+    first_option_for_edge = {}
+
+    steps.each do |step|
+      step
+        .workflow_step_options
+        .sort_by { |option| option.position.to_i }
+        .each do |step_option|
+          target_step = steps_by_id[step_option.target_step_id]
+          next if target_step.blank?
+
+          option_slug = step_option.workflow_option&.slug
+          next if option_slug.blank?
+
+          edge_key = [step.position.to_i, target_step.position.to_i]
+          first_option_for_edge[edge_key] ||= option_slug
+        end
+    end
+
+    first_option_for_edge.map do |(from_position, to_position), option_slug|
+      {
+        from_position: from_position,
+        to_position: to_position,
+        option_slug: option_slug,
+      }
+    end
+  end
+
   add_to_serializer(
     :topic_view,
     :workflow_slug,
@@ -269,6 +339,49 @@ after_initialize do
     :workflow_overdue,
     include_condition: -> { object.workflow_name.present? }
   ) { object.workflow_overdue }
+
+  add_to_serializer(
+    :topic_list_item,
+    :workflow_can_act,
+    include_condition: -> { object.workflow_name.present? }
+  ) do
+    begin
+      scope.ensure_can_create_topic_on_category!(object.category_id)
+      true
+    rescue Discourse::InvalidAccess
+      false
+    end
+  end
+
+  add_to_serializer(
+    :topic_list,
+    :workflow_kanban_compatible,
+    include_condition: -> {
+      object.topics.any? { |topic| topic.workflow_state.present? }
+    }
+  ) { object.workflow_kanban_compatible }
+
+  add_to_serializer(
+    :topic_list,
+    :workflow_kanban_workflow_name,
+    include_condition: -> { object.workflow_kanban_compatible }
+  ) { object.workflow_kanban_workflow.name }
+
+  add_to_serializer(
+    :topic_list,
+    :workflow_kanban_steps,
+    include_condition: -> {
+      object.topics.any? { |topic| topic.workflow_state.present? }
+    }
+  ) { object.workflow_kanban_steps }
+
+  add_to_serializer(
+    :topic_list,
+    :workflow_kanban_transitions,
+    include_condition: -> {
+      object.topics.any? { |topic| topic.workflow_state.present? }
+    }
+  ) { object.workflow_kanban_transitions }
 
   on(:topic_created) do |*params|
     topic, opts = params
