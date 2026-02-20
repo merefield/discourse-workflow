@@ -187,11 +187,12 @@ body.workflow-kanban-view {
   }
 
   .workflow-kanban__column {
+    display: flex;
+    flex-direction: column;
     border: 1px solid var(--primary-low);
     border-radius: 8px;
     background: var(--secondary);
-    min-height: 180px;
-    overflow: hidden;
+    overflow: visible;
   }
 
   .workflow-kanban__column--source {
@@ -245,8 +246,10 @@ body.workflow-kanban-view {
 
   .workflow-kanban__cards {
     display: grid;
+    grid-auto-rows: min-content;
     gap: 0.5rem;
     padding: 0.75rem;
+    flex: 1 0 auto;
     min-height: 120px;
     transition: background-color 120ms ease, opacity 120ms ease;
   }
