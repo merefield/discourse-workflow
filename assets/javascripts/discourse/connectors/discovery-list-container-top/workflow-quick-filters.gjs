@@ -607,7 +607,12 @@ export default class WorkflowQuickFiltersConnector extends Component {
   }
 
   async transitionTopic(topicId, fromPosition, toPosition) {
-    if (!topicId || !fromPosition || !toPosition || toPosition === fromPosition) {
+    if (
+      !topicId ||
+      !fromPosition ||
+      !toPosition ||
+      toPosition === fromPosition
+    ) {
       return false;
     }
 
