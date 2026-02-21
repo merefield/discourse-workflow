@@ -345,12 +345,23 @@ after_initialize do
     :workflow_can_act,
     include_condition: -> { object.workflow_name.present? }
   ) do
-    begin
-      scope.ensure_can_create_topic_on_category!(object.category_id)
-      true
-    rescue Discourse::InvalidAccess
-      false
+    # Cache permission checks per category on the scope to avoid repeated work
+    permissions_cache =
+      scope.instance_variable_get(:@workflow_can_act_category_permissions) ||
+        scope.instance_variable_set(:@workflow_can_act_category_permissions, {})
+
+    category_id = object.category_id
+
+    unless permissions_cache.key?(category_id)
+      begin
+        scope.ensure_can_create_topic_on_category!(category_id)
+        permissions_cache[category_id] = true
+      rescue Discourse::InvalidAccess
+        permissions_cache[category_id] = false
+      end
     end
+
+    permissions_cache[category_id]
   end
 
   add_to_serializer(
