@@ -32,7 +32,9 @@ module ::DiscourseWorkflow
 
       step_ids = steps.map(&:id)
       step_lookup = step_ids.index_with(true)
+      steps_by_id = steps.index_by(&:id)
       edges = Hash.new { |hash, key| hash[key] = [] }
+      edge_lookup = {}
 
       steps.each do |step|
         step.workflow_step_options.each do |step_option|
@@ -40,6 +42,12 @@ module ::DiscourseWorkflow
           next if target_step_id.blank?
           return false if !step_lookup[target_step_id]
 
+          from_position = step.position.to_i
+          to_position = steps_by_id[target_step_id].position.to_i
+          edge_key = [from_position, to_position]
+          return false if edge_lookup[edge_key]
+
+          edge_lookup[edge_key] = true
           edges[step.id] << target_step_id
         end
       end
