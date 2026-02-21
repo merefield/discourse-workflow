@@ -20,6 +20,10 @@ If you are new to the terminology, see:
 - Transition actions presented as buttons per step option
 - Permission model aligned to native Discourse category permissions
 - Workflow discovery list (`/workflow`) with quick filters
+- Kanban view toggle for compatible single-workflow lists
+- Drag/drop transitions in Kanban with legal/illegal drop-zone highlighting
+- Keyboard Kanban transitions on focused cards (`ArrowLeft` / `ArrowRight`) when legal
+- Workflow-level Kanban tags toggle (`show_kanban_tags`, default `true`)
 - Overdue behavior with hierarchy:
   - global default (`workflow_overdue_days_default`)
   - workflow override
@@ -37,7 +41,8 @@ If you are new to the terminology, see:
 2. Go to `Admin -> Plugins -> Discourse Workflow`, create a Workflow, then save it.
 3. Add Workflow Steps (Categories in journey order), then add Step Options (actions/transitions).
 4. Create a Topic in the first step Category and transition it through actions from the topic banner.
-5. Use `/workflow` to view queue state, apply quick filters, and visualize progress.
+5. Use `/workflow` to view queue state, apply quick filters, toggle `List`/`Kanban`, and visualize progress.
+6. In Kanban, click a card to open the topic, drag cards to legal target steps, or use keyboard arrows on focused cards.
 
 ## Setup
 
@@ -61,6 +66,10 @@ You can change the label of an Option in `Admin -> Customize -> Text`.
 
 A good range of Options is seeded by default, but you can customize the text as needed.
 
+Workflow-level Kanban controls:
+
+- `show_kanban_tags`: controls whether tags render on Kanban cards below the title. Default is enabled.
+
 ### Overdue setup hierarchy
 
 - Global default: `workflow_overdue_days_default`
@@ -68,6 +77,21 @@ A good range of Options is seeded by default, but you can customize the text as 
 - Optional step-level override: `WorkflowStep.overdue_days`
 
 Resolution order is `step -> workflow -> global`. A value of `0` means overdue behavior is disabled at that level.
+
+### Kanban compatibility and behavior
+
+Kanban view is shown when the current `/workflow` list is scoped to a single compatible workflow.
+
+Compatibility requires:
+
+- at least one step
+- a single start step at position `1`
+- unique step positions
+- valid target step IDs
+- all steps reachable from the start step
+- unique directed transition mapping per step pair (`from_step -> to_step`)
+
+For each directed edge, Kanban drag/keyboard transitions are option-agnostic and deterministic.
 
 ### AI actions
 
@@ -150,9 +174,10 @@ Permissioning principle:
 
 | Area        | Capability                                                    | Status      | Notes                                                                      |
 | ----------- | ------------------------------------------------------------- | ----------- | -------------------------------------------------------------------------- |
-| Definition  | Workflow definitions (steps/options mapped to categories)     | Implemented | Core admin CRUD is available                                               |
+| Definition  | Workflow definitions (steps/options mapped to categories)     | Implemented | Core admin CRUD plus workflow-level display controls (for example `show_kanban_tags`) |
 | Runtime     | Topic transitions with audit posts                            | Implemented | Transition actions are logged in-topic                                     |
-| Discovery   | Workflow list with quick filters and step filtering           | Implemented | `/workflow` includes semantic quick filters                                |
+| Discovery   | Workflow list with quick filters, list/kanban toggle, and step filtering | Implemented | `/workflow` supports SPA quick filters plus list/kanban switching          |
+| Kanban      | Card transitions (drag/drop and keyboard arrows)              | Implemented | Legal transitions only; deterministic directed edge mapping                |
 | SLA         | Overdue thresholds (step -> workflow -> global, `0` disables) | Implemented | Includes overdue list indicator                                            |
 | Permissions | Native Discourse category permissions for acting/commenting   | Implemented | Transition authority still aligns with category create access              |
 | Permissions | Step/action-level transition permissions                      | Partial     | Deliberately lower priority to preserve simple, core-aligned permissioning |
