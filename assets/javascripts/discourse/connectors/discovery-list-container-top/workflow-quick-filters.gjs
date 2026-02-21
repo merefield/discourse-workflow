@@ -247,20 +247,22 @@ export default class WorkflowQuickFiltersConnector extends Component {
     return this.isColumnLegalDropTarget(position) ? "legal" : "illegal";
   }
 
+  getTopicListSafe() {
+    try {
+      const topicCollection =
+        this.discovery.currentTopicList?.topics ||
+        this.topicList?.topics ||
+        this.topicListMetadata?.topics ||
+        this.topicListMetadata?.topic_list?.topics ||
+        [];
+      return Array.isArray(topicCollection) ? topicCollection : [];
+    } catch {
+      return [];
+    }
+  }
+
   get kanbanColumns() {
-    const topics = (() => {
-      try {
-        const topicCollection =
-          this.discovery.currentTopicList?.topics ||
-          this.topicList?.topics ||
-          this.topicListMetadata?.topics ||
-          this.topicListMetadata?.topic_list?.topics ||
-          [];
-        return Array.isArray(topicCollection) ? topicCollection : [];
-      } catch {
-        return [];
-      }
-    })();
+    const topics = this.getTopicListSafe();
 
     return this.kanbanSteps.map((step) => {
       const position = Number(step.position);
