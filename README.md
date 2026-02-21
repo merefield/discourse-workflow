@@ -177,6 +177,7 @@ Permissioning principle:
 | Definition  | Workflow definitions (steps/options mapped to categories)     | Implemented | Core admin CRUD plus workflow-level display controls (for example `show_kanban_tags`) |
 | Runtime     | Topic transitions with audit posts                            | Implemented | Transition actions are logged in-topic                                     |
 | Discovery   | Workflow list with quick filters, list/kanban toggle, and step filtering | Implemented | `/workflow` supports SPA quick filters plus list/kanban switching          |
+| Discovery   | Real-time workflow state-change notifier with refresh CTA     | Planned     | Wire MessageBus updates into `/workflow` with a core-style “press to refresh” flow |
 | Kanban      | Card transitions (drag/drop and keyboard arrows)              | Implemented | Legal transitions only; deterministic directed edge mapping                |
 | SLA         | Overdue thresholds (step -> workflow -> global, `0` disables) | Implemented | Includes overdue list indicator                                            |
 | Permissions | Native Discourse category permissions for acting/commenting   | Implemented | Transition authority still aligns with category create access              |
@@ -192,8 +193,9 @@ Permissioning principle:
 
 ### Priority Roadmap
 
-1. Add transition preconditions and clearer per-action validation feedback.
-2. Add escalation automation (reminders/alerts) on top of existing overdue thresholds.
-3. Add first-class reporting and assignment integration for operational workflows.
-4. Add definition lifecycle tooling (import/export/versioning) for safe environment promotion.
-5. Keep advanced step/action permission granularity as a lower-priority enhancement to avoid unnecessary complexity versus native Discourse permissioning.
+1. Add MessageBus-driven workflow state-change notifications with a core-style refresh CTA in `/workflow`.
+2. Add transition preconditions and clearer per-action validation feedback.
+3. Add escalation automation (reminders/alerts) on top of existing overdue thresholds.
+4. Add first-class reporting and assignment integration for operational workflows.
+5. Add definition lifecycle tooling (import/export/versioning) for safe environment promotion.
+6. Keep advanced step/action permission granularity as a lower-priority enhancement to avoid unnecessary complexity versus native Discourse permissioning.
