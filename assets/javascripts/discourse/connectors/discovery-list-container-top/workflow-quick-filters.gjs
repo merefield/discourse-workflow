@@ -7,6 +7,7 @@ import didInsert from "@ember/render-modifiers/modifiers/did-insert";
 import didUpdate from "@ember/render-modifiers/modifiers/did-update";
 import { service } from "@ember/service";
 import DButton from "discourse/components/d-button";
+import categoryColorVariable from "discourse/helpers/category-color-variable";
 import discourseTags from "discourse/helpers/discourse-tags";
 import { ajax } from "discourse/lib/ajax";
 import { extractError } from "discourse/lib/ajax-error";
@@ -323,6 +324,9 @@ export default class WorkflowQuickFiltersConnector extends Component {
         ...step,
         drop_state: dropState,
         column_class: columnClasses.join(" "),
+        column_style: step.category_color
+          ? categoryColorVariable(step.category_color)
+          : null,
         topics: stepTopics,
         topic_count_label: i18n("discourse_workflow.kanban.topic_count", {
           count: stepTopics.length,
@@ -781,6 +785,7 @@ export default class WorkflowQuickFiltersConnector extends Component {
               {{#each this.kanbanColumns key="position" as |column|}}
                 <section
                   class={{column.column_class}}
+                  style={{column.column_style}}
                   data-workflow-step-position={{column.position}}
                   {{on "dragover" (fn this.columnDragOver column)}}
                   {{on "drop" (fn this.columnDrop column)}}

@@ -247,6 +247,25 @@ RSpec.describe "Workflow quick filters", type: :system do
     expect(workflow_discovery_page).to have_kanban_card_for_topic_in_step(topic_1.id, 2)
   end
 
+  it "uses step category colors for kanban column borders" do
+    category_1.update_columns(color: "112233")
+    category_2.update_columns(color: "445566")
+    category_3.update_columns(color: "778899")
+
+    workflow_discovery_page.visit_workflow
+    workflow_discovery_page.toggle_workflow_view
+
+    expect(workflow_discovery_page.kanban_column_border_color(1)).to eq(
+      css_rgb_for_hex(category_1.reload.color),
+    )
+    expect(workflow_discovery_page.kanban_column_border_color(2)).to eq(
+      css_rgb_for_hex(category_2.reload.color),
+    )
+    expect(workflow_discovery_page.kanban_column_border_color(3)).to eq(
+      css_rgb_for_hex(category_3.reload.color),
+    )
+  end
+
   it "refreshes kanban view after stale transition errors to re-sync backend state" do
     workflow_discovery_page.visit_workflow
     workflow_discovery_page.toggle_workflow_view
@@ -301,5 +320,13 @@ RSpec.describe "Workflow quick filters", type: :system do
     workflow_discovery_page.visit_workflow
 
     expect(workflow_discovery_page).to have_no_workflow_view_toggle
+  end
+
+  def css_rgb_for_hex(hex)
+    normalized = hex.delete("#")
+    normalized =
+      normalized.chars.map { |channel| "#{channel}#{channel}" }.join if normalized.length == 3
+    red, green, blue = normalized.scan(/../).map { |channel| channel.to_i(16) }
+    "rgb(#{red}, #{green}, #{blue})"
   end
 end

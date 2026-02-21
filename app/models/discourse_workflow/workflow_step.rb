@@ -2,8 +2,9 @@
 
 module ::DiscourseWorkflow
   class WorkflowStep < ActiveRecord::Base
-    self.table_name = 'workflow_steps'
+    self.table_name = "workflow_steps"
     belongs_to :workflow
+    belongs_to :category
     has_many :workflow_step_options
     has_many :workflow_states
 

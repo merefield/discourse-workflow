@@ -190,7 +190,7 @@ body.workflow-kanban-view {
   .workflow-kanban__column {
     display: flex;
     flex-direction: column;
-    border: 1px solid var(--primary-low);
+    border: 1px solid var(--category-badge-color, var(--primary-low));
     border-radius: 8px;
     background: var(--secondary);
     overflow: visible;
@@ -226,7 +226,9 @@ body.workflow-kanban-view {
     grid-template-columns: auto 1fr auto;
     gap: 0.5rem;
     align-items: center;
+    margin: 1px 1px 0;
     padding: 0.5rem 0.75rem;
+    border-radius: 8px 8px 0 0;
     border-bottom: 1px solid var(--primary-low);
     background: var(--primary-very-low);
   }

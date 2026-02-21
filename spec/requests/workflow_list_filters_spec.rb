@@ -8,20 +8,10 @@ RSpec.describe "Workflow list filters", type: :request do
   fab!(:category_a, :category)
   fab!(:category_b, :category)
   fab!(:step_1) do
-    Fabricate(
-      :workflow_step,
-      workflow_id: workflow.id,
-      category_id: category_a.id,
-      position: 1,
-    )
+    Fabricate(:workflow_step, workflow_id: workflow.id, category_id: category_a.id, position: 1)
   end
   fab!(:step_2) do
-    Fabricate(
-      :workflow_step,
-      workflow_id: workflow.id,
-      category_id: category_b.id,
-      position: 2,
-    )
+    Fabricate(:workflow_step, workflow_id: workflow.id, category_id: category_b.id, position: 2)
   end
   fab!(:next_option) { Fabricate(:workflow_option, slug: "next", name: "Next") }
   fab!(:step_transition) do
@@ -92,14 +82,12 @@ RSpec.describe "Workflow list filters", type: :request do
     get "/workflow.json"
 
     topic_list = response.parsed_body["topic_list"]
+    steps = topic_list["workflow_kanban_steps"]
     step_positions = topic_list["workflow_kanban_steps"].map { |step| step["position"] }
+    steps_by_position = steps.index_by { |step| step["position"] }
     transitions =
       topic_list["workflow_kanban_transitions"].map do |transition|
-        [
-          transition["from_position"],
-          transition["to_position"],
-          transition["option_slug"],
-        ]
+        [transition["from_position"], transition["to_position"], transition["option_slug"]]
       end
     topics_by_id = topic_list["topics"].index_by { |topic| topic["id"] }
 
@@ -107,6 +95,8 @@ RSpec.describe "Workflow list filters", type: :request do
     expect(topic_list["workflow_kanban_workflow_name"]).to eq(workflow.name)
     expect(topic_list["workflow_kanban_show_tags"]).to eq(true)
     expect(step_positions).to eq([1, 2])
+    expect(steps_by_position[1]["category_color"]).to eq(category_a.color)
+    expect(steps_by_position[2]["category_color"]).to eq(category_b.color)
     expect(transitions).to contain_exactly([1, 2, "next"])
     expect(topics_by_id[topic_a.id]["workflow_can_act"]).to eq(true)
     expect(topics_by_id[topic_b.id]["workflow_can_act"]).to eq(false)
