@@ -150,13 +150,13 @@ end
 #
 # Table name: workflows
 #
-#  id           :bigint           not null, primary key
-#  description  :text
-#  enabled      :boolean          default(TRUE)
-#  name         :string
-#  overdue_days :integer
-#  show_kanban_tags :boolean        default(TRUE), not null
-#  slug         :string
-#  created_at   :datetime         not null
-#  updated_at   :datetime         not null
+#  id               :bigint           not null, primary key
+#  description      :text
+#  enabled          :boolean          default(TRUE)
+#  name             :string
+#  overdue_days     :integer
+#  show_kanban_tags :boolean          default(TRUE), not null
+#  slug             :string
+#  created_at       :datetime         not null
+#  updated_at       :datetime         not null
 #
