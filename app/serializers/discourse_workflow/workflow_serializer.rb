@@ -9,6 +9,7 @@ module DiscourseWorkflow
               :description,
               :enabled,
               :overdue_days,
+              :show_kanban_tags,
               :kanban_compatible,
               :workflow_steps_count,
               :starting_category_id,

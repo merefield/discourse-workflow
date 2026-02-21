@@ -105,10 +105,20 @@ RSpec.describe "Workflow list filters", type: :request do
 
     expect(topic_list["workflow_kanban_compatible"]).to eq(true)
     expect(topic_list["workflow_kanban_workflow_name"]).to eq(workflow.name)
+    expect(topic_list["workflow_kanban_show_tags"]).to eq(true)
     expect(step_positions).to eq([1, 2])
     expect(transitions).to contain_exactly([1, 2, "next"])
     expect(topics_by_id[topic_a.id]["workflow_can_act"]).to eq(true)
     expect(topics_by_id[topic_b.id]["workflow_can_act"]).to eq(false)
+  end
+
+  it "serializes workflow_kanban_show_tags false when disabled on the workflow" do
+    workflow.update!(show_kanban_tags: false)
+
+    get "/workflow.json"
+
+    topic_list = response.parsed_body["topic_list"]
+    expect(topic_list["workflow_kanban_show_tags"]).to eq(false)
   end
 
   it "does not mark kanban compatibility when multiple workflows are visible" do

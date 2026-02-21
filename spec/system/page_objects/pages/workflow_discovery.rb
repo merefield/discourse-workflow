@@ -69,6 +69,18 @@ module PageObjects
         )
       end
 
+      def has_kanban_tag_for_topic?(topic_id, tag_name)
+        has_css?(
+          ".workflow-kanban__card[data-topic-id='#{topic_id}'] .workflow-kanban__tags .discourse-tag[data-tag-name='#{tag_name}']"
+        )
+      end
+
+      def has_no_kanban_tag_for_topic?(topic_id, tag_name)
+        has_no_css?(
+          ".workflow-kanban__card[data-topic-id='#{topic_id}'] .workflow-kanban__tags .discourse-tag[data-tag-name='#{tag_name}']"
+        )
+      end
+
       def has_kanban_legal_drop_target_for_step?(position)
         has_css?(
           ".workflow-kanban__column--legal[data-workflow-step-position='#{position}']"

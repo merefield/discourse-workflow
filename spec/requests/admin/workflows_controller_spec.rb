@@ -32,6 +32,7 @@ describe DiscourseWorkflow::Admin::WorkflowsController do
     expect(response.status).to eq(200)
     payload = response.parsed_body["workflows"].find { |w| w["id"] == workflow.id }
     expect(payload["kanban_compatible"]).to eq(false)
+    expect(payload["show_kanban_tags"]).to eq(true)
   end
 
   it "serializes kanban compatibility for compatible workflows" do
@@ -48,5 +49,13 @@ describe DiscourseWorkflow::Admin::WorkflowsController do
     expect(response.status).to eq(200)
     payload = response.parsed_body["workflows"].find { |w| w["id"] == workflow.id }
     expect(payload["kanban_compatible"]).to eq(true)
+  end
+
+  it "updates show_kanban_tags on a workflow" do
+    put "/admin/plugins/discourse-workflow/workflows/#{workflow.id}.json",
+        params: { workflow: { show_kanban_tags: false } }
+
+    expect(response.status).to eq(200)
+    expect(workflow.reload.show_kanban_tags).to eq(false)
   end
 end

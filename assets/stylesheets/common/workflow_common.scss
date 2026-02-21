@@ -305,6 +305,16 @@ body.workflow-kanban-view {
     overflow-wrap: anywhere;
   }
 
+  .workflow-kanban__tags.discourse-tags {
+    margin-top: 0.15rem;
+    gap: 0.3rem;
+  }
+
+  .workflow-kanban__tags .discourse-tag.box {
+    font-size: var(--font-down-2);
+    line-height: 1.4;
+  }
+
   .workflow-kanban__card-overdue {
     color: var(--danger);
     font-size: var(--font-down-1);

@@ -124,6 +124,8 @@ en:
           description: "Description"
           overdue_days: "Overdue Days Override"
           overdue_days_help: "Blank uses the global default. 0 disables overdue behavior for this workflow."
+          show_kanban_tags: "Show Tags In Kanban"
+          show_kanban_tags_help: "When enabled, Kanban cards display topic tags below the title."
           kanban_compatibility:
             label: "Kanban Compatibility"
             compatible: "Compatible"

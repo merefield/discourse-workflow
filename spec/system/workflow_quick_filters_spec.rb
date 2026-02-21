@@ -4,6 +4,7 @@ RSpec.describe "Workflow quick filters", type: :system do
   fab!(:workflow_discovery_page) { PageObjects::Pages::WorkflowDiscovery.new }
   fab!(:user) { Fabricate(:user, trust_level: TrustLevel[1], refresh_auto_groups: true) }
   fab!(:workflow) { Fabricate(:workflow, name: "Quick Filter Workflow") }
+  fab!(:kanban_tag) { Fabricate(:tag, name: "kanban-tag") }
   fab!(:category_1, :category)
   fab!(:category_2, :category)
   fab!(:category_3, :category)
@@ -49,7 +50,9 @@ RSpec.describe "Workflow quick filters", type: :system do
       target_step_id: step_3.id,
     )
   end
-  fab!(:topic_1) { Fabricate(:topic_with_op, category: category_1, user: user) }
+  fab!(:topic_1) do
+    Fabricate(:topic_with_op, category: category_1, user: user, tags: [kanban_tag])
+  end
   fab!(:topic_2) { Fabricate(:topic_with_op, category: category_1, user: user) }
   fab!(:workflow_state_1) do
     Fabricate(
@@ -71,6 +74,7 @@ RSpec.describe "Workflow quick filters", type: :system do
   before do
     enable_current_plugin
     SiteSetting.workflow_enabled = true
+    SiteSetting.tagging_enabled = true
     category_1.set_permissions(everyone: :full, staff: :full)
     category_2.set_permissions(everyone: :readonly, staff: :full)
     category_3.set_permissions(everyone: :readonly, staff: :full)
@@ -271,6 +275,19 @@ RSpec.describe "Workflow quick filters", type: :system do
 
     workflow_discovery_page.move_kanban_card_with_key(topic_1.id, "ArrowLeft")
     expect(workflow_discovery_page).to have_kanban_card_for_topic_in_step(topic_1.id, 2)
+  end
+
+  it "shows kanban card tags when enabled on the workflow and hides them when disabled" do
+    workflow_discovery_page.visit_workflow
+    workflow_discovery_page.toggle_workflow_view
+
+    expect(workflow_discovery_page).to have_kanban_tag_for_topic(topic_1.id, "kanban-tag")
+
+    workflow.update!(show_kanban_tags: false)
+    workflow_discovery_page.visit_workflow
+    workflow_discovery_page.toggle_workflow_view
+
+    expect(workflow_discovery_page).to have_no_kanban_tag_for_topic(topic_1.id, "kanban-tag")
   end
 
   it "does not show kanban toggle when the workflow list includes multiple workflows" do

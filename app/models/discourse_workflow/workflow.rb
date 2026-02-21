@@ -155,6 +155,7 @@ end
 #  enabled      :boolean          default(TRUE)
 #  name         :string
 #  overdue_days :integer
+#  show_kanban_tags :boolean        default(TRUE), not null
 #  slug         :string
 #  created_at   :datetime         not null
 #  updated_at   :datetime         not null

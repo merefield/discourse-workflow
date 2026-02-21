@@ -196,6 +196,11 @@ after_initialize do
     workflow.present? && workflow.kanban_compatible?
   end
 
+  add_to_class(:topic_list, :workflow_kanban_show_tags) do
+    workflow = workflow_kanban_workflow
+    workflow.present? && workflow.show_kanban_tags != false
+  end
+
   add_to_class(:topic_list, :workflow_kanban_steps) do
     return [] if !workflow_kanban_compatible
 
@@ -377,6 +382,14 @@ after_initialize do
     :workflow_kanban_workflow_name,
     include_condition: -> { object.workflow_kanban_compatible }
   ) { object.workflow_kanban_workflow.name }
+
+  add_to_serializer(
+    :topic_list,
+    :workflow_kanban_show_tags,
+    include_condition: -> {
+      object.topics.any? { |topic| topic.workflow_state.present? }
+    }
+  ) { object.workflow_kanban_show_tags }
 
   add_to_serializer(
     :topic_list,

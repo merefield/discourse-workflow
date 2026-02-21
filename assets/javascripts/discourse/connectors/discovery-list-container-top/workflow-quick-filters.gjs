@@ -7,6 +7,7 @@ import didInsert from "@ember/render-modifiers/modifiers/did-insert";
 import didUpdate from "@ember/render-modifiers/modifiers/did-update";
 import { service } from "@ember/service";
 import DButton from "discourse/components/d-button";
+import discourseTags from "discourse/helpers/discourse-tags";
 import { ajax } from "discourse/lib/ajax";
 import { popupAjaxError } from "discourse/lib/ajax-error";
 import { i18n } from "discourse-i18n";
@@ -162,6 +163,10 @@ export default class WorkflowQuickFiltersConnector extends Component {
     return this.isKanbanView || this.canUseKanbanView;
   }
 
+  get showKanbanTags() {
+    return this.topicListMetadata?.workflow_kanban_show_tags !== false;
+  }
+
   get workflowViewLabel() {
     return this.isKanbanView
       ? "discourse_workflow.quick_filters.list_view"
@@ -295,6 +300,7 @@ export default class WorkflowQuickFiltersConnector extends Component {
           ),
           workflow_overdue: !!get(topic, "workflow_overdue"),
           workflow_can_act: !!get(topic, "workflow_can_act"),
+          tags: get(topic, "tags") || [],
           workflow_topic_url:
             get(topic, "url") ||
             (get(topic, "slug")
@@ -820,6 +826,17 @@ export default class WorkflowQuickFiltersConnector extends Component {
                           <span class="workflow-kanban__card-title">
                             {{topic.title}}
                           </span>
+                          {{#if this.showKanbanTags}}
+                            {{#if topic.tags.length}}
+                              {{discourseTags
+                                null
+                                tags=topic.tags
+                                style="box"
+                                tagName="span"
+                                className="workflow-kanban__tags"
+                              }}
+                            {{/if}}
+                          {{/if}}
                           {{#if topic.workflow_overdue}}
                             <span class="workflow-kanban__card-overdue">
                               {{i18n "discourse_workflow.overdue_indicator"}}

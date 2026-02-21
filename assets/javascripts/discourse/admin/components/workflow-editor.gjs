@@ -81,6 +81,14 @@ export default class WorkflowEditor extends Component {
     await this.toggleField("enabled");
   }
 
+  @action
+  toggleShowKanbanTags() {
+    this.editingModel.set(
+      "show_kanban_tags",
+      !this.editingModel.show_kanban_tags
+    );
+  }
+
   async toggleField(field, sortWorkflows) {
     this.args.workflow.set(field, !this.args.workflow[field]);
     this.editingModel.set(field, this.args.workflow[field]);
@@ -219,6 +227,18 @@ export default class WorkflowEditor extends Component {
           disabled={{this.editingModel.system}}
         />
         <p>{{i18n "admin.discourse_workflow.workflows.overdue_days_help"}}</p>
+      </div>
+      <div class="control-group">
+        <DToggleSwitch
+          class="workflow-editor__show-kanban-tags"
+          @state={{this.editingModel.show_kanban_tags}}
+          @label="admin.discourse_workflow.workflows.show_kanban_tags"
+          @disabled={{this.editingModel.system}}
+          {{on "click" this.toggleShowKanbanTags}}
+        />
+        <p>{{i18n
+            "admin.discourse_workflow.workflows.show_kanban_tags_help"
+          }}</p>
       </div>
       {{#if @workflow.id}}
         <div class="control-group">
