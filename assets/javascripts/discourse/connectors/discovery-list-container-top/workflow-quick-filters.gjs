@@ -9,12 +9,13 @@ import { service } from "@ember/service";
 import DButton from "discourse/components/d-button";
 import discourseTags from "discourse/helpers/discourse-tags";
 import { ajax } from "discourse/lib/ajax";
-import { popupAjaxError } from "discourse/lib/ajax-error";
+import { extractError } from "discourse/lib/ajax-error";
 import { i18n } from "discourse-i18n";
 
 const STORAGE_KEY = "discourse_workflow_quick_filters";
 
 export default class WorkflowQuickFiltersConnector extends Component {
+  @service dialog;
   @service discovery;
   @service router;
 
@@ -632,7 +633,8 @@ export default class WorkflowQuickFiltersConnector extends Component {
       this.updateTopicTransitionState(topicId, toPosition);
       return true;
     } catch (error) {
-      popupAjaxError(error);
+      await this.dialog.alert(extractError(error));
+      this.router.refresh();
       return false;
     } finally {
       this.transitionInFlightTopicId = null;

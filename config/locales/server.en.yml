@@ -6,6 +6,7 @@ en:
     topic_transition_action_description: 'Moved from "%{starting_step_name}" to "%{ending_step_name}" with action: "%{step_option_name}" by @%{username}'
     errors:
       no_midway_error: "You cannot create a Topic midway through a workflow and this Category is part of a workflow."
+      transition_failed_stale_state_refreshing: "Transition Failed: probably due to stale UI state - please try again after refresh - refreshing!"
     options:
       start: "Start"
       ready: "Ready"

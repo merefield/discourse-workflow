@@ -4,7 +4,7 @@ require_relative "../plugin_helper"
 
 RSpec.describe DiscourseWorkflow::WorkflowActionController, type: :request do
   fab!(:user) { Fabricate(:user, trust_level: TrustLevel[1], refresh_auto_groups: true) }
-  fab!(:workflow) { Fabricate(:workflow, name: "Cooldown Workflow") }
+  fab!(:workflow) { Fabricate(:workflow, name: "Transition Workflow") }
   fab!(:category_1, :category)
   fab!(:category_2, :category)
   fab!(:step_1) do
@@ -26,6 +26,7 @@ RSpec.describe DiscourseWorkflow::WorkflowActionController, type: :request do
     )
   end
   fab!(:next_option) { Fabricate(:workflow_option, slug: "next", name: "Next") }
+  fab!(:back_option) { Fabricate(:workflow_option, slug: "back", name: "Back") }
   fab!(:step_1_option) do
     Fabricate(
       :workflow_step_option,
@@ -39,7 +40,7 @@ RSpec.describe DiscourseWorkflow::WorkflowActionController, type: :request do
     Fabricate(
       :workflow_step_option,
       workflow_step_id: step_2.id,
-      workflow_option_id: next_option.id,
+      workflow_option_id: back_option.id,
       target_step_id: step_1.id,
       position: 1,
     )
@@ -56,7 +57,6 @@ RSpec.describe DiscourseWorkflow::WorkflowActionController, type: :request do
 
   before do
     SiteSetting.workflow_enabled = true
-    DiscourseWorkflow::Transition.any_instance.stubs(:transition).returns(true)
     category_1.set_permissions(everyone: :full, staff: :full)
     category_2.set_permissions(everyone: :full, staff: :full)
     category_1.save!
@@ -65,15 +65,27 @@ RSpec.describe DiscourseWorkflow::WorkflowActionController, type: :request do
     Discourse.redis.del("discourse-workflow-transition-#{user.id}-#{topic.id}")
   end
 
-  it "blocks immediate repeated transitions for the same user and topic" do
+  it "returns 200 for a valid transition" do
     post "/discourse-workflow/act/#{topic.id}.json", params: { option: "next" }
+
     expect(response.status).to eq(200)
     expect(response.parsed_body["success"]).to eq("OK")
+    expect(workflow_state.reload.workflow_step_id).to eq(step_2.id)
+  end
 
-    expect do
-      post "/discourse-workflow/act/#{topic.id}.json", params: { option: "next" }
-    end.not_to change { DiscourseWorkflow::WorkflowAuditLog.count }
+  it "returns conflict when trying a stale transition option" do
+    post "/discourse-workflow/act/#{topic.id}.json", params: { option: "next" }
+    expect(response.status).to eq(200)
 
+    # clear cooldown so we can assert stale-state behavior instead of cooldown
+    Discourse.redis.del("discourse-workflow-transition-#{user.id}-#{topic.id}")
+
+    post "/discourse-workflow/act/#{topic.id}.json", params: { option: "next" }
+
+    expect(response.status).to eq(409)
     expect(response.parsed_body["failed"]).to eq("FAILED")
+    expect(response.parsed_body["message"]).to eq(
+      I18n.t("discourse_workflow.errors.transition_failed_stale_state_refreshing"),
+    )
   end
 end

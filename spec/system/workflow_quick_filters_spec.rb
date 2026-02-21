@@ -9,28 +9,13 @@ RSpec.describe "Workflow quick filters", type: :system do
   fab!(:category_2, :category)
   fab!(:category_3, :category)
   fab!(:step_1) do
-    Fabricate(
-      :workflow_step,
-      workflow_id: workflow.id,
-      category_id: category_1.id,
-      position: 1,
-    )
+    Fabricate(:workflow_step, workflow_id: workflow.id, category_id: category_1.id, position: 1)
   end
   fab!(:step_2) do
-    Fabricate(
-      :workflow_step,
-      workflow_id: workflow.id,
-      category_id: category_2.id,
-      position: 2,
-    )
+    Fabricate(:workflow_step, workflow_id: workflow.id, category_id: category_2.id, position: 2)
   end
   fab!(:step_3) do
-    Fabricate(
-      :workflow_step,
-      workflow_id: workflow.id,
-      category_id: category_3.id,
-      position: 3,
-    )
+    Fabricate(:workflow_step, workflow_id: workflow.id, category_id: category_3.id, position: 3)
   end
   fab!(:next_option) { Fabricate(:workflow_option, slug: "next", name: "Next") }
   fab!(:finish_option) { Fabricate(:workflow_option, slug: "finish", name: "Finish") }
@@ -50,9 +35,7 @@ RSpec.describe "Workflow quick filters", type: :system do
       target_step_id: step_3.id,
     )
   end
-  fab!(:topic_1) do
-    Fabricate(:topic_with_op, category: category_1, user: user, tags: [kanban_tag])
-  end
+  fab!(:topic_1) { Fabricate(:topic_with_op, category: category_1, user: user, tags: [kanban_tag]) }
   fab!(:topic_2) { Fabricate(:topic_with_op, category: category_1, user: user) }
   fab!(:workflow_state_1) do
     Fabricate(
@@ -133,10 +116,7 @@ RSpec.describe "Workflow quick filters", type: :system do
     expect(workflow_discovery_page).to have_quick_filters
 
     workflow_discovery_page.set_step_filter(2)
-    expect(page).to have_current_path(
-      %r{/workflow\?.*workflow_step_position=2},
-      url: true,
-    )
+    expect(page).to have_current_path(%r{/workflow\?.*workflow_step_position=2}, url: true)
     expect(page).to have_content(topic_2.title)
     expect(page).to have_no_content(topic_1.title)
     expect(page).to have_css(".workflow-quick-filters__apply-step.btn-primary")
@@ -148,10 +128,7 @@ RSpec.describe "Workflow quick filters", type: :system do
     expect(page).to have_css(".workflow-quick-filters__apply-step.btn-default")
 
     workflow_discovery_page.set_step_filter(2)
-    expect(page).to have_current_path(
-      %r{/workflow\?.*workflow_step_position=2},
-      url: true,
-    )
+    expect(page).to have_current_path(%r{/workflow\?.*workflow_step_position=2}, url: true)
     expect(page).to have_css(".workflow-quick-filters__apply-step.btn-primary")
 
     workflow_discovery_page.set_step_filter(2)
@@ -199,12 +176,8 @@ RSpec.describe "Workflow quick filters", type: :system do
     workflow_discovery_page.visit_workflow
 
     expect(page).to have_css("th.workflow-overdue-column")
-    expect(
-      page,
-    ).to have_css("tr[data-topic-id='#{topic_1.id}'] .workflow-overdue-indicator")
-    expect(
-      page,
-    ).to have_no_css("tr[data-topic-id='#{topic_2.id}'] .workflow-overdue-indicator")
+    expect(page).to have_css("tr[data-topic-id='#{topic_1.id}'] .workflow-overdue-indicator")
+    expect(page).to have_no_css("tr[data-topic-id='#{topic_2.id}'] .workflow-overdue-indicator")
   end
 
   it "shows kanban toggle only when the current list is a single compatible workflow" do
@@ -220,10 +193,7 @@ RSpec.describe "Workflow quick filters", type: :system do
 
     workflow_discovery_page.toggle_workflow_view
 
-    expect(page).to have_current_path(
-      %r{/workflow\?.*workflow_view=kanban},
-      url: true,
-    )
+    expect(page).to have_current_path(%r{/workflow\?.*workflow_view=kanban}, url: true)
     expect(workflow_discovery_page).to have_kanban_board
     expect(workflow_discovery_page).to have_kanban_column_for_step(1)
     expect(workflow_discovery_page).to have_kanban_column_for_step(2)
@@ -274,6 +244,27 @@ RSpec.describe "Workflow quick filters", type: :system do
     expect(workflow_discovery_page).to have_kanban_card_for_topic_in_step(topic_1.id, 2)
 
     workflow_discovery_page.move_kanban_card_with_key(topic_1.id, "ArrowLeft")
+    expect(workflow_discovery_page).to have_kanban_card_for_topic_in_step(topic_1.id, 2)
+  end
+
+  it "refreshes kanban view after stale transition errors to re-sync backend state" do
+    workflow_discovery_page.visit_workflow
+    workflow_discovery_page.toggle_workflow_view
+
+    expect(workflow_discovery_page).to have_kanban_card_for_topic_in_step(topic_1.id, 1)
+
+    # Simulate another actor advancing this item after the client has loaded.
+    workflow_state_1.update_columns(workflow_step_id: step_2.id)
+
+    workflow_discovery_page.drag_kanban_card_to_step(topic_1.id, 2)
+
+    expect(page).to have_css(
+      ".dialog-body",
+      text:
+        "Transition Failed: probably due to stale UI state - please try again after refresh - refreshing!",
+    )
+    find("#dialog-holder .btn-primary").click
+    expect(workflow_discovery_page).to have_no_kanban_card_for_topic_in_step(topic_1.id, 1)
     expect(workflow_discovery_page).to have_kanban_card_for_topic_in_step(topic_1.id, 2)
   end
 
