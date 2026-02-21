@@ -180,6 +180,34 @@ module PageObjects
         self
       end
 
+      def move_kanban_card_with_key(topic_id, key)
+        page.execute_script(
+          <<~JS,
+            const id = arguments[0];
+            const key = arguments[1];
+            const card = document.querySelector(
+              `.workflow-kanban__card[data-topic-id="${id}"]`
+            );
+
+            if (!card) {
+              return;
+            }
+
+            card.focus();
+            card.dispatchEvent(
+              new KeyboardEvent("keydown", {
+                key,
+                bubbles: true,
+                cancelable: true,
+              })
+            );
+          JS
+          topic_id,
+          key
+        )
+        self
+      end
+
       def current_url
         page.current_url
       end

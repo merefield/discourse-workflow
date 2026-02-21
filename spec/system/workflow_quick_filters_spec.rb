@@ -260,6 +260,19 @@ RSpec.describe "Workflow quick filters", type: :system do
     expect(workflow_discovery_page).to have_kanban_card_for_topic_in_step(topic_1.id, 2)
   end
 
+  it "supports keyboard arrow transitions for focused kanban cards when legal" do
+    workflow_discovery_page.visit_workflow
+    workflow_discovery_page.toggle_workflow_view
+
+    expect(workflow_discovery_page).to have_kanban_card_for_topic_in_step(topic_1.id, 1)
+
+    workflow_discovery_page.move_kanban_card_with_key(topic_1.id, "ArrowRight")
+    expect(workflow_discovery_page).to have_kanban_card_for_topic_in_step(topic_1.id, 2)
+
+    workflow_discovery_page.move_kanban_card_with_key(topic_1.id, "ArrowLeft")
+    expect(workflow_discovery_page).to have_kanban_card_for_topic_in_step(topic_1.id, 2)
+  end
+
   it "does not show kanban toggle when the workflow list includes multiple workflows" do
     other_workflow = Fabricate(:workflow, name: "Second Workflow")
     other_step =

@@ -24,6 +24,14 @@ export default class WorkflowQuickFiltersConnector extends Component {
   @tracked transitionInFlightTopicId = null;
   @tracked recentlyDraggedTopicId = null;
 
+  willDestroy(...args) {
+    super.willDestroy(...args);
+
+    if (typeof document !== "undefined") {
+      document.body.classList.remove("workflow-kanban-view");
+    }
+  }
+
   clearDragState(topicId = null) {
     const normalizedTopicId = Number(topicId || this.draggedTopicId);
 
@@ -38,14 +46,6 @@ export default class WorkflowQuickFiltersConnector extends Component {
 
     this.draggedTopicId = null;
     this.draggedFromPosition = null;
-  }
-
-  willDestroy(...args) {
-    super.willDestroy(...args);
-
-    if (typeof document !== "undefined") {
-      document.body.classList.remove("workflow-kanban-view");
-    }
   }
 
   sanitizeFilters(filters) {
@@ -218,6 +218,18 @@ export default class WorkflowQuickFiltersConnector extends Component {
 
   optionSlugForTransition(fromPosition, toPosition) {
     return this.kanbanTransitionMap.get(`${fromPosition}:${toPosition}`);
+  }
+
+  adjacentStepPosition(fromPosition, direction) {
+    const positions = this.kanbanSteps.map((step) => Number(step.position));
+    const index = positions.indexOf(Number(fromPosition));
+
+    if (index === -1) {
+      return null;
+    }
+
+    const nextPosition = positions[index + direction];
+    return Number.isInteger(nextPosition) ? nextPosition : null;
   }
 
   isColumnLegalDropTarget(position) {
@@ -512,13 +524,41 @@ export default class WorkflowQuickFiltersConnector extends Component {
   }
 
   @action
-  openKanbanTopicWithKeyboard(topic, event) {
-    if (event.key !== "Enter" && event.key !== " ") {
+  async openKanbanTopicWithKeyboard(topic, event) {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      this.openKanbanTopic(topic, event);
+      return;
+    }
+
+    if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") {
       return;
     }
 
     event.preventDefault();
-    this.openKanbanTopic(topic, event);
+
+    if (!topic.workflow_can_act || this.transitionInFlightTopicId) {
+      return;
+    }
+
+    const fromPosition = Number(topic.workflow_step_position);
+    const direction = event.key === "ArrowRight" ? 1 : -1;
+    const targetPosition = this.adjacentStepPosition(fromPosition, direction);
+    const topicId = Number(topic.id);
+
+    if (!targetPosition) {
+      return;
+    }
+
+    const didTransition = await this.transitionTopic(
+      topicId,
+      fromPosition,
+      targetPosition
+    );
+
+    if (didTransition) {
+      this.focusKanbanCard(topicId);
+    }
   }
 
   @action
@@ -560,29 +600,14 @@ export default class WorkflowQuickFiltersConnector extends Component {
     });
   }
 
-  @action
-  async columnDrop(column, event) {
-    event.preventDefault();
-
-    const topicId =
-      Number(event.dataTransfer.getData("text/plain")) || this.draggedTopicId;
-    const fromPosition = Number(this.draggedFromPosition);
-    const toPosition = Number(column.position);
-
-    if (!topicId || !fromPosition || !toPosition) {
-      this.clearDragState(topicId);
-      return;
-    }
-
-    if (toPosition === fromPosition) {
-      this.clearDragState(topicId);
-      return;
+  async transitionTopic(topicId, fromPosition, toPosition) {
+    if (!topicId || !fromPosition || !toPosition || toPosition === fromPosition) {
+      return false;
     }
 
     const optionSlug = this.optionSlugForTransition(fromPosition, toPosition);
     if (!optionSlug) {
-      this.clearDragState(topicId);
-      return;
+      return false;
     }
 
     this.transitionInFlightTopicId = topicId;
@@ -594,12 +619,36 @@ export default class WorkflowQuickFiltersConnector extends Component {
       });
 
       this.updateTopicTransitionState(topicId, toPosition);
+      return true;
     } catch (error) {
       popupAjaxError(error);
+      return false;
     } finally {
       this.transitionInFlightTopicId = null;
-      this.clearDragState(topicId);
     }
+  }
+
+  focusKanbanCard(topicId) {
+    if (typeof document === "undefined") {
+      return;
+    }
+
+    document
+      .querySelector(`.workflow-kanban__card[data-topic-id="${topicId}"]`)
+      ?.focus();
+  }
+
+  @action
+  async columnDrop(column, event) {
+    event.preventDefault();
+
+    const topicId =
+      Number(event.dataTransfer.getData("text/plain")) || this.draggedTopicId;
+    const fromPosition = Number(this.draggedFromPosition);
+    const toPosition = Number(column.position);
+
+    await this.transitionTopic(topicId, fromPosition, toPosition);
+    this.clearDragState(topicId);
   }
 
   @action
