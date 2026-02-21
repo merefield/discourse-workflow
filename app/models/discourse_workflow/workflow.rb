@@ -20,6 +20,53 @@ module ::DiscourseWorkflow
 
     scope :ordered, -> { order("lower(name) ASC") }
 
+    def kanban_compatible?
+      steps = workflow_steps.includes(:workflow_step_options).to_a
+      return false if steps.blank?
+
+      positions = steps.map { |step| step.position.to_i }
+      return false if positions.uniq.size != positions.size
+
+      start_steps = steps.select { |step| step.position.to_i == 1 }
+      return false unless start_steps.one?
+
+      step_ids = steps.map(&:id)
+      step_lookup = step_ids.index_with(true)
+      steps_by_id = steps.index_by(&:id)
+      edges = Hash.new { |hash, key| hash[key] = [] }
+      edge_lookup = {}
+
+      steps.each do |step|
+        step.workflow_step_options.each do |step_option|
+          target_step_id = step_option.target_step_id
+          next if target_step_id.blank?
+          return false if !step_lookup[target_step_id]
+
+          from_position = step.position.to_i
+          to_position = steps_by_id[target_step_id].position.to_i
+          edge_key = [from_position, to_position]
+          return false if edge_lookup[edge_key]
+
+          edge_lookup[edge_key] = true
+          edges[step.id] << target_step_id
+        end
+      end
+
+      start_step_id = start_steps.first.id
+      visited = {}
+      stack = [start_step_id]
+
+      until stack.empty?
+        current_step_id = stack.pop
+        next if visited[current_step_id]
+
+        visited[current_step_id] = true
+        edges[current_step_id].each { |target_step_id| stack << target_step_id }
+      end
+
+      visited.size == step_ids.size
+    end
+
     def validation_warnings
       warnings = []
 
@@ -103,12 +150,13 @@ end
 #
 # Table name: workflows
 #
-#  id           :bigint           not null, primary key
-#  description  :text
-#  enabled      :boolean          default(TRUE)
-#  name         :string
-#  overdue_days :integer
-#  slug         :string
-#  created_at   :datetime         not null
-#  updated_at   :datetime         not null
+#  id               :bigint           not null, primary key
+#  description      :text
+#  enabled          :boolean          default(TRUE)
+#  name             :string
+#  overdue_days     :integer
+#  show_kanban_tags :boolean          default(TRUE), not null
+#  slug             :string
+#  created_at       :datetime         not null
+#  updated_at       :datetime         not null
 #

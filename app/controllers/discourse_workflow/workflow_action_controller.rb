@@ -10,10 +10,11 @@ module DiscourseWorkflow
       user_id = current_user.id
       option = params[:option]
       cooldown_key = nil
+      successful_transition = false
+
       if user_id.present? && option.present? && topic.present?
         cooldown_key = "discourse-workflow-transition-#{user_id}-#{topic.id}"
-        cooldown_acquired =
-          Discourse.redis.set(cooldown_key, "1", ex: 5, nx: true)
+        cooldown_acquired = Discourse.redis.set(cooldown_key, "1", ex: 5, nx: true)
 
         if !cooldown_acquired
           render json: failed_json
@@ -23,14 +24,17 @@ module DiscourseWorkflow
         successful_transition = Transition.new.transition(user_id, topic, option)
       end
 
-      if !successful_transition && cooldown_key.present?
-        Discourse.redis.del(cooldown_key)
-      end
+      Discourse.redis.del(cooldown_key) if !successful_transition && cooldown_key.present?
 
       if successful_transition
         render json: success_json
       else
-        render json: failed_json
+        render json:
+                 failed_json.merge(
+                   message:
+                     I18n.t("discourse_workflow.errors.transition_failed_stale_state_refreshing"),
+                 ),
+               status: :conflict
       end
     end
   end

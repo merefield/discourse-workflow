@@ -4,25 +4,38 @@ RSpec.describe "Workflow quick filters", type: :system do
   fab!(:workflow_discovery_page) { PageObjects::Pages::WorkflowDiscovery.new }
   fab!(:user) { Fabricate(:user, trust_level: TrustLevel[1], refresh_auto_groups: true) }
   fab!(:workflow) { Fabricate(:workflow, name: "Quick Filter Workflow") }
+  fab!(:kanban_tag) { Fabricate(:tag, name: "kanban-tag") }
   fab!(:category_1, :category)
   fab!(:category_2, :category)
+  fab!(:category_3, :category)
   fab!(:step_1) do
-    Fabricate(
-      :workflow_step,
-      workflow_id: workflow.id,
-      category_id: category_1.id,
-      position: 1,
-    )
+    Fabricate(:workflow_step, workflow_id: workflow.id, category_id: category_1.id, position: 1)
   end
   fab!(:step_2) do
+    Fabricate(:workflow_step, workflow_id: workflow.id, category_id: category_2.id, position: 2)
+  end
+  fab!(:step_3) do
+    Fabricate(:workflow_step, workflow_id: workflow.id, category_id: category_3.id, position: 3)
+  end
+  fab!(:next_option) { Fabricate(:workflow_option, slug: "next", name: "Next") }
+  fab!(:finish_option) { Fabricate(:workflow_option, slug: "finish", name: "Finish") }
+  fab!(:step_transition) do
     Fabricate(
-      :workflow_step,
-      workflow_id: workflow.id,
-      category_id: category_2.id,
-      position: 2,
+      :workflow_step_option,
+      workflow_step_id: step_1.id,
+      workflow_option_id: next_option.id,
+      target_step_id: step_2.id,
     )
   end
-  fab!(:topic_1) { Fabricate(:topic_with_op, category: category_1, user: user) }
+  fab!(:step_transition_2) do
+    Fabricate(
+      :workflow_step_option,
+      workflow_step_id: step_2.id,
+      workflow_option_id: finish_option.id,
+      target_step_id: step_3.id,
+    )
+  end
+  fab!(:topic_1) { Fabricate(:topic_with_op, category: category_1, user: user, tags: [kanban_tag]) }
   fab!(:topic_2) { Fabricate(:topic_with_op, category: category_1, user: user) }
   fab!(:workflow_state_1) do
     Fabricate(
@@ -44,10 +57,13 @@ RSpec.describe "Workflow quick filters", type: :system do
   before do
     enable_current_plugin
     SiteSetting.workflow_enabled = true
+    SiteSetting.tagging_enabled = true
     category_1.set_permissions(everyone: :full, staff: :full)
     category_2.set_permissions(everyone: :readonly, staff: :full)
+    category_3.set_permissions(everyone: :readonly, staff: :full)
     category_1.save!
     category_2.save!
+    category_3.save!
     topic_2.update_columns(category_id: category_2.id)
     workflow_state_1.update_columns(updated_at: 5.days.ago)
     sign_in(user)
@@ -100,10 +116,7 @@ RSpec.describe "Workflow quick filters", type: :system do
     expect(workflow_discovery_page).to have_quick_filters
 
     workflow_discovery_page.set_step_filter(2)
-    expect(page).to have_current_path(
-      %r{/workflow\?.*workflow_step_position=2},
-      url: true,
-    )
+    expect(page).to have_current_path(%r{/workflow\?.*workflow_step_position=2}, url: true)
     expect(page).to have_content(topic_2.title)
     expect(page).to have_no_content(topic_1.title)
     expect(page).to have_css(".workflow-quick-filters__apply-step.btn-primary")
@@ -115,10 +128,7 @@ RSpec.describe "Workflow quick filters", type: :system do
     expect(page).to have_css(".workflow-quick-filters__apply-step.btn-default")
 
     workflow_discovery_page.set_step_filter(2)
-    expect(page).to have_current_path(
-      %r{/workflow\?.*workflow_step_position=2},
-      url: true,
-    )
+    expect(page).to have_current_path(%r{/workflow\?.*workflow_step_position=2}, url: true)
     expect(page).to have_css(".workflow-quick-filters__apply-step.btn-primary")
 
     workflow_discovery_page.set_step_filter(2)
@@ -166,11 +176,157 @@ RSpec.describe "Workflow quick filters", type: :system do
     workflow_discovery_page.visit_workflow
 
     expect(page).to have_css("th.workflow-overdue-column")
-    expect(
-      page,
-    ).to have_css("tr[data-topic-id='#{topic_1.id}'] .workflow-overdue-indicator")
-    expect(
-      page,
-    ).to have_no_css("tr[data-topic-id='#{topic_2.id}'] .workflow-overdue-indicator")
+    expect(page).to have_css("tr[data-topic-id='#{topic_1.id}'] .workflow-overdue-indicator")
+    expect(page).to have_no_css("tr[data-topic-id='#{topic_2.id}'] .workflow-overdue-indicator")
+  end
+
+  it "shows kanban toggle only when the current list is a single compatible workflow" do
+    workflow_discovery_page.visit_workflow
+
+    expect(workflow_discovery_page).to have_workflow_view_toggle
+  end
+
+  it "toggles between workflow list and kanban board view" do
+    workflow_discovery_page.visit_workflow
+    expect(page).to have_css(".topic-list")
+    expect(page).to have_no_css(".workflow-kanban")
+
+    workflow_discovery_page.toggle_workflow_view
+
+    expect(page).to have_current_path(%r{/workflow\?.*workflow_view=kanban}, url: true)
+    expect(workflow_discovery_page).to have_kanban_board
+    expect(workflow_discovery_page).to have_kanban_column_for_step(1)
+    expect(workflow_discovery_page).to have_kanban_column_for_step(2)
+    expect(workflow_discovery_page).to have_kanban_column_for_step(3)
+    expect(workflow_discovery_page).to have_kanban_card_for_topic(topic_1.id)
+    expect(workflow_discovery_page).to have_kanban_card_for_topic(topic_2.id)
+    expect(page).to have_no_css(".topic-list")
+    expect(page).to have_css(".workflow-quick-filters__workflow-view.btn-primary")
+
+    workflow_discovery_page.toggle_workflow_view
+
+    expect(page).to have_current_path("/workflow", url: false)
+    expect(page).to have_css(".topic-list")
+    expect(page).to have_no_css(".workflow-kanban")
+    expect(page).to have_css(".workflow-quick-filters__workflow-view.btn-default")
+  end
+
+  it "supports drag-drop transitions with legal and illegal column highlighting" do
+    workflow_discovery_page.visit_workflow
+    workflow_discovery_page.toggle_workflow_view
+
+    expect(workflow_discovery_page).to have_kanban_card_for_topic_in_step(topic_1.id, 1)
+    expect(workflow_discovery_page).to have_kanban_card_for_topic_in_step(topic_2.id, 2)
+
+    workflow_discovery_page.start_drag_on_kanban_card(topic_1.id)
+
+    expect(workflow_discovery_page).to have_kanban_legal_drop_target_for_step(2)
+    expect(workflow_discovery_page).to have_kanban_illegal_drop_target_for_step(3)
+
+    workflow_discovery_page.end_drag_on_kanban_card(topic_1.id)
+    workflow_discovery_page.drag_kanban_card_to_step(topic_1.id, 3)
+
+    expect(workflow_discovery_page).to have_kanban_card_for_topic_in_step(topic_1.id, 1)
+
+    workflow_discovery_page.drag_kanban_card_to_step(topic_1.id, 2)
+
+    expect(workflow_discovery_page).to have_no_kanban_card_for_topic_in_step(topic_1.id, 1)
+    expect(workflow_discovery_page).to have_kanban_card_for_topic_in_step(topic_1.id, 2)
+  end
+
+  it "supports keyboard arrow transitions for focused kanban cards when legal" do
+    workflow_discovery_page.visit_workflow
+    workflow_discovery_page.toggle_workflow_view
+
+    expect(workflow_discovery_page).to have_kanban_card_for_topic_in_step(topic_1.id, 1)
+
+    workflow_discovery_page.move_kanban_card_with_key(topic_1.id, "ArrowRight")
+    expect(workflow_discovery_page).to have_kanban_card_for_topic_in_step(topic_1.id, 2)
+
+    workflow_discovery_page.move_kanban_card_with_key(topic_1.id, "ArrowLeft")
+    expect(workflow_discovery_page).to have_kanban_card_for_topic_in_step(topic_1.id, 2)
+  end
+
+  it "uses step category colors for kanban column borders" do
+    category_1.update_columns(color: "112233")
+    category_2.update_columns(color: "445566")
+    category_3.update_columns(color: "778899")
+
+    workflow_discovery_page.visit_workflow
+    workflow_discovery_page.toggle_workflow_view
+
+    expect(workflow_discovery_page.kanban_column_border_color(1)).to eq(
+      css_rgb_for_hex(category_1.reload.color),
+    )
+    expect(workflow_discovery_page.kanban_column_border_color(2)).to eq(
+      css_rgb_for_hex(category_2.reload.color),
+    )
+    expect(workflow_discovery_page.kanban_column_border_color(3)).to eq(
+      css_rgb_for_hex(category_3.reload.color),
+    )
+  end
+
+  it "refreshes kanban view after stale transition errors to re-sync backend state" do
+    workflow_discovery_page.visit_workflow
+    workflow_discovery_page.toggle_workflow_view
+
+    expect(workflow_discovery_page).to have_kanban_card_for_topic_in_step(topic_1.id, 1)
+
+    # Simulate another actor advancing this item after the client has loaded.
+    workflow_state_1.update_columns(workflow_step_id: step_2.id)
+
+    workflow_discovery_page.drag_kanban_card_to_step(topic_1.id, 2)
+
+    expect(page).to have_css(
+      ".dialog-body",
+      text:
+        "Transition Failed: probably due to stale UI state - please try again after refresh - refreshing!",
+    )
+    find("#dialog-holder .btn-primary").click
+    expect(workflow_discovery_page).to have_no_kanban_card_for_topic_in_step(topic_1.id, 1)
+    expect(workflow_discovery_page).to have_kanban_card_for_topic_in_step(topic_1.id, 2)
+  end
+
+  it "shows kanban card tags when enabled on the workflow and hides them when disabled" do
+    workflow_discovery_page.visit_workflow
+    workflow_discovery_page.toggle_workflow_view
+
+    expect(workflow_discovery_page).to have_kanban_tag_for_topic(topic_1.id, "kanban-tag")
+
+    workflow.update!(show_kanban_tags: false)
+    workflow_discovery_page.visit_workflow
+    workflow_discovery_page.toggle_workflow_view
+
+    expect(workflow_discovery_page).to have_no_kanban_tag_for_topic(topic_1.id, "kanban-tag")
+  end
+
+  it "does not show kanban toggle when the workflow list includes multiple workflows" do
+    other_workflow = Fabricate(:workflow, name: "Second Workflow")
+    other_step =
+      Fabricate(
+        :workflow_step,
+        workflow_id: other_workflow.id,
+        category_id: category_1.id,
+        position: 1,
+      )
+    other_topic = Fabricate(:topic_with_op, category: category_1, user: user)
+    Fabricate(
+      :workflow_state,
+      topic_id: other_topic.id,
+      workflow_id: other_workflow.id,
+      workflow_step_id: other_step.id,
+    )
+
+    workflow_discovery_page.visit_workflow
+
+    expect(workflow_discovery_page).to have_no_workflow_view_toggle
+  end
+
+  def css_rgb_for_hex(hex)
+    normalized = hex.delete("#")
+    normalized =
+      normalized.chars.map { |channel| "#{channel}#{channel}" }.join if normalized.length == 3
+    red, green, blue = normalized.scan(/../).map { |channel| channel.to_i(16) }
+    "rgb(#{red}, #{green}, #{blue})"
   end
 end

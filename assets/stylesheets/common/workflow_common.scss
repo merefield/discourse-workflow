@@ -103,6 +103,230 @@ body.workflow-topic {
 
   .workflow-quick-filters__step-input {
     max-width: 90px;
+    margin-bottom: 0;
+  }
+}
+
+.admin-interface {
+  .workflow-editor__kanban-compatible {
+    color: var(--success);
+    font-weight: 600;
+  }
+
+  .workflow-editor__kanban-incompatible {
+    color: var(--danger);
+    font-weight: 600;
+  }
+}
+
+.workflow-quick-filters {
+  .workflow-kanban {
+    display: none;
+  }
+}
+
+.workflow-quick-filters.workflow-quick-filters--kanban-active {
+  flex-wrap: wrap;
+
+  .workflow-kanban {
+    display: block;
+    flex-basis: 100%;
+    width: 100%;
+  }
+}
+
+.workflow-quick-filters.workflow-quick-filters--kanban-active
+  ~ .discovery-topics-list {
+  .topic-list,
+  .load-more,
+  .topic-list-bottom {
+    display: none;
+  }
+}
+
+body.workflow-kanban-view {
+  .discovery-topics-list {
+    .topic-list,
+    .load-more,
+    .topic-list-bottom {
+      display: none;
+    }
+  }
+}
+
+.contents.workflow-kanban-hide-topics {
+  .topic-list,
+  .load-more,
+  .topic-list-bottom {
+    display: none;
+  }
+}
+
+.workflow-kanban {
+  margin: 0.75rem 0 1rem;
+
+  .workflow-kanban__header {
+    margin-bottom: 0.75rem;
+  }
+
+  .workflow-kanban__title {
+    margin: 0;
+    font-size: var(--font-up-1);
+  }
+
+  .workflow-kanban__workflow-name {
+    margin: 0.25rem 0 0;
+    color: var(--primary-medium);
+    font-size: var(--font-down-1);
+  }
+
+  .workflow-kanban__columns {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 0.75rem;
+    align-items: start;
+  }
+
+  .workflow-kanban__column {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--category-badge-color, var(--primary-low));
+    border-radius: 8px;
+    background: var(--secondary);
+    overflow: visible;
+  }
+
+  .workflow-kanban__column--source {
+    border-color: var(--primary-medium);
+  }
+
+  .workflow-kanban__column--legal {
+    border-color: var(--success);
+
+    .workflow-kanban__cards {
+      background: color-mix(in srgb, var(--success) 14%, transparent);
+    }
+  }
+
+  .workflow-kanban__column--illegal {
+    .workflow-kanban__cards {
+      background-image: repeating-linear-gradient(
+        135deg,
+        transparent,
+        transparent 8px,
+        color-mix(in srgb, var(--danger) 14%, transparent) 8px,
+        color-mix(in srgb, var(--danger) 14%, transparent) 16px
+      );
+      opacity: 0.85;
+    }
+  }
+
+  .workflow-kanban__column-header {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 0.5rem;
+    align-items: center;
+    margin: 1px 1px 0;
+    padding: 0.5rem 0.75rem;
+    border-radius: 8px 8px 0 0;
+    border-bottom: 1px solid var(--primary-low);
+    background: var(--primary-very-low);
+  }
+
+  .workflow-kanban__step-position {
+    font-weight: 700;
+    color: var(--primary-medium);
+  }
+
+  .workflow-kanban__step-name {
+    font-weight: 600;
+  }
+
+  .workflow-kanban__topic-count {
+    color: var(--primary-medium);
+    font-size: var(--font-down-1);
+  }
+
+  .workflow-kanban__cards {
+    display: grid;
+    grid-auto-rows: min-content;
+    gap: 0.5rem;
+    padding: 0.75rem;
+    flex: 1 0 auto;
+    min-height: 120px;
+    transition: background-color 120ms ease, opacity 120ms ease;
+  }
+
+  .workflow-kanban__card {
+    display: grid;
+    gap: 0.35rem;
+    border: 1px solid color-mix(in srgb, var(--primary-low) 80%, black);
+    border-radius: 8px;
+    padding: 0.65rem 0.75rem;
+    text-decoration: none;
+    color: var(--primary);
+    background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--secondary) 88%, white),
+      var(--secondary)
+    );
+    box-shadow: 0 1px 2px color-mix(in srgb, var(--primary) 10%, transparent);
+    cursor: grab;
+    user-select: none;
+    transition: transform 100ms ease, box-shadow 100ms ease,
+      border-color 100ms ease;
+  }
+
+  .workflow-kanban__card:hover {
+    border-color: var(--primary-medium);
+    box-shadow: 0 4px 14px color-mix(in srgb, var(--primary) 20%, transparent);
+    transform: translateY(-1px);
+  }
+
+  .workflow-kanban__card--draggable:active {
+    cursor: grabbing;
+  }
+
+  .workflow-kanban__card--dragging {
+    opacity: 0.55;
+    transform: scale(0.98);
+  }
+
+  .workflow-kanban__card--transitioning {
+    opacity: 0.7;
+    cursor: progress;
+  }
+
+  .workflow-kanban__card--locked {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+
+  .workflow-kanban__card-title {
+    font-weight: 500;
+    overflow-wrap: anywhere;
+  }
+
+  .workflow-kanban__tags.discourse-tags {
+    margin-top: 0.15rem;
+    gap: 0.3rem;
+  }
+
+  .workflow-kanban__tags .discourse-tag.box {
+    font-size: var(--font-down-2);
+    line-height: 1.4;
+  }
+
+  .workflow-kanban__card-overdue {
+    color: var(--danger);
+    font-size: var(--font-down-1);
+    font-weight: 600;
+  }
+
+  .workflow-kanban__empty-step {
+    margin: 0;
+    color: var(--primary-medium);
+    font-size: var(--font-down-1);
   }
 }
 

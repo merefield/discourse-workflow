@@ -61,6 +61,7 @@ module DiscourseWorkflow
             :description,
             :enabled,
             :overdue_days,
+            :show_kanban_tags,
           )
 
         permitted
