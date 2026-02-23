@@ -52,13 +52,13 @@ export default class WorkflowBurndownChartConnector extends Component {
   }
 
   get currentLocation() {
-    this.router.currentURL;
+    const currentURL = this.router.currentURL;
 
     if (typeof window !== "undefined") {
       return `${window.location.pathname}${window.location.search}`;
     }
 
-    return this.router.currentURL || "";
+    return currentURL || "";
   }
 
   get currentPathname() {
