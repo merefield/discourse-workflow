@@ -1,18 +1,20 @@
 # frozen_string_literal: true
 
-class ::Jobs::WorkflowDataExplorerQueriesCompleteness < ::Jobs::Scheduled
-  sidekiq_options retry: false
+module Jobs
+  module DiscourseWorkflow
+    class DataExplorerQueriesCompleteness < ::Jobs::Scheduled
+      sidekiq_options retry: false
 
-  every 24.hours
+      every 24.hours
 
-  def execute(args)
-    if !ActiveRecord::Base.connection.table_exists?(:data_explorer_queries)
-      Rails.logger.warn "Skipping WorkflowDataExplorerQueriesCompleteness: doesn't look like Data Explorer plugin is properly installed"
-      return
-    end
+      def execute(args = {})
+        if !ActiveRecord::Base.connection.table_exists?(:data_explorer_queries)
+          Rails.logger.warn "Skipping DataExplorerQueriesCompleteness: doesn't look like Data Explorer plugin is properly installed"
+          return
+        end
 
-    if !::DiscourseDataExplorer::Query.exists?(name: "Workflow Stats (default)")
-      query_sql = <<~SQL
+        if !::DiscourseDataExplorer::Query.exists?(name: "Workflow Stats (default)")
+          query_sql = <<~SQL
         -- [params]
         -- int :workflow_id = 1
         -- int :num_of_days_history = 14
@@ -28,7 +30,7 @@ class ::Jobs::WorkflowDataExplorerQueriesCompleteness < ::Jobs::Scheduled
           AND wstt.workflow_id = :workflow_id
       SQL
 
-      DB.exec <<~SQL, now: Time.zone.now, query_sql: query_sql
+          DB.exec <<~SQL, now: Time.zone.now, query_sql: query_sql
         INSERT INTO data_explorer_queries(name, description, sql, created_at, updated_at)
         VALUES
         ('Workflow Stats (default)',
@@ -37,12 +39,12 @@ class ::Jobs::WorkflowDataExplorerQueriesCompleteness < ::Jobs::Scheduled
         :now,
         :now)
       SQL
-    end
+        end
 
-    if !::DiscourseDataExplorer::Query.exists?(
-         name: "Workflow Audit Log (default)"
-       )
-      query_sql = <<~SQL
+        if !::DiscourseDataExplorer::Query.exists?(
+             name: "Workflow Audit Log (default)"
+           )
+          query_sql = <<~SQL
         -- [params]
         -- int :workflow_id = 1
         -- int :num_of_days_history = 14
@@ -58,7 +60,7 @@ class ::Jobs::WorkflowDataExplorerQueriesCompleteness < ::Jobs::Scheduled
         AND workflow_id = :workflow_id
       SQL
 
-      DB.exec <<~SQL, now: Time.zone.now, query_sql: query_sql
+          DB.exec <<~SQL, now: Time.zone.now, query_sql: query_sql
         INSERT INTO data_explorer_queries(name, description, sql, created_at, updated_at)
         VALUES
         ('Workflow Audit Log (default)',
@@ -67,6 +69,8 @@ class ::Jobs::WorkflowDataExplorerQueriesCompleteness < ::Jobs::Scheduled
         :now,
         :now)
       SQL
+        end
+      end
     end
   end
 end

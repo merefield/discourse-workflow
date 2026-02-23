@@ -88,7 +88,7 @@ module DiscourseWorkflow
       end
 
       if success && topic.category_id != starting_category_id
-        ::Jobs::WorkflowTopicArrivalNotifier.perform_async(
+        ::Jobs::DiscourseWorkflow::TopicArrivalNotifier.perform_async(
           { topic_id: topic.id }.as_json
         )
       end

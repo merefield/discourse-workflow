@@ -70,11 +70,30 @@ export default class WorkflowQuickFiltersConnector extends Component {
       sanitized.workflow_step_position = String(filters.workflow_step_position);
     }
 
-    if (filters?.workflow_view === "kanban") {
-      sanitized.workflow_view = "kanban";
+    if (
+      filters?.workflow_view === "kanban" ||
+      filters?.workflow_view === "chart"
+    ) {
+      sanitized.workflow_view = filters.workflow_view;
+    }
+
+    if (filters?.chart_weeks) {
+      const normalizedWeeks = this.normalizedChartWeeks(filters.chart_weeks);
+      if (normalizedWeeks) {
+        sanitized.chart_weeks = String(normalizedWeeks);
+      }
     }
 
     return sanitized;
+  }
+
+  normalizedChartWeeks(value) {
+    const parsed = Number(value);
+    if (!Number.isInteger(parsed) || parsed < 1) {
+      return null;
+    }
+
+    return Math.min(parsed, 12);
   }
 
   get routeTopicList() {
@@ -133,6 +152,13 @@ export default class WorkflowQuickFiltersConnector extends Component {
     );
   }
 
+  get isWorkflowChartsRoute() {
+    return (
+      this.router.currentRouteName === "discovery.workflowCharts" ||
+      this.currentPathname.startsWith("/workflow/charts")
+    );
+  }
+
   get hasMyCategoriesFilter() {
     return this.currentSearchParams.get("my_categories") === "1";
   }
@@ -153,6 +179,10 @@ export default class WorkflowQuickFiltersConnector extends Component {
     return this.workflowView === "kanban";
   }
 
+  get isChartView() {
+    return this.workflowView === "chart" || this.isWorkflowChartsRoute;
+  }
+
   get canUseKanbanView() {
     try {
       return this.topicListMetadata?.workflow_kanban_compatible === true;
@@ -161,18 +191,51 @@ export default class WorkflowQuickFiltersConnector extends Component {
     }
   }
 
-  get showKanbanToggle() {
-    return this.isKanbanView || this.canUseKanbanView;
+  get canUseChartView() {
+    try {
+      return (
+        this.topicListMetadata?.workflow_can_view_charts === true &&
+        Number(this.topicListMetadata?.workflow_single_workflow_id) > 0
+      );
+    } catch {
+      return false;
+    }
   }
 
   get showKanbanTags() {
     return this.topicListMetadata?.workflow_kanban_show_tags !== false;
   }
 
-  get workflowViewLabel() {
-    return this.isKanbanView
-      ? "discourse_workflow.quick_filters.list_view"
-      : "discourse_workflow.quick_filters.kanban_view";
+  get currentWorkflowView() {
+    if (this.isChartView) {
+      return "chart";
+    }
+
+    if (this.isKanbanView) {
+      return "kanban";
+    }
+
+    return "list";
+  }
+
+  get showChartViewOption() {
+    return this.isChartView || this.canUseChartView;
+  }
+
+  get showWorkflowViewSelector() {
+    return this.canUseKanbanView || this.showChartViewOption;
+  }
+
+  get shouldRenderKanbanBoard() {
+    return this.canUseKanbanView && this.isKanbanView;
+  }
+
+  get chartWeekOptions() {
+    return [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+  }
+
+  get chartWeeksValue() {
+    return String(this.normalizedChartWeeks(this.currentSearchParams.get("chart_weeks")) || 2);
   }
 
   get kanbanWorkflowName() {
@@ -339,14 +402,20 @@ export default class WorkflowQuickFiltersConnector extends Component {
   initializeFilters() {
     const params = this.currentSearchParams;
     this.stepPosition = params.get("workflow_step_position") || "";
-    this.workflowView = params.get("workflow_view") || null;
+    this.workflowView =
+      params.get("workflow_view") || (this.isWorkflowChartsRoute ? "chart" : null);
+
+    if (this.isWorkflowChartsRoute) {
+      return;
+    }
 
     if (
       params.has("my_categories") ||
       params.has("overdue") ||
       params.has("overdue_days") ||
       params.has("workflow_step_position") ||
-      params.has("workflow_view")
+      params.has("workflow_view") ||
+      params.has("chart_weeks")
     ) {
       return;
     }
@@ -385,6 +454,7 @@ export default class WorkflowQuickFiltersConnector extends Component {
       overdue_days: sanitized.overdue_days || null,
       workflow_step_position: sanitized.workflow_step_position || null,
       workflow_view: sanitized.workflow_view || null,
+      chart_weeks: sanitized.chart_weeks || null,
     };
     const currentParams = this.currentSearchParams;
     const unchanged =
@@ -395,8 +465,8 @@ export default class WorkflowQuickFiltersConnector extends Component {
         queryParams.overdue_days &&
       (currentParams.get("workflow_step_position") || null) ===
         queryParams.workflow_step_position &&
-      (currentParams.get("workflow_view") || null) ===
-        queryParams.workflow_view;
+      (currentParams.get("workflow_view") || null) === queryParams.workflow_view &&
+      (currentParams.get("chart_weeks") || null) === queryParams.chart_weeks;
 
     if (unchanged) {
       return;
@@ -481,18 +551,65 @@ export default class WorkflowQuickFiltersConnector extends Component {
   }
 
   @action
-  toggleWorkflowView() {
+  changeWorkflowView(event) {
+    const nextView = event.target.value;
     const params = new URLSearchParams(this.currentSearchParams.toString());
 
-    if (this.isKanbanView) {
+    if (nextView === "list") {
       params.delete("workflow_view");
       this.workflowView = null;
-    } else {
+    } else if (nextView === "kanban") {
+      if (!this.canUseKanbanView) {
+        event.target.value = this.currentWorkflowView;
+        return;
+      }
+
       params.set("workflow_view", "kanban");
       this.workflowView = "kanban";
+    } else if (nextView === "chart") {
+      if (!this.canUseChartView) {
+        event.target.value = this.currentWorkflowView;
+        return;
+      }
+
+      params.set("workflow_view", "chart");
+      if (!params.get("chart_weeks")) {
+        params.set("chart_weeks", "2");
+      }
+      this.workflowView = "chart";
     }
 
     this.syncBodyClass();
+    const nextFilters = Object.fromEntries(params.entries());
+
+    if (this.isWorkflowChartsRoute) {
+      this.router.transitionTo("discovery.workflow", {
+        queryParams: {
+          my_categories: nextFilters.my_categories || null,
+          overdue: nextFilters.overdue || null,
+          overdue_days: nextFilters.overdue_days || null,
+          workflow_step_position: nextFilters.workflow_step_position || null,
+          workflow_view: nextFilters.workflow_view || null,
+          chart_weeks: nextFilters.chart_weeks || null,
+        },
+      });
+      return;
+    }
+
+    this.navigateWithFilters(nextFilters);
+  }
+
+  @action
+  changeChartWeeks(event) {
+    const weeks = this.normalizedChartWeeks(event.target.value);
+    if (!weeks) {
+      event.target.value = this.chartWeeksValue;
+      return;
+    }
+
+    const params = new URLSearchParams(this.currentSearchParams.toString());
+    params.set("workflow_view", "chart");
+    params.set("chart_weeks", String(weeks));
     this.navigateWithFilters(Object.fromEntries(params.entries()));
   }
 
@@ -672,7 +789,18 @@ export default class WorkflowQuickFiltersConnector extends Component {
   syncStepPositionFromUrl() {
     const params = this.currentSearchParams;
     this.stepPosition = params.get("workflow_step_position") || "";
-    this.workflowView = params.get("workflow_view") || null;
+    this.workflowView =
+      params.get("workflow_view") || (this.isWorkflowChartsRoute ? "chart" : null);
+
+    if (this.isChartView && !this.canUseChartView) {
+      const fallback = Object.fromEntries(params.entries());
+      delete fallback.workflow_view;
+      delete fallback.chart_weeks;
+      this.workflowView = null;
+      this.navigateWithFilters(fallback);
+      return;
+    }
+
     this.syncBodyClass();
   }
 
@@ -686,6 +814,10 @@ export default class WorkflowQuickFiltersConnector extends Component {
     document
       .querySelector("#list-area .contents")
       ?.classList.toggle("workflow-kanban-hide-topics", this.isKanbanView);
+    document.body.classList.toggle("workflow-charts-view", this.isChartView);
+    document
+      .querySelector("#list-area .contents")
+      ?.classList.toggle("workflow-charts-hide-topics", this.isChartView);
   }
 
   <template>
@@ -700,61 +832,88 @@ export default class WorkflowQuickFiltersConnector extends Component {
         {{didInsert this.syncBodyClass}}
         {{didUpdate this.syncStepPositionFromUrl this.currentLocation}}
       >
-        <DButton
-          class={{if
-            this.hasMyCategoriesFilter
-            "workflow-quick-filters__my-categories btn-primary"
-            "workflow-quick-filters__my-categories btn-default"
-          }}
-          @label="discourse_workflow.quick_filters.my_categories"
-          @action={{this.toggleMyCategories}}
-        />
-        <DButton
-          class={{if
-            this.hasOverdueFilter
-            "workflow-quick-filters__overdue btn-primary"
-            "workflow-quick-filters__overdue btn-default"
-          }}
-          @label="discourse_workflow.quick_filters.overdue"
-          @action={{this.toggleOverdue}}
-        />
-        <input
-          class="workflow-quick-filters__step-input"
-          type="number"
-          min="1"
-          value={{this.stepPosition}}
-          placeholder={{i18n
-            "discourse_workflow.quick_filters.step_placeholder"
-          }}
-          {{on "input" this.updateStepPosition}}
-        />
-        <DButton
-          class={{if
-            this.hasStepFilter
-            "workflow-quick-filters__apply-step btn-primary"
-            "workflow-quick-filters__apply-step btn-default"
-          }}
-          @label="discourse_workflow.quick_filters.apply_step"
-          @action={{this.applyStepFilter}}
-        />
-        {{#if this.showKanbanToggle}}
+        {{#if this.showWorkflowViewSelector}}
+          <select
+            class="workflow-quick-filters__view-select"
+            value={{this.currentWorkflowView}}
+            {{on "change" this.changeWorkflowView}}
+          >
+            <option value="list">
+              {{i18n "discourse_workflow.quick_filters.list_view"}}
+            </option>
+            {{#if this.canUseKanbanView}}
+              <option value="kanban">
+                {{i18n "discourse_workflow.quick_filters.kanban_view"}}
+              </option>
+            {{/if}}
+            {{#if this.showChartViewOption}}
+              <option value="chart">
+                {{i18n "discourse_workflow.quick_filters.chart_view"}}
+              </option>
+            {{/if}}
+          </select>
+        {{/if}}
+        {{#if this.isChartView}}
+          <select
+            class="workflow-quick-filters__chart-weeks-select"
+            value={{this.chartWeeksValue}}
+            aria-label={{i18n "discourse_workflow.charts.weeks_label"}}
+            {{on "change" this.changeChartWeeks}}
+          >
+            {{#each this.chartWeekOptions as |weeks|}}
+              <option value={{weeks}}>
+                {{i18n "discourse_workflow.charts.weeks_value" count=weeks}}
+              </option>
+            {{/each}}
+          </select>
+        {{/if}}
+
+        {{#unless this.isChartView}}
           <DButton
             class={{if
-              this.isKanbanView
-              "workflow-quick-filters__workflow-view btn-primary"
-              "workflow-quick-filters__workflow-view btn-default"
+              this.hasMyCategoriesFilter
+              "workflow-quick-filters__my-categories btn-primary"
+              "workflow-quick-filters__my-categories btn-default"
             }}
-            @label={{this.workflowViewLabel}}
-            @action={{this.toggleWorkflowView}}
+            @label="discourse_workflow.quick_filters.my_categories"
+            @action={{this.toggleMyCategories}}
           />
-        {{/if}}
+          <DButton
+            class={{if
+              this.hasOverdueFilter
+              "workflow-quick-filters__overdue btn-primary"
+              "workflow-quick-filters__overdue btn-default"
+            }}
+            @label="discourse_workflow.quick_filters.overdue"
+            @action={{this.toggleOverdue}}
+          />
+          <input
+            class="workflow-quick-filters__step-input"
+            type="number"
+            min="1"
+            value={{this.stepPosition}}
+            placeholder={{i18n
+              "discourse_workflow.quick_filters.step_placeholder"
+            }}
+            {{on "input" this.updateStepPosition}}
+          />
+          <DButton
+            class={{if
+              this.hasStepFilter
+              "workflow-quick-filters__apply-step btn-primary"
+              "workflow-quick-filters__apply-step btn-default"
+            }}
+            @label="discourse_workflow.quick_filters.apply_step"
+            @action={{this.applyStepFilter}}
+          />
+        {{/unless}}
         <DButton
           class="workflow-quick-filters__clear btn-default"
           @label="discourse_workflow.quick_filters.clear"
           @action={{this.clearFilters}}
         />
 
-        {{#if this.showKanbanToggle}}
+        {{#if this.shouldRenderKanbanBoard}}
           <section
             class={{if
               this.isKanbanView

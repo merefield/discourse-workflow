@@ -54,7 +54,18 @@ en:
         apply_step: "Step = X"
         kanban_view: "Kanban"
         list_view: "List"
+        chart_view: "Chart"
         clear: "Clear"
+      charts:
+        title: "Workflow Burn Down"
+        weeks_label: "Weeks"
+        weeks_value:
+          one: "%{count} week"
+          other: "%{count} weeks"
+        workflow_label: "Workflow"
+        workflow_name: "Workflow: %{workflow_name}"
+        loading: "Loading chart data..."
+        y_axis_count: "Topics in step"
       kanban:
         title: "Workflow Kanban"
         workflow_name: "Workflow: %{workflow_name}"

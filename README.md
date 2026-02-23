@@ -20,19 +20,24 @@ If you are new to the terminology, see:
 - Transition actions presented as buttons per step option
 - Permission model aligned to native Discourse category permissions
 - Workflow discovery list (`/workflow`) with quick filters
-- Kanban view toggle for compatible single-workflow lists
+- Workflow view selector in discovery (`List`, `Kanban`, `Chart`) when applicable
+- Kanban view for compatible single-workflow lists
 - Drag/drop transitions in Kanban with legal/illegal drop-zone highlighting
 - Keyboard Kanban transitions on focused cards (`ArrowLeft` / `ArrowRight`) when legal
 - Workflow-level Kanban tags toggle (`show_kanban_tags`, default `true`)
+- Workflow burn down chart view (`/workflow/charts` and chart mode in `/workflow`) for single-workflow context
+- Chart period selector (`1` to `12` weeks), complete-week windows (Sunday to Saturday), per-step colored series
 - Overdue behavior with hierarchy:
   - global default (`workflow_overdue_days_default`)
   - workflow override
   - step override
   - `0` disables overdue behavior at that scope
 - Workflow overdue indicator column in the workflow topic list
+- Stale state transition handling with explicit user-facing error and automatic refresh
 - Transition audit trail via small action posts
 - Workflow visualization modal from topic and list links
 - Data Explorer audit query support
+- Data Explorer workflow stats query support for chart-oriented time series
 - Optional AI-assisted step handling with prompt + option guardrails
 
 ## Quickstart
@@ -41,8 +46,9 @@ If you are new to the terminology, see:
 2. Go to `Admin -> Plugins -> Discourse Workflow`, create a Workflow, then save it.
 3. Add Workflow Steps (Categories in journey order), then add Step Options (actions/transitions).
 4. Create a Topic in the first step Category and transition it through actions from the topic banner.
-5. Use `/workflow` to view queue state, apply quick filters, toggle `List`/`Kanban`, and visualize progress.
+5. Use `/workflow` to view queue state, apply quick filters, and switch between `List` / `Kanban` / `Chart` views when available.
 6. In Kanban, click a card to open the topic, drag cards to legal target steps, or use keyboard arrows on focused cards.
+7. Use `/workflow/charts` (or `Chart` view in `/workflow`) to see step counts over time for the currently scoped single workflow.
 
 ## Setup
 
@@ -53,6 +59,7 @@ If you are new to the terminology, see:
 - `workflow_openai_api_key`: API key for AI actions.
 - `workflow_ai_model`: model used for AI actions.
 - `workflow_ai_prompt_system`: system prompt support for AI transitions.
+- `workflow_charts_allowed_groups`: non-admin groups allowed to view workflow charts.
 
 ### Workflow definition setup
 
@@ -93,6 +100,35 @@ Compatibility requires:
 
 For each directed edge, Kanban drag/keyboard transitions are option-agnostic and deterministic.
 
+### Chart view behavior and access model
+
+Chart view is shown when the current workflow discovery context resolves to a single workflow.
+
+- Route support: `/workflow/charts` and chart mode in `/workflow` via `workflow_view=chart`
+- View selector behavior: `Chart` is only shown when the user can view charts and the current discovery context is a single workflow
+- Period selection: `1` to `12` weeks
+- Time windows: complete weeks (Sunday through Saturday)
+- Series: one line per step, color derived from step category color (or parent category color fallback)
+- Response scope: chart payload includes selected workflow metadata (`selected_workflow_id`, `selected_workflow_name`) plus series data for that selected workflow context
+
+Access model for charts is intentionally separate from topic-level category access:
+
+- Admins can always view charts
+- Users in `workflow_charts_allowed_groups` can view charts
+- Chart access is aggregate and workflow-level; it is intentionally not constrained to per-topic visibility rules
+- This allows operational/reporting audiences to monitor workflow throughput without granting direct access to every underlying topic
+
+If you want stricter chart data visibility, keep `workflow_charts_allowed_groups` empty and rely on admin-only access.
+
+### Background jobs
+
+The plugin schedules and runs the following jobs:
+
+- `Jobs::DiscourseWorkflow::DailyStats`: records daily workflow step counts
+- `Jobs::DiscourseWorkflow::AiTransitions`: runs AI-enabled transitions
+- `Jobs::DiscourseWorkflow::DataExplorerQueriesCompleteness`: ensures default workflow Data Explorer queries exist
+- `Jobs::DiscourseWorkflow::TopicArrivalNotifier`: sends first-post arrival notifications on workflow transitions
+
 ### AI actions
 
 You can leverage AI to handle a step. You need `workflow_openai_api_key`, AI enabled on the step, and a prompt including both `{{options}}` and `{{topic}}`. You can also tune behavior with `workflow_ai_model` and `workflow_ai_prompt_system`.
@@ -131,7 +167,11 @@ Actions on a Topic are captured in a Small Action Post to help users understand 
 
 ## Dashboard
 
-A Topic Discovery filter `Workflow` gives a list of workflow instances (special workflow topics).
+A Topic Discovery filter `Workflow` gives a list of workflow instances (special workflow topics), with three presentation modes when available:
+
+- `List`: sortable workflow topic list with workflow columns and quick filters
+- `Kanban`: actionable card board for compatible single-workflow views
+- `Chart`: step count trends over time for a single workflow
 
 You should keep Workflow Categories and ideally tags distinct, so you can also use those to filter for all workflow instances that are at a particular stage, or have a specific tag.
 

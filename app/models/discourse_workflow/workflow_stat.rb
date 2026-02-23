@@ -3,8 +3,8 @@
 module ::DiscourseWorkflow
   class WorkflowStat < ActiveRecord::Base
     self.table_name = 'workflow_stats'
-    has_one :workflow
-    has_one :workflow_step
+    belongs_to :workflow
+    belongs_to :workflow_step
     validates :cob_date, presence: true
     validates :workflow_id, presence: true
     validates :workflow_step_id, presence: true
