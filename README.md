@@ -186,6 +186,7 @@ Permissioning principle:
 | SLA         | Escalation/reminder notifications                             | Partial     | Overdue visibility exists; automated escalation is next                    |
 | Ownership   | Discourse Assign integration                                  | Planned     | Target is step-entry assignment and auditable ownership changes            |
 | Operations  | Bulk workflow transitions from list views                     | Missing     | High-volume queue operation not yet first-class                            |
+| Performance | Eliminate admin serialization N+1 queries                     | Planned     | Preload workflow step/category associations in admin payloads for large workflow edit/list screens |
 | Reporting   | Built-in workflow analytics dashboards                        | Partial     | Data Explorer support exists; admin-native reporting is next               |
 | Lifecycle   | Import/export/version workflow definitions                    | Missing     | Useful for staging->production promotion and rollback                      |
 | Integration | Event hooks / webhooks / automation integration               | Planned     | Transition and step events are good integration points                     |
