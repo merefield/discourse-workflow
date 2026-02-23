@@ -156,6 +156,33 @@ export default class WorkflowBurndownChartConnector extends Component {
     return `#${normalized}`;
   }
 
+  parseLocalDateFromLabel(label) {
+    if (typeof label !== "string") {
+      return null;
+    }
+
+    const [yearStr, monthStr, dayStr] = label.split("-");
+    const year = Number(yearStr);
+    const month = Number(monthStr);
+    const day = Number(dayStr);
+
+    if (
+      !Number.isInteger(year) ||
+      !Number.isInteger(month) ||
+      !Number.isInteger(day)
+    ) {
+      return null;
+    }
+
+    const date = new Date(year, month - 1, day);
+
+    if (Number.isNaN(date.getTime())) {
+      return null;
+    }
+
+    return date;
+  }
+
   @action
   initialize() {
     this.syncFromUrl();
@@ -232,8 +259,8 @@ export default class WorkflowBurndownChartConnector extends Component {
         return "";
       }
 
-      const date = new Date(label);
-      if (Number.isNaN(date.getTime())) {
+      const date = this.parseLocalDateFromLabel(label);
+      if (!date) {
         return "";
       }
 
