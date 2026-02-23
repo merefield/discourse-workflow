@@ -184,6 +184,7 @@ RSpec.describe "Workflow quick filters", type: :system do
     workflow_discovery_page.visit_workflow
 
     expect(workflow_discovery_page).to have_workflow_view_toggle
+    expect(workflow_discovery_page).to have_no_workflow_view_option("Chart")
   end
 
   it "toggles between workflow list and kanban board view" do
@@ -201,14 +202,14 @@ RSpec.describe "Workflow quick filters", type: :system do
     expect(workflow_discovery_page).to have_kanban_card_for_topic(topic_1.id)
     expect(workflow_discovery_page).to have_kanban_card_for_topic(topic_2.id)
     expect(page).to have_no_css(".topic-list")
-    expect(page).to have_css(".workflow-quick-filters__workflow-view.btn-primary")
+    expect(workflow_discovery_page.workflow_view_value).to eq("kanban")
 
     workflow_discovery_page.toggle_workflow_view
 
     expect(page).to have_current_path("/workflow", url: false)
     expect(page).to have_css(".topic-list")
     expect(page).to have_no_css(".workflow-kanban")
-    expect(page).to have_css(".workflow-quick-filters__workflow-view.btn-default")
+    expect(workflow_discovery_page.workflow_view_value).to eq("list")
   end
 
   it "supports drag-drop transitions with legal and illegal column highlighting" do

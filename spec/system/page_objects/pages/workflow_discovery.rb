@@ -8,8 +8,90 @@ module PageObjects
         self
       end
 
+      def visit_workflow_charts
+        page.visit("/workflow/charts")
+        self
+      end
+
       def has_quick_filters?
         has_css?(".workflow-quick-filters")
+      end
+
+      def select_workflow_view(view_label)
+        find(".workflow-quick-filters__view-select").select(view_label)
+        self
+      end
+
+      def has_workflow_view_option?(view_label)
+        has_css?(".workflow-quick-filters__view-select option", text: view_label)
+      end
+
+      def has_no_workflow_view_option?(view_label)
+        has_no_css?(".workflow-quick-filters__view-select option", text: view_label)
+      end
+
+      def has_workflow_burndown_chart?
+        has_css?(".workflow-burndown")
+      end
+
+      def has_workflow_burndown_chart_canvas?
+        has_css?(".workflow-burndown__chart canvas")
+      end
+
+      def has_workflow_chart_legend_step?(step_name)
+        has_css?(".workflow-burndown__legend .workflow-burndown__legend-step", text: step_name)
+      end
+
+      def has_no_workflow_chart_legend_step?(step_name)
+        has_no_css?(".workflow-burndown__legend .workflow-burndown__legend-step", text: step_name)
+      end
+
+      def has_workflow_chart_weeks_selector?
+        has_css?(".workflow-quick-filters__chart-weeks-select")
+      end
+
+      def has_chart_weeks_option?(weeks)
+        has_css?(
+          ".workflow-quick-filters__chart-weeks-select option[value='#{weeks}']",
+        )
+      end
+
+      def has_view_then_period_order?
+        page.evaluate_script(<<~JS)
+            (() => {
+              const row = document.querySelector(".workflow-quick-filters");
+              if (!row) {
+                return false;
+              }
+
+              const view = row.querySelector(".workflow-quick-filters__view-select");
+              const period = row.querySelector(".workflow-quick-filters__chart-weeks-select");
+              if (!view || !period) {
+                return false;
+              }
+
+              return !!(view.compareDocumentPosition(period) & Node.DOCUMENT_POSITION_FOLLOWING);
+            })()
+          JS
+      end
+
+      def has_workflow_chart_workflow_selector?
+        has_css?(".workflow-burndown__workflow-select")
+      end
+
+      def select_chart_weeks(weeks)
+        select = find(".workflow-quick-filters__chart-weeks-select")
+        select.find("option[value='#{weeks}']").select_option
+        self
+      end
+
+      def select_chart_workflow(name)
+        find(".workflow-burndown__workflow-select").select(name)
+        self
+      end
+
+      def workflow_chart_point_count
+        find(".workflow-burndown__chart").native["data-point-count"].to_i
       end
 
       def toggle_my_categories
@@ -29,16 +111,21 @@ module PageObjects
       end
 
       def has_workflow_view_toggle?
-        has_css?(".workflow-quick-filters__workflow-view")
+        has_css?(".workflow-quick-filters__view-select")
       end
 
       def has_no_workflow_view_toggle?
-        has_no_css?(".workflow-quick-filters__workflow-view")
+        has_no_css?(".workflow-quick-filters__view-select")
       end
 
       def toggle_workflow_view
-        find(".workflow-quick-filters__workflow-view").click
+        select = find(".workflow-quick-filters__view-select")
+        select.select(select.value == "kanban" ? "List" : "Kanban")
         self
+      end
+
+      def workflow_view_value
+        find(".workflow-quick-filters__view-select").value
       end
 
       def has_kanban_board?

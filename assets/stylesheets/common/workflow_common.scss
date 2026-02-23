@@ -105,6 +105,18 @@ body.workflow-topic {
     max-width: 90px;
     margin-bottom: 0;
   }
+
+  .workflow-quick-filters__view-select {
+    margin-bottom: 0;
+    min-height: 36px;
+    min-width: 130px;
+  }
+
+  .workflow-quick-filters__chart-weeks-select {
+    margin-bottom: 0;
+    min-height: 36px;
+    min-width: 115px;
+  }
 }
 
 .admin-interface {
@@ -155,6 +167,24 @@ body.workflow-kanban-view {
 }
 
 .contents.workflow-kanban-hide-topics {
+  .topic-list,
+  .load-more,
+  .topic-list-bottom {
+    display: none;
+  }
+}
+
+body.workflow-charts-view {
+  .discovery-topics-list {
+    .topic-list,
+    .load-more,
+    .topic-list-bottom {
+      display: none;
+    }
+  }
+}
+
+.contents.workflow-charts-hide-topics {
   .topic-list,
   .load-more,
   .topic-list-bottom {
@@ -327,6 +357,61 @@ body.workflow-kanban-view {
     margin: 0;
     color: var(--primary-medium);
     font-size: var(--font-down-1);
+  }
+}
+
+.workflow-burndown {
+  margin: 0.75rem 0 1rem;
+  display: grid;
+  gap: 0.75rem;
+
+  .workflow-burndown__title {
+    margin: 0;
+    font-size: var(--font-up-1);
+  }
+
+  .workflow-burndown__status {
+    margin: 0;
+    color: var(--primary-medium);
+  }
+
+  .workflow-burndown__status--error {
+    color: var(--danger);
+  }
+
+  .workflow-burndown__chart {
+    border: 1px solid var(--primary-low);
+    border-radius: 8px;
+    background: var(--secondary);
+    min-height: 320px;
+    padding: 0.75rem;
+  }
+
+  .workflow-burndown__chart canvas {
+    width: 100%;
+    min-height: 300px;
+  }
+
+  .workflow-burndown__legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .workflow-burndown__legend-step {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: var(--font-down-1);
+    color: var(--primary-medium);
+  }
+
+  .workflow-burndown__legend-color {
+    width: 0.9rem;
+    height: 0.9rem;
+    border-radius: 999px;
+    border: 1px solid color-mix(in srgb, var(--primary-medium) 30%, transparent);
+    background: var(--primary-medium);
   }
 }
 

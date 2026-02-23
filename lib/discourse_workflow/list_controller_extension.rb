@@ -5,7 +5,7 @@ module DiscourseWorkflow
     extend ActiveSupport::Concern
 
     prepended do
-      before_action :ensure_discourse_workflow, only: %i[workflow]
+      before_action :ensure_discourse_workflow, only: %i[workflow workflow_charts]
       skip_before_action :ensure_logged_in, only: %i[workflow]
     end
 
@@ -80,6 +80,18 @@ module DiscourseWorkflow
       list.more_topics_url = url_for(construct_url_with(:next, list_opts))
       list.prev_topics_url = url_for(construct_url_with(:prev, list_opts))
       respond_with_list(list)
+    end
+
+    def workflow_charts
+      if !DiscourseWorkflow::ChartsPermissions.can_view?(current_user)
+        raise Discourse::InvalidAccess.new(
+                nil,
+                nil,
+                custom_message: "discourse_workflow.errors.charts_access_denied",
+              )
+      end
+
+      workflow
     end
 
     protected

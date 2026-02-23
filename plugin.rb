@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 # name: discourse-workflow
 # about: A topic-based workflow engine for Discourse
-# version: 0.3.0
+# version: 0.4.0
 # authors: Robert Barrow
 # contact_emails: robert@pavilion.tech
 # url: https://github.com/merefield/discourse-workflow
@@ -33,6 +33,10 @@ after_initialize do
 
   register_topic_preloader_associations({ workflow_state: %i[workflow workflow_step] }) do
     SiteSetting.workflow_enabled
+  end
+
+  Discourse::Application.routes.prepend do
+    get "/workflow/charts" => "list#workflow_charts"
   end
 
   Discourse.top_menu_items.push(:workflow)
@@ -174,6 +178,14 @@ after_initialize do
   add_to_class(:topic_list, :workflow_kanban_show_tags) do
     workflow = workflow_kanban_workflow
     workflow.present? && workflow.show_kanban_tags != false
+  end
+
+  add_to_class(:topic_list, :workflow_single_workflow_id) do
+    workflow_kanban_workflow&.id
+  end
+
+  add_to_class(:topic_list, :workflow_single_workflow_name) do
+    workflow_kanban_workflow&.name
   end
 
   add_to_class(:topic_list, :workflow_kanban_steps) do
@@ -349,8 +361,20 @@ after_initialize do
   add_to_serializer(
     :topic_list,
     :workflow_kanban_workflow_name,
-    include_condition: -> { object.workflow_kanban_compatible },
+    include_condition: -> { object.workflow_single_workflow_name.present? },
   ) { object.workflow_kanban_workflow.name }
+
+  add_to_serializer(
+    :topic_list,
+    :workflow_single_workflow_id,
+    include_condition: -> { object.topics.any? { |topic| topic.workflow_state.present? } },
+  ) { object.workflow_single_workflow_id }
+
+  add_to_serializer(
+    :topic_list,
+    :workflow_can_view_charts,
+    include_condition: -> { object.topics.any? { |topic| topic.workflow_state.present? } },
+  ) { DiscourseWorkflow::ChartsPermissions.can_view?(scope.user) }
 
   add_to_serializer(
     :topic_list,

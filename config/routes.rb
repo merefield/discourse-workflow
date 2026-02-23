@@ -31,8 +31,5 @@ end
 ::DiscourseWorkflow::Engine.routes.draw do
   post "/act/:topic_id" => "workflow_action#act"
   get "/visualisation/:topic_id" => "workflow_visualisation#network"
-end
-
-Discourse::Application.routes.prepend do
-  get '/workflow' => 'list#workflow'
+  get "/charts" => "workflow_charts#index"
 end

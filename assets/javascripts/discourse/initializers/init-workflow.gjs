@@ -4,7 +4,7 @@ import { withPluginApi } from "discourse/lib/plugin-api";
 import { i18n } from "discourse-i18n";
 import WorkflowNameLink from "./../components/workflow-name-link";
 
-const WORKFLOW_LIST_ROUTES = ["discovery.workflow"];
+const WORKFLOW_LIST_ROUTES = ["discovery.workflow", "discovery.workflowCharts"];
 
 const workflowNameHeader = <template>
   <SortableColumn
@@ -111,6 +111,10 @@ export default {
       refreshModel: true,
     });
     addDiscoveryQueryParam("workflow_view", {
+      replace: true,
+      refreshModel: false,
+    });
+    addDiscoveryQueryParam("chart_weeks", {
       replace: true,
       refreshModel: false,
     });
