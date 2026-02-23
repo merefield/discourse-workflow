@@ -118,10 +118,6 @@ export default {
       replace: true,
       refreshModel: false,
     });
-    addDiscoveryQueryParam("chart_workflow_id", {
-      replace: true,
-      refreshModel: false,
-    });
 
     withPluginApi((api) => {
       api.addAdminPluginConfigurationNav("discourse-workflow", [
