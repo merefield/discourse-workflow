@@ -235,7 +235,10 @@ export default class WorkflowQuickFiltersConnector extends Component {
   }
 
   get chartWeeksValue() {
-    return String(this.normalizedChartWeeks(this.currentSearchParams.get("chart_weeks")) || 2);
+    return String(
+      this.normalizedChartWeeks(this.currentSearchParams.get("chart_weeks")) ||
+        2
+    );
   }
 
   get kanbanWorkflowName() {
@@ -403,7 +406,8 @@ export default class WorkflowQuickFiltersConnector extends Component {
     const params = this.currentSearchParams;
     this.stepPosition = params.get("workflow_step_position") || "";
     this.workflowView =
-      params.get("workflow_view") || (this.isWorkflowChartsRoute ? "chart" : null);
+      params.get("workflow_view") ||
+      (this.isWorkflowChartsRoute ? "chart" : null);
 
     if (this.isWorkflowChartsRoute) {
       return;
@@ -465,7 +469,8 @@ export default class WorkflowQuickFiltersConnector extends Component {
         queryParams.overdue_days &&
       (currentParams.get("workflow_step_position") || null) ===
         queryParams.workflow_step_position &&
-      (currentParams.get("workflow_view") || null) === queryParams.workflow_view &&
+      (currentParams.get("workflow_view") || null) ===
+        queryParams.workflow_view &&
       (currentParams.get("chart_weeks") || null) === queryParams.chart_weeks;
 
     if (unchanged) {
@@ -790,7 +795,8 @@ export default class WorkflowQuickFiltersConnector extends Component {
     const params = this.currentSearchParams;
     this.stepPosition = params.get("workflow_step_position") || "";
     this.workflowView =
-      params.get("workflow_view") || (this.isWorkflowChartsRoute ? "chart" : null);
+      params.get("workflow_view") ||
+      (this.isWorkflowChartsRoute ? "chart" : null);
 
     if (this.isChartView && !this.canUseChartView) {
       const fallback = Object.fromEntries(params.entries());

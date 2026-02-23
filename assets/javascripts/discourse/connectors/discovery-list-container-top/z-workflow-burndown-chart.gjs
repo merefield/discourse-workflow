@@ -341,7 +341,10 @@ export default class WorkflowBurndownChartConnector extends Component {
         {{/if}}
 
         {{#if this.hasChartData}}
-          <div class="workflow-burndown__chart" data-point-count={{this.pointCount}}>
+          <div
+            class="workflow-burndown__chart"
+            data-point-count={{this.pointCount}}
+          >
             <canvas {{didInsert this.captureCanvas}}></canvas>
           </div>
 
