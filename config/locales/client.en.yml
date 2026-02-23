@@ -48,6 +48,7 @@ en:
         visualisation_button: "Visualise"
         visualisation_title: "Workflow: %{workflow_name}"
       quick_filters:
+        view_label: "Workflow View"
         my_categories: "My Categories"
         overdue: "Overdue"
         step_placeholder: "Step #"

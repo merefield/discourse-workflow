@@ -842,6 +842,7 @@ export default class WorkflowQuickFiltersConnector extends Component {
           <select
             class="workflow-quick-filters__view-select"
             value={{this.currentWorkflowView}}
+            aria-label={{i18n "discourse_workflow.quick_filters.view_label"}}
             {{on "change" this.changeWorkflowView}}
           >
             <option value="list">
