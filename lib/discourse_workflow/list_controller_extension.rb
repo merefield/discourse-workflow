@@ -83,7 +83,14 @@ module DiscourseWorkflow
     end
 
     def workflow_charts
-      raise Discourse::InvalidAccess if !DiscourseWorkflow::ChartsPermissions.can_view?(current_user)
+      if !DiscourseWorkflow::ChartsPermissions.can_view?(current_user)
+        raise Discourse::InvalidAccess.new(
+                nil,
+                nil,
+                custom_message: "discourse_workflow.errors.charts_access_denied",
+              )
+      end
+
       workflow
     end
 

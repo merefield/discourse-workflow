@@ -39,7 +39,12 @@ module DiscourseWorkflow
 
     def ensure_can_view_charts
       return if ::DiscourseWorkflow::ChartsPermissions.can_view?(current_user)
-      raise Discourse::InvalidAccess.new(I18n.t("discourse_workflow.errors.charts_access_denied"))
+
+      raise Discourse::InvalidAccess.new(
+              nil,
+              nil,
+              custom_message: "discourse_workflow.errors.charts_access_denied",
+            )
     end
 
     def normalized_weeks

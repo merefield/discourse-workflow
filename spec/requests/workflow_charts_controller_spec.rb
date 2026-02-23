@@ -92,6 +92,20 @@ RSpec.describe DiscourseWorkflow::WorkflowChartsController, type: :request do
     get "/discourse-workflow/charts.json"
 
     expect(response.status).to eq(403)
+    expect(response.parsed_body["errors"]).to include(
+      I18n.t("discourse_workflow.errors.charts_access_denied"),
+    )
+  end
+
+  it "returns the localized access denied message on workflow discovery charts route when unauthorized" do
+    sign_in(blocked_user)
+
+    get "/workflow/charts.json"
+
+    expect(response.status).to eq(403)
+    expect(response.parsed_body["errors"]).to include(
+      I18n.t("discourse_workflow.errors.charts_access_denied"),
+    )
   end
 
   it "allows configured group members to query workflow chart data" do
