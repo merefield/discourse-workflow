@@ -35,9 +35,7 @@ after_initialize do
     SiteSetting.workflow_enabled
   end
 
-  Discourse::Application.routes.prepend do
-    get "/workflow/charts" => "list#workflow_charts"
-  end
+  Discourse::Application.routes.prepend { get "/workflow/charts" => "list#workflow_charts" }
 
   Discourse.top_menu_items.push(:workflow)
   Discourse.anonymous_top_menu_items.push(:workflow)
@@ -170,6 +168,12 @@ after_initialize do
       end
   end
 
+  add_to_class(:topic_list, :has_workflow_topics?) do
+    return @has_workflow_topics if defined?(@has_workflow_topics)
+
+    @has_workflow_topics = topics.any? { |topic| topic.workflow_state.present? }
+  end
+
   add_to_class(:topic_list, :workflow_kanban_compatible) do
     workflow = workflow_kanban_workflow
     workflow.present? && workflow.kanban_compatible?
@@ -180,13 +184,9 @@ after_initialize do
     workflow.present? && workflow.show_kanban_tags != false
   end
 
-  add_to_class(:topic_list, :workflow_single_workflow_id) do
-    workflow_kanban_workflow&.id
-  end
+  add_to_class(:topic_list, :workflow_single_workflow_id) { workflow_kanban_workflow&.id }
 
-  add_to_class(:topic_list, :workflow_single_workflow_name) do
-    workflow_kanban_workflow&.name
-  end
+  add_to_class(:topic_list, :workflow_single_workflow_name) { workflow_kanban_workflow&.name }
 
   add_to_class(:topic_list, :workflow_kanban_steps) do
     return [] if !workflow_kanban_compatible
@@ -355,7 +355,7 @@ after_initialize do
   add_to_serializer(
     :topic_list,
     :workflow_kanban_compatible,
-    include_condition: -> { object.topics.any? { |topic| topic.workflow_state.present? } },
+    include_condition: -> { object.has_workflow_topics? },
   ) { object.workflow_kanban_compatible }
 
   add_to_serializer(
@@ -367,31 +367,31 @@ after_initialize do
   add_to_serializer(
     :topic_list,
     :workflow_single_workflow_id,
-    include_condition: -> { object.topics.any? { |topic| topic.workflow_state.present? } },
+    include_condition: -> { object.has_workflow_topics? },
   ) { object.workflow_single_workflow_id }
 
   add_to_serializer(
     :topic_list,
     :workflow_can_view_charts,
-    include_condition: -> { object.topics.any? { |topic| topic.workflow_state.present? } },
+    include_condition: -> { object.has_workflow_topics? },
   ) { DiscourseWorkflow::ChartsPermissions.can_view?(scope.user) }
 
   add_to_serializer(
     :topic_list,
     :workflow_kanban_show_tags,
-    include_condition: -> { object.topics.any? { |topic| topic.workflow_state.present? } },
+    include_condition: -> { object.has_workflow_topics? },
   ) { object.workflow_kanban_show_tags }
 
   add_to_serializer(
     :topic_list,
     :workflow_kanban_steps,
-    include_condition: -> { object.topics.any? { |topic| topic.workflow_state.present? } },
+    include_condition: -> { object.has_workflow_topics? },
   ) { object.workflow_kanban_steps }
 
   add_to_serializer(
     :topic_list,
     :workflow_kanban_transitions,
-    include_condition: -> { object.topics.any? { |topic| topic.workflow_state.present? } },
+    include_condition: -> { object.has_workflow_topics? },
   ) { object.workflow_kanban_transitions }
 
   on(:topic_created) do |*params|
