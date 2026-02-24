@@ -183,6 +183,30 @@ RSpec.describe DiscourseWorkflow::WorkflowChartsController, type: :request do
     expect(payload).not_to have_key("workflows")
   end
 
+  it "loads chart workflow step data only for the selected workflow" do
+    sign_in(admin)
+
+    workflow_queries, workflow_steps_queries =
+      track_sql_queries do
+        get "/discourse-workflow/charts.json", params: { workflow_id: workflow.id, weeks: 1 }
+      end.partition { |query| query.include?('FROM "workflows"') }
+
+    workflow_steps_queries.select! do |query|
+      query.include?('FROM "workflow_steps"') && query.include?('"workflow_steps"."workflow_id"')
+    end
+
+    unscoped_workflow_query =
+      workflow_queries.any? do |query|
+        query.include?('"workflows"."enabled" = TRUE') && !query.include?('"workflows"."id" =')
+      end
+
+    expect(response.status).to eq(200)
+    expect(unscoped_workflow_query).to eq(false)
+    expect(workflow_steps_queries.any? { |query| query.include?(other_workflow.id.to_s) }).to eq(
+      false,
+    )
+  end
+
   it "supports a one-week horizon when requested" do
     sign_in(admin)
 
