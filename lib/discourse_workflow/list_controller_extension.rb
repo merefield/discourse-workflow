@@ -12,27 +12,24 @@ module DiscourseWorkflow
     def workflow
       list_opts = build_topic_list_options
       user = list_target_user || current_user
-      filtered_topic_ids = nil
+      workflow_topic_ids_scope = DiscourseWorkflow::WorkflowState.all.select(:topic_id).distinct
+      workflow_filters_applied = false
 
       if user.present? && params[:my_categories] == "1"
-        allowed_category_ids =
-          Category.topic_create_allowed(Guardian.new(user)).pluck(:id)
-
-        my_category_topic_ids =
-          DiscourseWorkflow::WorkflowState
-            .joins(:topic)
-            .where(topics: { category_id: allowed_category_ids })
-            .pluck(:topic_id)
-            .uniq
-
-        filtered_topic_ids =
-          filtered_topic_ids ? (filtered_topic_ids & my_category_topic_ids) : my_category_topic_ids
+        allowed_category_ids = Category.topic_create_allowed(Guardian.new(user)).select(:id)
+        workflow_topic_ids_scope =
+          workflow_topic_ids_scope.joins(:topic).where(
+            topics: {
+              category_id: allowed_category_ids,
+            },
+          )
+        workflow_filters_applied = true
       end
 
       if params[:overdue] == "1"
         default_overdue_days = SiteSetting.workflow_overdue_days_default.to_i
-        overdue_topic_ids =
-          DiscourseWorkflow::WorkflowState
+        workflow_topic_ids_scope =
+          workflow_topic_ids_scope
             .joins(:workflow_step, :workflow)
             .where(
               "COALESCE(workflow_steps.overdue_days, workflows.overdue_days, ?) > 0",
@@ -42,43 +39,30 @@ module DiscourseWorkflow
               "workflow_states.updated_at <= NOW() - (COALESCE(workflow_steps.overdue_days, workflows.overdue_days, ?) * INTERVAL '1 day')",
               default_overdue_days,
             )
-            .pluck(:topic_id)
-            .uniq
-
-        filtered_topic_ids =
-          filtered_topic_ids ? (filtered_topic_ids & overdue_topic_ids) : overdue_topic_ids
+        workflow_filters_applied = true
       elsif params[:overdue_days].present? && params[:overdue_days].to_i > 0
         cutoff = params[:overdue_days].to_i.days.ago
-        overdue_topic_ids =
-          DiscourseWorkflow::WorkflowState
-            .where("updated_at <= ?", cutoff)
-            .pluck(:topic_id)
-            .uniq
-
-        filtered_topic_ids =
-          filtered_topic_ids ? (filtered_topic_ids & overdue_topic_ids) : overdue_topic_ids
+        workflow_topic_ids_scope =
+          workflow_topic_ids_scope.where("workflow_states.updated_at <= ?", cutoff)
+        workflow_filters_applied = true
       end
 
-      if params[:workflow_step_position].present? &&
-           params[:workflow_step_position].to_i > 0
-        position_topic_ids =
-          DiscourseWorkflow::WorkflowState
-            .joins(:workflow_step)
-            .where(workflow_steps: { position: params[:workflow_step_position].to_i })
-            .pluck(:topic_id)
-            .uniq
-
-        filtered_topic_ids =
-          filtered_topic_ids ? (filtered_topic_ids & position_topic_ids) : position_topic_ids
+      if params[:workflow_step_position].present? && params[:workflow_step_position].to_i > 0
+        workflow_topic_ids_scope =
+          workflow_topic_ids_scope.joins(:workflow_step).where(
+            workflow_steps: {
+              position: params[:workflow_step_position].to_i,
+            },
+          )
+        workflow_filters_applied = true
       end
 
-      if filtered_topic_ids
-        list_opts[:topic_ids] = filtered_topic_ids.presence || [-1]
-      end
+      list_opts[:topic_ids] = workflow_topic_ids_scope if workflow_filters_applied
 
       list = TopicQuery.new(user, list_opts).public_send("list_workflow")
-      list.more_topics_url = url_for(construct_url_with(:next, list_opts))
-      list.prev_topics_url = url_for(construct_url_with(:prev, list_opts))
+      list_query_opts = list_opts.except(:topic_ids)
+      list.more_topics_url = url_for(construct_url_with(:next, list_query_opts))
+      list.prev_topics_url = url_for(construct_url_with(:prev, list_query_opts))
       respond_with_list(list)
     end
 
@@ -97,9 +81,7 @@ module DiscourseWorkflow
     protected
 
     def ensure_discourse_workflow
-      if !SiteSetting.workflow_enabled
-        raise Discourse::NotFound
-      end
+      raise Discourse::NotFound if !SiteSetting.workflow_enabled
     end
   end
 end

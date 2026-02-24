@@ -136,4 +136,24 @@ RSpec.describe "Workflow list filters", type: :request do
     expect(topic_list["workflow_kanban_steps"]).to eq([])
     expect(topic_list["workflow_kanban_transitions"]).to eq([])
   end
+
+  it "does not materialize workflow topic ids when combining quick filters" do
+    state_a.update_columns(updated_at: 5.days.ago)
+
+    workflow_state_topic_id_plucks =
+      track_sql_queries do
+        get "/workflow.json",
+            params: {
+              my_categories: "1",
+              overdue: "1",
+              workflow_step_position: "1",
+            }
+      end.select do |query|
+        query.match?(/SELECT\s+"workflow_states"\."topic_id"/) &&
+          query.include?('FROM "workflow_states"')
+      end
+
+    expect(response.status).to eq(200)
+    expect(workflow_state_topic_id_plucks).to eq([])
+  end
 end
