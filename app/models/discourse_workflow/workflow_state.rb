@@ -2,7 +2,7 @@
 
 module ::DiscourseWorkflow
   class WorkflowState < ActiveRecord::Base
-    self.table_name = 'workflow_states'
+    self.table_name = "workflow_states"
 
     belongs_to :topic
     belongs_to :workflow
@@ -26,6 +26,7 @@ end
 #  index_workflow_states_on_topic_id          (topic_id)
 #  index_workflow_states_on_workflow_id       (workflow_id)
 #  index_workflow_states_on_workflow_step_id  (workflow_step_id)
+#  idx_workflow_states_updated_at             (updated_at)
 #
 # Foreign Keys
 #
