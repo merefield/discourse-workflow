@@ -114,7 +114,6 @@ module DiscourseWorkflow
           :ai_enabled,
           :ai_prompt,
           :overdue_days,
-          :other_attributes...,
         )
       end
 

@@ -117,7 +117,6 @@ module DiscourseWorkflow
           :workflow_step_id,
           :workflow_option_id,
           :target_step_id,
-          :other_attributes...,
         )
       end
 
