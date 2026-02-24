@@ -10,12 +10,7 @@ module DiscourseWorkflow
 
     def index
       weeks = normalized_weeks
-      workflows =
-        ::DiscourseWorkflow::Workflow
-          .where(enabled: true)
-          .ordered
-          .includes(workflow_steps: { category: :parent_category })
-      selected_workflow = selected_workflow_for(workflows)
+      selected_workflow = selected_chart_workflow
       date_range = chart_date_range(weeks)
 
       render_json_dump(
@@ -55,9 +50,20 @@ module DiscourseWorkflow
       [requested, 12].min
     end
 
-    def selected_workflow_for(workflows)
+    def selected_chart_workflow
+      workflow_scope = ::DiscourseWorkflow::Workflow.where(enabled: true).ordered
       selected_id = params[:workflow_id].to_i
-      workflows.find { |workflow| workflow.id == selected_id } || workflows.first
+
+      if selected_id > 0
+        selected_workflow = load_chart_workflow(workflow_scope.where(id: selected_id))
+        return selected_workflow if selected_workflow.present?
+      end
+
+      load_chart_workflow(workflow_scope)
+    end
+
+    def load_chart_workflow(scope)
+      scope.includes(workflow_steps: { category: :parent_category }).first
     end
 
     def chart_date_range(weeks)
@@ -71,14 +77,13 @@ module DiscourseWorkflow
 
       steps = workflow.workflow_steps.sort_by { |step| step.position.to_i }
       return [] if steps.blank?
+      today = Date.current
 
       step_ids = steps.map(&:id)
       stats =
         ::DiscourseWorkflow::WorkflowStat
           .where(workflow_id: workflow.id, workflow_step_id: step_ids)
-          .where(
-            cob_date: date_range.first.beginning_of_day..date_range.last.end_of_day,
-          )
+          .where(cob_date: date_range.first.beginning_of_day..date_range.last.end_of_day)
           .group("DATE(cob_date)", :workflow_step_id)
           .sum(:count)
       counts_by_day_step =
@@ -93,7 +98,10 @@ module DiscourseWorkflow
           step_name: step.name,
           step_position: step.position.to_i,
           color: category&.color || category&.parent_category&.color,
-          data: date_range.map { |date| counts_by_day_step.fetch([date, step.id], 0) },
+          data:
+            date_range.map do |date|
+              date > today ? nil : counts_by_day_step.fetch([date, step.id], 0)
+            end,
         }
       end
     end

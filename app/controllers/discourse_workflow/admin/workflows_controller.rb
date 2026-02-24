@@ -8,12 +8,22 @@ module DiscourseWorkflow
       before_action :find_workflow, only: %i[edit show update destroy]
 
       def index
-        @workflows = Workflow.order(:enabled).order(:name).order(:id)
+        @workflows = Workflow.order(:enabled).order(:name).order(:id).to_a
+        ActiveRecord::Associations::Preloader.new(
+          records: @workflows,
+          associations: {
+            workflow_steps: [:category, { workflow_step_options: :workflow_option }],
+          },
+        ).call
         render_json_dump(
-          { workflows:
-          ActiveModel::ArraySerializer.new(@workflows,
-          each_serializer: DiscourseWorkflow::WorkflowSerializer)
-          })
+          {
+            workflows:
+              ActiveModel::ArraySerializer.new(
+                @workflows,
+                each_serializer: DiscourseWorkflow::WorkflowSerializer,
+              ),
+          },
+        )
       end
 
       def new
@@ -37,8 +47,8 @@ module DiscourseWorkflow
       def update
         if @workflow.update(workflow_params)
           render json: WorkflowSerializer.new(@workflow, root: false)
-         else
-           render_json_error @workflow
+        else
+          render_json_error @workflow
         end
       end
 

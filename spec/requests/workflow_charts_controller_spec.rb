@@ -183,6 +183,30 @@ RSpec.describe DiscourseWorkflow::WorkflowChartsController, type: :request do
     expect(payload).not_to have_key("workflows")
   end
 
+  it "loads chart workflow step data only for the selected workflow" do
+    sign_in(admin)
+
+    workflow_queries, workflow_steps_queries =
+      track_sql_queries do
+        get "/discourse-workflow/charts.json", params: { workflow_id: workflow.id, weeks: 1 }
+      end.partition { |query| query.include?('FROM "workflows"') }
+
+    workflow_steps_queries.select! do |query|
+      query.include?('FROM "workflow_steps"') && query.include?('"workflow_steps"."workflow_id"')
+    end
+
+    unscoped_workflow_query =
+      workflow_queries.any? do |query|
+        query.include?('"workflows"."enabled" = TRUE') && !query.include?('"workflows"."id" =')
+      end
+
+    expect(response.status).to eq(200)
+    expect(unscoped_workflow_query).to eq(false)
+    expect(workflow_steps_queries.any? { |query| query.include?(other_workflow.id.to_s) }).to eq(
+      false,
+    )
+  end
+
   it "supports a one-week horizon when requested" do
     sign_in(admin)
 
@@ -192,6 +216,24 @@ RSpec.describe DiscourseWorkflow::WorkflowChartsController, type: :request do
     expect(response.status).to eq(200)
     expect(payload["weeks"]).to eq(1)
     expect(payload["labels"].length).to eq(7)
+  end
+
+  it "returns nil data points for future days so lines stop at the current day" do
+    freeze_time(Time.zone.parse("2026-02-18 10:00:00 UTC")) do
+      sign_in(admin)
+
+      get "/discourse-workflow/charts.json", params: { workflow_id: workflow.id, weeks: 1 }
+
+      payload = response.parsed_body
+      labels = payload["labels"]
+      future_indexes = labels.each_index.select { |index| Date.parse(labels[index]) > Date.current }
+
+      expect(future_indexes).to be_present
+
+      payload["series"].each do |series|
+        future_indexes.each { |index| expect(series["data"][index]).to be_nil }
+      end
+    end
   end
 
   def create_stats_history
