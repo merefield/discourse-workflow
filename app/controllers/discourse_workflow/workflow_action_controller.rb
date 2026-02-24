@@ -7,13 +7,13 @@ module DiscourseWorkflow
     def act
       topic = Topic.find(params[:topic_id])
       guardian.ensure_can_create_topic_on_category!(topic.category_id)
-      user_id = current_user.id
+      user = current_user
       option = params[:option]
       cooldown_key = nil
       successful_transition = false
 
-      if user_id.present? && option.present? && topic.present?
-        cooldown_key = "discourse-workflow-transition-#{user_id}-#{topic.id}"
+      if user.present? && option.present? && topic.present?
+        cooldown_key = "discourse-workflow-transition-#{user.id}-#{topic.id}"
         cooldown_acquired = Discourse.redis.set(cooldown_key, "1", ex: 5, nx: true)
 
         if !cooldown_acquired
@@ -21,7 +21,7 @@ module DiscourseWorkflow
           return
         end
 
-        successful_transition = Transition.new.transition(user_id, topic, option)
+        successful_transition = Transition.new.transition(user, topic, option)
       end
 
       Discourse.redis.del(cooldown_key) if !successful_transition && cooldown_key.present?
