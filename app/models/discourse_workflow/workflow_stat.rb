@@ -32,8 +32,8 @@ end
 # Indexes
 #
 #  idx_workflow_stats_daily_workflow_step_unique  (cob_date,workflow_id,workflow_step_id) UNIQUE
-#  index_workflow_stats_on_workflow_id       (workflow_id)
-#  index_workflow_stats_on_workflow_step_id  (workflow_step_id)
+#  index_workflow_stats_on_workflow_id            (workflow_id)
+#  index_workflow_stats_on_workflow_step_id       (workflow_step_id)
 #
 # Foreign Keys
 #
