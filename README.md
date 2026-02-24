@@ -226,7 +226,11 @@ Permissioning principle:
 | SLA         | Escalation/reminder notifications                             | Partial     | Overdue visibility exists; automated escalation is next                    |
 | Ownership   | Discourse Assign integration                                  | Planned     | Target is step-entry assignment and auditable ownership changes            |
 | Operations  | Bulk workflow transitions from list views                     | Missing     | High-volume queue operation not yet first-class                            |
-| Performance | Eliminate admin serialization N+1 queries                     | Planned     | Preload workflow step/category associations in admin payloads for large workflow edit/list screens |
+| Performance | Admin/list/chart/transition query-path N+1 and over-fetch hardening | Implemented | Admin serializers preloaded, workflow quick filters now SQL-scoped, chart loading scoped to selected workflow, transition lookup round-trips reduced, and workflow-state staleness indexing added |
+| Performance | Bulk workflow arrival notification fan-out                    | Planned     | Use bulk insert (`insert_all`) for category watcher notifications to reduce per-user insert overhead at high watcher counts |
+| Performance | Cache workflow chart payloads                                 | Planned     | Add short-lived caching keyed by workflow and period to reduce repeated chart aggregation for frequent refreshes |
+| Performance | Cache workflow visualisation payloads                         | Planned     | Cache graph payloads keyed by topic/workflow-state version to avoid rebuilding identical visualisations |
+| Performance | Production query-plan validation for workflow filters         | Partial     | Query shape is now SQL-driven; continue with `EXPLAIN`/index tuning against large production-like datasets |
 | Reporting   | Built-in workflow analytics dashboards                        | Partial     | Data Explorer support exists; admin-native reporting is next               |
 | Lifecycle   | Import/export/version workflow definitions                    | Missing     | Useful for staging->production promotion and rollback                      |
 | Integration | Event hooks / webhooks / automation integration               | Planned     | Transition and step events are good integration points                     |
