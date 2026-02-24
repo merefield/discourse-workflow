@@ -5,16 +5,16 @@ module DiscourseWorkflow
     root "workflow"
 
     attributes :id,
-              :name,
-              :description,
-              :enabled,
-              :overdue_days,
-              :show_kanban_tags,
-              :kanban_compatible,
-              :workflow_steps_count,
-              :starting_category_id,
-              :final_category_id,
-              :validation_warnings
+               :name,
+               :description,
+               :enabled,
+               :overdue_days,
+               :show_kanban_tags,
+               :kanban_compatible,
+               :workflow_steps_count,
+               :starting_category_id,
+               :final_category_id,
+               :validation_warnings
 
     has_many :workflow_steps,
              serializer: WorkflowStepSerializer,
@@ -22,15 +22,15 @@ module DiscourseWorkflow
              key: :workflow_steps
 
     def workflow_steps_count
-      object.workflow_steps.count
+      ordered_workflow_steps.length
     end
 
     def starting_category_id
-      object.workflow_steps.order(:position).first&.category_id
+      ordered_workflow_steps.first&.category_id
     end
 
     def final_category_id
-      object.workflow_steps.order(:position).last&.category_id
+      ordered_workflow_steps.last&.category_id
     end
 
     def validation_warnings
@@ -39,6 +39,12 @@ module DiscourseWorkflow
 
     def kanban_compatible
       object.kanban_compatible?
+    end
+
+    private
+
+    def ordered_workflow_steps
+      @ordered_workflow_steps ||= object.workflow_steps.to_a.sort_by { |step| step.position.to_i }
     end
   end
 end

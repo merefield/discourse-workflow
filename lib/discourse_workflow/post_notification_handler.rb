@@ -22,8 +22,7 @@ module DiscourseWorkflow
       return false if !post.topic.is_workflow_topic?
       return false if !post.is_first_post?
 
-      workflow_state =
-        DiscourseWorkflow::WorkflowState.find_by(topic_id: post.topic.id)
+      workflow_state = DiscourseWorkflow::WorkflowState.find_by(topic_id: post.topic.id)
       return false if workflow_state.blank?
 
       data = {
@@ -32,22 +31,17 @@ module DiscourseWorkflow
         username: post.user.username,
         workflow_name: workflow_state.workflow.name,
         workflow_step_name: workflow_state.workflow_step.name,
-        topic_title: post.topic.title
+        topic_title: post.topic.title,
       }
 
       ::CategoryUser
-        .where(
-          notification_level: WATCHING_FIRST_POST,
-          category_id: post.topic.category_id
-        )
+        .where(notification_level: WATCHING_FIRST_POST, category_id: post.topic.category_id)
         .each do |category_user|
-          # PostAlerter.create_notification handles many edge cases, such as
-          # muting, ignoring, double notifications etc.
-          user = category_user.user
-          user.notifications.create!(
+          ::Notification.create!(
+            user_id: category_user.user_id,
             notification_type: ::Notification.types[:workflow_topic_arrival],
             high_priority: true,
-            data: data.to_json
+            data: data.to_json,
           )
         end
     end

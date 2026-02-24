@@ -5,20 +5,29 @@ module DiscourseWorkflow
     class WorkflowStepsController < ::Admin::AdminController
       requires_plugin ::DiscourseWorkflow::PLUGIN_NAME
 
-      before_action :set_workflow, only: [:index, :new, :create]
-      before_action :set_workflow_step, only: [:show, :edit, :update, :destroy]
+      before_action :set_workflow, only: %i[index new create]
+      before_action :set_workflow_step, only: %i[show edit update destroy]
 
       def index
-        if @workflow.present?
-          @workflow_steps = WorkflowStep.where(workflow_id: @workflow.id).order(:position)
-        else
-          @workflow_steps = WorkflowStep.all.order(:position)
-        end
+        @workflow_steps =
+          if @workflow.present?
+            WorkflowStep.where(workflow_id: @workflow.id).order(:position).to_a
+          else
+            WorkflowStep.all.order(:position).to_a
+          end
+        ActiveRecord::Associations::Preloader.new(
+          records: @workflow_steps,
+          associations: [:category, { workflow_step_options: :workflow_option }],
+        ).call
         render_json_dump(
-          { workflow_steps:
-          ActiveModel::ArraySerializer.new(@workflow_steps,
-          each_serializer: DiscourseWorkflow::WorkflowStepSerializer)
-          })
+          {
+            workflow_steps:
+              ActiveModel::ArraySerializer.new(
+                @workflow_steps,
+                each_serializer: DiscourseWorkflow::WorkflowStepSerializer,
+              ),
+          },
+        )
       end
 
       def show
@@ -28,8 +37,8 @@ module DiscourseWorkflow
         workflow_step = WorkflowStep.new(workflow_step_params)
         if workflow_step.save
           render json: {
-            workflow_step: WorkflowStepSerializer.new(workflow_step, root: false),
-             },
+                   workflow_step: WorkflowStepSerializer.new(workflow_step, root: false),
+                 },
                  status: :created
         else
           render_json_error workflow_step
@@ -39,16 +48,18 @@ module DiscourseWorkflow
       def create
         workflow_step = WorkflowStep.new(workflow_step_params)
         if !workflow_step.position.present?
-          if WorkflowStep.count == 0 || WorkflowStep.where(workflow_id: workflow_step.workflow_id).count == 0
+          if WorkflowStep.count == 0 ||
+               WorkflowStep.where(workflow_id: workflow_step.workflow_id).count == 0
             workflow_step.position = 1
           else
-            workflow_step.position = WorkflowStep.where(workflow_id: workflow_step.workflow_id).maximum(:position).to_i + 1
+            workflow_step.position =
+              WorkflowStep.where(workflow_id: workflow_step.workflow_id).maximum(:position).to_i + 1
           end
         end
         if workflow_step.save
           render json: {
-            workflow_step: WorkflowStepSerializer.new(workflow_step, root: false),
-             },
+                   workflow_step: WorkflowStepSerializer.new(workflow_step, root: false),
+                 },
                  status: :created
           # redirect_to edit_workflow_workflow_step_path(workflow_id: workflow_step.workflow_id, id: workflow_step.id)
         else
@@ -62,8 +73,8 @@ module DiscourseWorkflow
       def update
         if @workflow_step.update(workflow_step_params)
           render json: {
-            workflow_step: WorkflowStepSerializer.new(@workflow_step, root: false),
-             },
+                   workflow_step: WorkflowStepSerializer.new(@workflow_step, root: false),
+                 },
                  status: :ok
         else
           render_json_error @workflow_step
@@ -94,19 +105,17 @@ module DiscourseWorkflow
       end
 
       def workflow_step_params
-        params
-          .require(:workflow_step)
-          .permit(
-            :workflow_id,
-            :position,
-            :name,
-            :description,
-            :category_id,
-            :ai_enabled,
-            :ai_prompt,
-            :overdue_days,
-            :other_attributes...,
-          )
+        params.require(:workflow_step).permit(
+          :workflow_id,
+          :position,
+          :name,
+          :description,
+          :category_id,
+          :ai_enabled,
+          :ai_prompt,
+          :overdue_days,
+          :other_attributes...,
+        )
       end
 
       def ensure_admin
