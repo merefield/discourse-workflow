@@ -7,7 +7,11 @@ module DiscourseWorkflow
       current_date = Date.current
       now = Time.zone.now
       counts_by_workflow_step =
-        ::DiscourseWorkflow::WorkflowState.group(:workflow_id, :workflow_step_id).count
+        ::DiscourseWorkflow::WorkflowState
+          .where.not(workflow_id: nil)
+          .where.not(workflow_step_id: nil)
+          .group(:workflow_id, :workflow_step_id)
+          .count
       records =
         counts_by_workflow_step.map do |(workflow_id, workflow_step_id), count|
           {
