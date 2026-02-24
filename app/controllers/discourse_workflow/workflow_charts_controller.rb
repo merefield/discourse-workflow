@@ -77,6 +77,7 @@ module DiscourseWorkflow
 
       steps = workflow.workflow_steps.sort_by { |step| step.position.to_i }
       return [] if steps.blank?
+      today = Date.current
 
       step_ids = steps.map(&:id)
       stats =
@@ -97,7 +98,10 @@ module DiscourseWorkflow
           step_name: step.name,
           step_position: step.position.to_i,
           color: category&.color || category&.parent_category&.color,
-          data: date_range.map { |date| counts_by_day_step.fetch([date, step.id], 0) },
+          data:
+            date_range.map do |date|
+              date > today ? nil : counts_by_day_step.fetch([date, step.id], 0)
+            end,
         }
       end
     end

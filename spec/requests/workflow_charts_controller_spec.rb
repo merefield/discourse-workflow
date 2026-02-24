@@ -218,6 +218,24 @@ RSpec.describe DiscourseWorkflow::WorkflowChartsController, type: :request do
     expect(payload["labels"].length).to eq(7)
   end
 
+  it "returns nil data points for future days so lines stop at the current day" do
+    freeze_time(Time.zone.parse("2026-02-18 10:00:00 UTC")) do
+      sign_in(admin)
+
+      get "/discourse-workflow/charts.json", params: { workflow_id: workflow.id, weeks: 1 }
+
+      payload = response.parsed_body
+      labels = payload["labels"]
+      future_indexes = labels.each_index.select { |index| Date.parse(labels[index]) > Date.current }
+
+      expect(future_indexes).to be_present
+
+      payload["series"].each do |series|
+        future_indexes.each { |index| expect(series["data"][index]).to be_nil }
+      end
+    end
+  end
+
   def create_stats_history
     end_date = Date.current.end_of_week(:saturday)
     start_date = end_date - 13.days
