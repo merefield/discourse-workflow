@@ -2,13 +2,18 @@
 
 module ::DiscourseWorkflow
   class WorkflowStat < ActiveRecord::Base
-    self.table_name = 'workflow_stats'
+    self.table_name = "workflow_stats"
     belongs_to :workflow
     belongs_to :workflow_step
     validates :cob_date, presence: true
     validates :workflow_id, presence: true
     validates :workflow_step_id, presence: true
-    validates :count, presence: true, numericality: { only_integer: true, greater_than_or_equal_to: 0 }
+    validates :count,
+              presence: true,
+              numericality: {
+                only_integer: true,
+                greater_than_or_equal_to: 0,
+              }
   end
 end
 
@@ -26,6 +31,7 @@ end
 #
 # Indexes
 #
+#  idx_workflow_stats_daily_workflow_step_unique  (cob_date,workflow_id,workflow_step_id) UNIQUE
 #  index_workflow_stats_on_workflow_id       (workflow_id)
 #  index_workflow_stats_on_workflow_step_id  (workflow_step_id)
 #
