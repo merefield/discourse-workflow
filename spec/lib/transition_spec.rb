@@ -2,6 +2,9 @@
 require_relative "../plugin_helper"
 
 describe ::DiscourseWorkflow::Transition do
+  fab!(:category_1, :category)
+  fab!(:category_2, :category)
+
   fab!(:workflow) do
     Fabricate(:workflow, name: "Test Workflow", description: "Test Workflow Description")
   end
@@ -9,6 +12,7 @@ describe ::DiscourseWorkflow::Transition do
     Fabricate(
       :workflow_step,
       workflow_id: workflow.id,
+      category_id: category_1.id,
       name: "Step 1",
       description: "Step 1 Description",
     )
@@ -17,6 +21,7 @@ describe ::DiscourseWorkflow::Transition do
     Fabricate(
       :workflow_step,
       workflow_id: workflow.id,
+      category_id: category_2.id,
       name: "Step 2",
       description: "Step 2 Description",
     )
@@ -33,7 +38,7 @@ describe ::DiscourseWorkflow::Transition do
     )
   end
 
-  fab!(:topic)
+  fab!(:topic) { Fabricate(:topic, category: category_1) }
 
   fab!(:workflow_state) do
     Fabricate(
@@ -79,5 +84,13 @@ describe ::DiscourseWorkflow::Transition do
       end
 
     expect(target_step_lookup_queries).to eq([])
+  end
+
+  it "writes ending category name from the target step category" do
+    transition.transition(user, topic, option_1.slug)
+
+    audit_log = DiscourseWorkflow::WorkflowAuditLog.order(:id).last
+    expect(audit_log.starting_category_name).to eq(category_1.name)
+    expect(audit_log.ending_category_name).to eq(category_2.name)
   end
 end

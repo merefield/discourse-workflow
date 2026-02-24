@@ -7,8 +7,7 @@ module DiscourseWorkflow
 
       workflow_state =
         DiscourseWorkflow::WorkflowState.includes(
-          :workflow,
-          { workflow: :workflow_steps },
+          { workflow: { workflow_steps: :category } },
           { workflow_step: { workflow_step_options: :workflow_option } },
         ).find_by(topic_id: topic.id)
 
@@ -37,6 +36,7 @@ module DiscourseWorkflow
       starting_position = current_step.position
       starting_category_id = topic.category_id
       starting_category_name = topic.category&.name
+      ending_category_name = target_step.category&.name
 
       WorkflowState.transaction do
         step_option_id = workflow_step_option.id
@@ -61,7 +61,7 @@ module DiscourseWorkflow
           starting_category_id: starting_category_id,
           starting_category_name: starting_category_name,
           ending_category_id: topic.category_id,
-          ending_category_name: topic.category&.name,
+          ending_category_name: ending_category_name,
           starting_position: starting_position,
           ending_position: target_step.position,
           step_option_id: step_option_id,
