@@ -19,12 +19,18 @@ module DiscourseWorkflow
           records: @workflow_steps,
           associations: [:category, { workflow_step_options: :workflow_option }],
         ).call
+        workflow_categories = categories_for_overview(@workflow_steps)
         render_json_dump(
           {
             workflow_steps:
               ActiveModel::ArraySerializer.new(
                 @workflow_steps,
                 each_serializer: DiscourseWorkflow::WorkflowStepSerializer,
+              ),
+            workflow_categories:
+              ActiveModel::ArraySerializer.new(
+                workflow_categories,
+                each_serializer: DiscourseWorkflow::WorkflowCategorySerializer,
               ),
           },
         )
@@ -115,6 +121,16 @@ module DiscourseWorkflow
           :ai_prompt,
           :overdue_days,
         )
+      end
+
+      def categories_for_overview(workflow_steps)
+        categories = workflow_steps.filter_map(&:category)
+        parent_category_ids =
+          categories.map { |category| category.parent_category_id || category.id }
+        category_ids = categories.map(&:id)
+        category_ids.concat(Category.where(parent_category_id: parent_category_ids).pluck(:id))
+
+        Category.where(id: category_ids.uniq).order(:position)
       end
 
       def ensure_admin

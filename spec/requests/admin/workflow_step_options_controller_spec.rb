@@ -43,6 +43,21 @@ describe DiscourseWorkflow::Admin::WorkflowStepOptionsController do
     expect(DiscourseWorkflow::WorkflowStepOption.order(:id).last.position).to eq(2)
   end
 
+  it "updates the workflow option used by a step option" do
+    put "/admin/plugins/discourse-workflow/workflow_step_options/#{step_option.id}.json",
+        params: {
+          workflow_step_option: {
+            workflow_step_id: step_1.id,
+            workflow_option_id: new_option.id,
+            target_step_id: step_2.id,
+            position: step_option.position,
+          },
+        }
+
+    expect(response.status).to eq(200)
+    expect(step_option.reload.workflow_option_id).to eq(new_option.id)
+  end
+
   it "does not add per-option queries when listing step options" do
     get "/admin/plugins/discourse-workflow/workflows/#{workflow.id}/workflow_steps/#{step_1.id}/workflow_step_options.json"
     base_query_count =
