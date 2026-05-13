@@ -26,6 +26,10 @@ module PageObjects
         has_css?(step_selector(step), **options)
       end
 
+      def has_no_step?(step)
+        has_no_css?(step_selector(step))
+      end
+
       def has_lane?(category, text: nil)
         options = text ? { text: text } : {}
         has_css?(lane_selector(category), **options)
@@ -678,6 +682,36 @@ module PageObjects
         JS
       end
 
+      def has_short_segment_penalty?
+        has_overview? && page.evaluate_script(<<~JS)
+          (() => {
+            const moduleName = "discourse/plugins/discourse-workflow/discourse/admin/components/workflow-overview-editor";
+            const WorkflowOverviewEditor = window.requirejs(moduleName).default;
+            const editor = Object.create(WorkflowOverviewEditor.prototype);
+            const scoreFor = (segments) => {
+              return editor.routeCandidateScore({
+                segments,
+                labelPoint: { x: 300, y: 300 },
+                obstacleRects: [],
+                labelObstacleRects: [],
+                routedSegments: [],
+                routedLabels: [],
+                arrowheadPoints: [],
+                laneStackBounds: null,
+                sidePenalty: 0,
+              });
+            };
+            const longSegment = [{ x1: 0, y1: 0, x2: 100, y2: 0 }];
+            const sameLengthWithShortSegments = [
+              { x1: 0, y1: 0, x2: 20, y2: 0 },
+              { x1: 20, y1: 0, x2: 100, y2: 0 },
+            ];
+
+            return scoreFor(sameLengthWithShortSegments) > scoreFor(longSegment);
+          })();
+        JS
+      end
+
       def has_lower_return_route_length_penalty?
         has_overview? && page.evaluate_script(<<~JS)
           (() => {
@@ -720,10 +754,10 @@ module PageObjects
             const editor = Object.create(WorkflowOverviewEditor.prototype);
             const laneStackBounds = { top: 0, bottom: 100 };
             const insideConnectorGutter = [
-              { x1: 0, y1: 130, x2: 100, y2: 130 },
+              { x1: 0, y1: 108, x2: 100, y2: 108 },
             ];
             const beyondConnectorGutter = [
-              { x1: 0, y1: 170, x2: 100, y2: 170 },
+              { x1: 0, y1: 118, x2: 100, y2: 118 },
             ];
 
             return editor.laneEscapePenalty(insideConnectorGutter, laneStackBounds) === 0 &&
@@ -963,6 +997,11 @@ module PageObjects
         self
       end
 
+      def delete_step(step)
+        find("#{step_selector(step)} .workflow-overview-editor__delete-step").click
+        self
+      end
+
       def has_delete_connector_confirmation?
         has_css?(
           ".dialog-body",
@@ -971,6 +1010,18 @@ module PageObjects
       end
 
       def confirm_delete_connector
+        find(".dialog-footer .btn-danger").click
+        self
+      end
+
+      def has_delete_step_confirmation?
+        has_css?(
+          ".dialog-body",
+          text: "Are you sure you want to permanently delete this step and all related connectors?",
+        )
+      end
+
+      def confirm_delete_step
         find(".dialog-footer .btn-danger").click
         self
       end

@@ -88,10 +88,18 @@ module DiscourseWorkflow
       end
 
       def destroy
-        if @workflow_step.destroy
-          head :no_content
-        else
-          render_json_error @workflow_step
+        WorkflowStep.transaction do
+          WorkflowStepOption
+            .where(workflow_step_id: @workflow_step.id)
+            .or(WorkflowStepOption.where(target_step_id: @workflow_step.id))
+            .destroy_all
+
+          if @workflow_step.destroy
+            head :no_content
+          else
+            render_json_error @workflow_step
+            raise ActiveRecord::Rollback
+          end
         end
       end
 

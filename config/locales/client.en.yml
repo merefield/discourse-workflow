@@ -207,9 +207,11 @@ en:
           overview:
             add_step: "Add step"
             confirm_delete_connector: "Are you sure you want to permanently delete this connector?"
+            confirm_delete_step: "Are you sure you want to permanently delete this step and all related connectors?"
             connector_handle: "%{step} %{side} connector"
             default_step_name: "Step %{position}"
             delete_connector: "Delete connector"
+            delete_step: "Delete step"
             loading: "Loading workflow overview..."
             new_step_name: "New step name"
             unknown_category: "Unknown category"

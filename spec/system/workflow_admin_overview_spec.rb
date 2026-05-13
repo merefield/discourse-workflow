@@ -106,6 +106,7 @@ RSpec.describe "Workflow admin overview" do
     expect(overview_page).to have_alternate_label_position_can_win
     expect(overview_page).to have_label_lane_boundary_penalty
     expect(overview_page).to have_turn_count_penalty
+    expect(overview_page).to have_short_segment_penalty
     expect(overview_page).to have_lower_return_route_length_penalty
     expect(overview_page).to have_lane_escape_gutter_for_connector_handles
     expect(overview_page).to have_lower_escape_route_candidate
@@ -159,6 +160,45 @@ RSpec.describe "Workflow admin overview" do
     )
     expect(overview_page).to have_no_css(
       ".workflow-overview-editor__option[data-workflow-step-option-id='#{queue_to_done_option.id}']",
+    )
+  end
+
+  it "deletes steps and their incoming and outgoing connectors after confirmation" do
+    incoming_option =
+      Fabricate(
+        :workflow_step_option,
+        workflow_step_id: queue_step.id,
+        workflow_option_id: next_option.id,
+        target_step_id: review_step.id,
+        position: 2,
+      )
+    outgoing_option =
+      Fabricate(
+        :workflow_step_option,
+        workflow_step_id: review_step.id,
+        workflow_option_id: next_option.id,
+        target_step_id: done_step.id,
+        position: 1,
+      )
+
+    overview_page.visit_workflow(workflow).switch_to_overview
+
+    overview_page.delete_step(review_step)
+
+    expect(overview_page).to have_delete_step_confirmation
+
+    overview_page.confirm_delete_step
+
+    expect(DiscourseWorkflow::WorkflowStep.exists?(review_step.id)).to eq(false)
+    expect(DiscourseWorkflow::WorkflowStepOption.exists?(incoming_option.id)).to eq(false)
+    expect(DiscourseWorkflow::WorkflowStepOption.exists?(outgoing_option.id)).to eq(false)
+    expect(DiscourseWorkflow::WorkflowStepOption.exists?(queue_to_done_option.id)).to eq(true)
+    expect(overview_page).to have_no_step(review_step)
+    expect(overview_page).to have_no_css(
+      ".workflow-overview-editor__edge-path[data-workflow-step-option-id='#{incoming_option.id}']",
+    )
+    expect(overview_page).to have_no_css(
+      ".workflow-overview-editor__edge-path[data-workflow-step-option-id='#{outgoing_option.id}']",
     )
   end
 

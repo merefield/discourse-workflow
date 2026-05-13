@@ -284,6 +284,33 @@ export default class WorkflowOverviewEditor extends Component {
     );
   }
 
+  @action
+  confirmDeleteStep(step) {
+    if (this.args.disabled) {
+      return;
+    }
+
+    return this.dialog.confirm({
+      message: i18n(
+        "admin.discourse_workflow.workflows.overview.confirm_delete_step"
+      ),
+      confirmButtonClass: "btn-danger",
+      confirmButtonLabel:
+        "admin.discourse_workflow.workflows.overview.delete_step",
+      didConfirm: async () => {
+        try {
+          await ajax(
+            `/admin/plugins/discourse-workflow/workflow_steps/${step.id}.json`,
+            { type: "DELETE" }
+          );
+          await this.loadGraph();
+        } catch (err) {
+          popupAjaxError(err);
+        }
+      },
+    });
+  }
+
   updateStepOption(stepOption, attributes) {
     return ajax(
       `/admin/plugins/discourse-workflow/workflow_step_options/${stepOption.id}.json`,
@@ -384,12 +411,17 @@ export default class WorkflowOverviewEditor extends Component {
       const headerRect = lane
         .querySelector(".workflow-overview-editor__lane-header")
         ?.getBoundingClientRect();
+      const contentRect = lane
+        .querySelector(".workflow-overview-editor__lane-steps")
+        ?.getBoundingClientRect();
 
       return {
         left: rect.left - boardRect.left,
         right: rect.right - boardRect.left,
         top: rect.top - boardRect.top,
         bottom: rect.bottom - boardRect.top,
+        contentLeft: (contentRect || rect).left - boardRect.left,
+        contentRight: (contentRect || rect).right - boardRect.left,
         labelTop: (headerRect || rect).top - boardRect.top,
         labelBottom: (headerRect || rect).bottom - boardRect.top,
       };
@@ -902,7 +934,8 @@ export default class WorkflowOverviewEditor extends Component {
 
     return (
       this.routeLength(segments) * routeLengthMultiplier +
-      this.routeTurnCount(segments) * 45 +
+      this.shortSegmentPenalty(segments) +
+      this.routeTurnCount(segments) * 90 +
       this.segmentCrossingCount(segments, routedSegments) * 2000 +
       this.horizontalSegmentLabelPenalty(segments, routedLabels) +
       this.labelPenalty({
@@ -961,9 +994,10 @@ export default class WorkflowOverviewEditor extends Component {
             return lanePenalty;
           }
 
+          const laneLeft = lane.contentLeft ?? lane.left;
+          const laneRight = lane.contentRight ?? lane.right;
           const overlap =
-            Math.min(segmentRight, lane.right) -
-            Math.max(segmentLeft, lane.left);
+            Math.min(segmentRight, laneRight) - Math.max(segmentLeft, laneLeft);
 
           return overlap > 0 ? lanePenalty + overlap * 80 : lanePenalty;
         }, 0)
@@ -997,9 +1031,15 @@ export default class WorkflowOverviewEditor extends Component {
             return gapPenalty;
           }
 
+          const previousLaneLeft =
+            previousLane.contentLeft ?? previousLane.left;
+          const previousLaneRight =
+            previousLane.contentRight ?? previousLane.right;
+          const laneLeft = lane.contentLeft ?? lane.left;
+          const laneRight = lane.contentRight ?? lane.right;
           const overlap =
-            Math.min(segmentRight, previousLane.right, lane.right) -
-            Math.max(segmentLeft, previousLane.left, lane.left);
+            Math.min(segmentRight, previousLaneRight, laneRight) -
+            Math.max(segmentLeft, previousLaneLeft, laneLeft);
 
           return overlap > 0 ? gapPenalty + overlap * 140 : gapPenalty;
         }, 0)
@@ -1012,7 +1052,7 @@ export default class WorkflowOverviewEditor extends Component {
       return 0;
     }
 
-    const connectorGutter = 48;
+    const connectorGutter = 12;
     const upperLimit = laneStackBounds.top - connectorGutter;
     const lowerLimit = laneStackBounds.bottom + connectorGutter;
 
@@ -1024,15 +1064,26 @@ export default class WorkflowOverviewEditor extends Component {
         Math.max(0, segment.y1 - lowerLimit) +
         Math.max(0, segment.y2 - lowerLimit);
 
-      return penalty + (escapedAbove + escapedBelow) * 240;
+      return penalty + (escapedAbove + escapedBelow) * 960;
     }, 0);
+  }
+
+  optionLabelRect(labelPoint) {
+    const halfWidth = 80;
+
+    return {
+      left: labelPoint.x - halfWidth,
+      right: labelPoint.x + halfWidth,
+      top: labelPoint.y - 20,
+      bottom: labelPoint.y + 20,
+    };
   }
 
   labelCollisionPenalty(labelPoint, routedLabels) {
     return routedLabels.reduce((penalty, routedLabel) => {
       const horizontalDistance = Math.abs(labelPoint.x - routedLabel.x);
       const verticalDistance = Math.abs(labelPoint.y - routedLabel.y);
-      const likelyHorizontalOverlap = horizontalDistance < 240;
+      const likelyHorizontalOverlap = horizontalDistance < 160;
 
       if (likelyHorizontalOverlap && verticalDistance < 40) {
         return Infinity;
@@ -1047,12 +1098,7 @@ export default class WorkflowOverviewEditor extends Component {
   }
 
   labelObstaclePenalty(labelPoint, obstacleRects) {
-    const labelRect = {
-      left: labelPoint.x - 120,
-      right: labelPoint.x + 120,
-      top: labelPoint.y - 20,
-      bottom: labelPoint.y + 20,
-    };
+    const labelRect = this.optionLabelRect(labelPoint);
 
     return obstacleRects.reduce((penalty, rect) => {
       const overlaps =
@@ -1066,12 +1112,7 @@ export default class WorkflowOverviewEditor extends Component {
   }
 
   labelArrowheadPenalty(labelPoint, arrowheadPoints) {
-    const labelRect = {
-      left: labelPoint.x - 120,
-      right: labelPoint.x + 120,
-      top: labelPoint.y - 20,
-      bottom: labelPoint.y + 20,
-    };
+    const labelRect = this.optionLabelRect(labelPoint);
 
     return arrowheadPoints.reduce((penalty, arrowheadPoint) => {
       const covered =
@@ -1085,12 +1126,7 @@ export default class WorkflowOverviewEditor extends Component {
   }
 
   labelSegmentPenalty(labelPoint, routedSegments) {
-    const labelRect = {
-      left: labelPoint.x - 120,
-      right: labelPoint.x + 120,
-      top: labelPoint.y - 20,
-      bottom: labelPoint.y + 20,
-    };
+    const labelRect = this.optionLabelRect(labelPoint);
 
     return routedSegments.reduce((penalty, segment) => {
       const segmentIntersectsLabel =
@@ -1106,12 +1142,7 @@ export default class WorkflowOverviewEditor extends Component {
       return 0;
     }
 
-    const labelRect = {
-      left: labelPoint.x - 120,
-      right: labelPoint.x + 120,
-      top: labelPoint.y - 20,
-      bottom: labelPoint.y + 20,
-    };
+    const labelRect = this.optionLabelRect(labelPoint);
 
     return laneStackBounds.lanes.reduce((penalty, lane) => {
       const overlapsTop =
@@ -1147,12 +1178,7 @@ export default class WorkflowOverviewEditor extends Component {
       return (
         penalty +
         routedLabels.reduce((labelPenalty, routedLabel) => {
-          const labelRect = {
-            left: routedLabel.x - 120,
-            right: routedLabel.x + 120,
-            top: routedLabel.y - 20,
-            bottom: routedLabel.y + 20,
-          };
+          const labelRect = this.optionLabelRect(routedLabel);
 
           return this.horizontalSegmentIntersectsRect(segment, labelRect)
             ? labelPenalty + 10_000
@@ -1225,6 +1251,21 @@ export default class WorkflowOverviewEditor extends Component {
         Math.abs(segment.x2 - segment.x1) +
         Math.abs(segment.y2 - segment.y1)
       );
+    }, 0);
+  }
+
+  shortSegmentPenalty(segments) {
+    const minimumSegmentLength = 24;
+
+    return segments.reduce((penalty, segment) => {
+      const segmentLength =
+        Math.abs(segment.x2 - segment.x1) + Math.abs(segment.y2 - segment.y1);
+
+      if (segmentLength >= minimumSegmentLength) {
+        return penalty;
+      }
+
+      return penalty + (minimumSegmentLength - segmentLength) * 12;
     }, 0);
   }
 
@@ -2225,6 +2266,14 @@ export default class WorkflowOverviewEditor extends Component {
                           {{on "dragover" this.allowDrop}}
                           {{on "drop" (fn this.dropOnStep step)}}
                         >
+                          <DButton
+                            class="btn-danger btn-small workflow-overview-editor__delete-step"
+                            @icon="xmark"
+                            @title="admin.discourse_workflow.workflows.overview.delete_step"
+                            @action={{fn this.confirmDeleteStep step}}
+                            @disabled={{@disabled}}
+                          />
+
                           {{#each this.connectorSides as |side|}}
                             <button
                               type="button"
