@@ -9,7 +9,6 @@ import DToggleSwitch from "discourse/components/d-toggle-switch";
 import concatClass from "discourse/helpers/concat-class";
 import { popupAjaxError } from "discourse/lib/ajax-error";
 import { i18n } from "discourse-i18n";
-import AdminConfigAreaEmptyList from "admin/components/admin-config-area-empty-list";
 import WorkflowEditor from "./workflow-editor";
 
 export default class WorkflowListEditor extends Component {
@@ -93,12 +92,15 @@ export default class WorkflowListEditor extends Component {
             </tbody>
           </table>
         {{else}}
-          <AdminConfigAreaEmptyList
-            @ctaLabel="discourse_workflow.workflows.new"
-            @ctaRoute="adminPlugins.show.discourse-workflows.new"
-            @ctaClass="workflow-list-editor__empty-new-button"
-            @emptyLabel="discourse_workflow.workflows.no_workflows"
-          />
+          <div class="workflow-list-editor__empty empty-state">
+            <p>{{i18n "admin.discourse_workflow.workflows.none"}}</p>
+            <LinkTo
+              @route="adminPlugins.show.discourse-workflow-workflows.new"
+              class="btn btn-primary workflow-list-editor__empty-new-button"
+            >
+              {{i18n "admin.discourse_workflow.workflows.new"}}
+            </LinkTo>
+          </div>
         {{/if}}
       {{/if}}
     </section>
