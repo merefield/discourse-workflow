@@ -11,7 +11,7 @@ module DiscourseWorkflow
 
     def workflow
       list_opts = build_topic_list_options
-      user = list_target_user || current_user
+      user = workflow_list_user
       workflow_topic_ids_scope = DiscourseWorkflow::WorkflowState.all.select(:topic_id).distinct
       workflow_filters_applied = false
 
@@ -79,6 +79,14 @@ module DiscourseWorkflow
     end
 
     protected
+
+    def workflow_list_user
+      if respond_to?(:list_target_user, true)
+        send(:list_target_user) || current_user
+      else
+        current_user
+      end
+    end
 
     def ensure_discourse_workflow
       raise Discourse::NotFound if !SiteSetting.workflow_enabled

@@ -3,7 +3,7 @@ import { or } from "truth-helpers";
 import dIcon from "discourse-common/helpers/d-icon";
 import { i18n } from "discourse-i18n";
 
-<template>
+export default <template>
   <LinkTo class="btn btn-primary" @route={{@route}} @model={{@model}}>
     {{dIcon "plus"}}
     {{i18n (or @label "admin.customize.new")}}

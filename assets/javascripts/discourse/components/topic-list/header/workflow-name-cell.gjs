@@ -1,4 +1,4 @@
-import SortableColumn from "./sortable-column";
+import SortableColumn from "discourse/components/topic-list/header/sortable-column";
 
 const WorkflowNameCell = <template>
   <SortableColumn
