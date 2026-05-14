@@ -122,6 +122,20 @@ module PageObjects
         has_css?(".workflow-visual-editor__option", text: text)
       end
 
+      def has_selected_option_label?(step_option, text)
+        has_css?(option_selector(step_option)) && page.evaluate_script(<<~JS, step_option.id, text)
+            (() => {
+              const stepOptionId = arguments[0];
+              const expectedText = arguments[1];
+              const select = document.querySelector(
+                `.workflow-visual-editor__option[data-workflow-step-option-id="${stepOptionId}"] select`
+              );
+
+              return select?.selectedOptions?.[0]?.textContent.trim() === expectedText;
+            })();
+          JS
+      end
+
       def has_any_option_control?
         has_css?(".workflow-visual-editor__option")
       end

@@ -164,6 +164,19 @@ RSpec.describe "Workflow admin visual" do
     expect(visual_page.tracked_request_count("/workflow_options.json")).to eq(0)
   end
 
+  it "falls back to workflow option names for untranslated action slugs" do
+    custom_option = Fabricate(:workflow_option, slug: "custom-action", name: "Custom action")
+
+    visual_page.visit_workflow(workflow).switch_to_visual
+
+    expect(visual_page).to have_selected_option_label(queue_to_done_option, "Next")
+
+    visual_page.select_option(queue_to_done_option, custom_option)
+
+    expect(queue_to_done_option.reload.workflow_option_id).to eq(custom_option.id)
+    expect(visual_page).to have_selected_option_label(queue_to_done_option, "Custom action")
+  end
+
   it "preserves scroll position after visual workflow changes" do
     visual_page.visit_workflow(workflow).switch_to_visual
     visual_page.make_page_scrollable.scroll_window_to(500)

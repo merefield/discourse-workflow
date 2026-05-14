@@ -145,7 +145,8 @@ export default class WorkflowVisualEditor extends Component {
     }
 
     return i18n(
-      `admin.discourse_workflow.workflows.steps.options.actions.${workflowOption.slug}`
+      `admin.discourse_workflow.workflows.steps.options.actions.${workflowOption.slug}`,
+      { defaultValue: workflowOption.name }
     );
   }
 
