@@ -158,10 +158,12 @@ module DiscourseWorkflow
 
       def categories_for_visual(workflow_steps)
         categories = workflow_steps.filter_map(&:category)
-        parent_category_ids =
-          categories.map { |category| category.parent_category_id || category.id }
         category_ids = categories.map(&:id)
-        category_ids.concat(Category.where(parent_category_id: parent_category_ids).pluck(:id))
+        parent_category_ids = categories.filter_map(&:parent_category_id).uniq
+
+        if parent_category_ids.present?
+          category_ids.concat(Category.where(parent_category_id: parent_category_ids).pluck(:id))
+        end
 
         Category.where(id: category_ids.uniq).order(:position)
       end

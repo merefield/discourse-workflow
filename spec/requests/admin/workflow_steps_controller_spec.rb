@@ -62,6 +62,36 @@ describe DiscourseWorkflow::Admin::WorkflowStepsController do
     expect(expanded_query_count).to be <= base_query_count + 2
   end
 
+  it "does not include every root category as a visual lane for top-level workflow steps" do
+    unrelated_root_category = Fabricate(:category)
+    child_of_workflow_category = Fabricate(:category, parent_category_id: category_1.id)
+
+    get "/admin/plugins/discourse-workflow/workflows/#{workflow.id}/workflow_steps.json"
+
+    category_ids = response.parsed_body["workflow_categories"].map { |category| category["id"] }
+
+    expect(category_ids).to contain_exactly(category_1.id, category_2.id)
+    expect(category_ids).not_to include(unrelated_root_category.id)
+    expect(category_ids).not_to include(child_of_workflow_category.id)
+  end
+
+  it "includes sibling subcategory lanes for workflow steps under a shared parent category" do
+    parent_category = Fabricate(:category)
+    subcategory_1 = Fabricate(:category, parent_category_id: parent_category.id)
+    subcategory_2 = Fabricate(:category, parent_category_id: parent_category.id)
+    unused_sibling = Fabricate(:category, parent_category_id: parent_category.id)
+
+    step_1.update!(category_id: subcategory_1.id)
+    step_2.update!(category_id: subcategory_2.id)
+
+    get "/admin/plugins/discourse-workflow/workflows/#{workflow.id}/workflow_steps.json"
+
+    category_ids = response.parsed_body["workflow_categories"].map { |category| category["id"] }
+
+    expect(category_ids).to include(subcategory_1.id, subcategory_2.id, unused_sibling.id)
+    expect(category_ids).not_to include(parent_category.id)
+  end
+
   it "deletes incoming and outgoing step options when destroying a workflow step" do
     category_3 = Fabricate(:category)
     step_3 =
