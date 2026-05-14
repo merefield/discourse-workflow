@@ -188,10 +188,12 @@ export default class WorkflowVisualEditor extends Component {
 
   @bind
   connectorHandleLabel(step, side) {
-    return i18n("admin.discourse_workflow.workflows.visual.connector_handle", {
-      step: step.name,
-      side,
-    });
+    return i18n(
+      `admin.discourse_workflow.workflows.visual.connector_handles.${side}`,
+      {
+        step: step.name,
+      }
+    );
   }
 
   edgeForHandle(step, side) {

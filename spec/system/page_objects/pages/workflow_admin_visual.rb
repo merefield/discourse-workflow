@@ -131,7 +131,11 @@ module PageObjects
       end
 
       def has_connector_handles?(step)
-        %w[top right bottom left].all? { |side| has_css?(connector_handle_selector(step, side)) }
+        %w[top right bottom left].all? do |side|
+          has_css?(
+            "#{connector_handle_selector(step, side)}[aria-label='#{side.capitalize} connector handle for #{step.name}']",
+          )
+        end
       end
 
       def has_arrow_link_for_option?(step_option)

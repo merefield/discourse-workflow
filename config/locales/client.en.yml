@@ -211,7 +211,11 @@ en:
             change_connector_option: "Change the action used by this connector"
             confirm_delete_connector: "Are you sure you want to permanently delete this connector?"
             confirm_delete_step: "Are you sure you want to permanently delete this step and all related connectors?"
-            connector_handle: "%{step} %{side} connector"
+            connector_handles:
+              top: "Top connector handle for %{step}"
+              right: "Right connector handle for %{step}"
+              bottom: "Bottom connector handle for %{step}"
+              left: "Left connector handle for %{step}"
             default_step_name: "Step %{position}"
             delete_connector: "Delete connector"
             delete_step: "Delete step"
