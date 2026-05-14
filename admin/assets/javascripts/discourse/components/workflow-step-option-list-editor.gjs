@@ -10,16 +10,20 @@ import DButton from "discourse/components/d-button";
 import DPageSubheader from "discourse/components/d-page-subheader";
 import concatClass from "discourse/helpers/concat-class";
 import { popupAjaxError } from "discourse/lib/ajax-error";
-import { bind } from "discourse-common/utils/decorators";
+import { bind } from "discourse/lib/decorators";
 import { i18n } from "discourse-i18n";
 import WorkflowLinkButton from "./workflow-link-button";
 import WorkflowStepOptionEditor from "./workflow-step-option-editor";
 
 export default class WorkflowStepOptionsListEditor extends Component {
   @service store;
-  @tracked currentWorkflowStepOption = this.args.currentWorkflowStepOption;
+
   @tracked workflowStepOptions = [];
   @tracked workflowStepOptionsPresent = false;
+
+  get currentWorkflowStepOption() {
+    return this.args.currentWorkflowStepOption;
+  }
 
   get newStepOption() {
     return this.store.createRecord("workflow-step-option", {

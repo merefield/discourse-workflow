@@ -6,7 +6,7 @@ module DiscourseWorkflow
       requires_plugin ::DiscourseWorkflow::PLUGIN_NAME
 
       before_action :set_workflow, only: %i[index new create]
-      before_action :set_workflow_step, only: %i[show edit update destroy]
+      before_action :set_workflow_step, only: %i[show edit update destroy reorder]
 
       def index
         @workflow_steps =
@@ -19,12 +19,18 @@ module DiscourseWorkflow
           records: @workflow_steps,
           associations: [:category, { workflow_step_options: :workflow_option }],
         ).call
+        workflow_categories = categories_for_visual(@workflow_steps)
         render_json_dump(
           {
             workflow_steps:
               ActiveModel::ArraySerializer.new(
                 @workflow_steps,
                 each_serializer: DiscourseWorkflow::WorkflowStepSerializer,
+              ),
+            workflow_categories:
+              ActiveModel::ArraySerializer.new(
+                workflow_categories,
+                each_serializer: DiscourseWorkflow::WorkflowCategorySerializer,
               ),
           },
         )
@@ -81,12 +87,40 @@ module DiscourseWorkflow
         end
       end
 
-      def destroy
-        if @workflow_step.destroy
-          head :no_content
-        else
-          render_json_error @workflow_step
+      def reorder
+        WorkflowStep.transaction do
+          reorder_params = workflow_step_reorder_params
+          target_position = reorder_params[:position].to_i
+          target_steps =
+            WorkflowStep
+              .where(workflow_id: @workflow_step.workflow_id, position: target_position)
+              .where.not(id: @workflow_step.id)
+
+          target_steps.update_all(position: @workflow_step.position, updated_at: Time.zone.now)
+          @workflow_step.update!(reorder_params)
         end
+
+        render json: {
+                 workflow_step: WorkflowStepSerializer.new(@workflow_step, root: false),
+               },
+               status: :ok
+      rescue ActiveRecord::RecordInvalid => err
+        render_json_error err.record
+      end
+
+      def destroy
+        WorkflowStep.transaction do
+          WorkflowStepOption
+            .where(workflow_step_id: @workflow_step.id)
+            .or(WorkflowStepOption.where(target_step_id: @workflow_step.id))
+            .destroy_all
+
+          @workflow_step.destroy!
+        end
+
+        head :no_content
+      rescue ActiveRecord::RecordNotDestroyed => err
+        render_json_error err.record || @workflow_step
       end
 
       private
@@ -115,6 +149,22 @@ module DiscourseWorkflow
           :ai_prompt,
           :overdue_days,
         )
+      end
+
+      def workflow_step_reorder_params
+        params.require(:workflow_step).permit(:position, :category_id)
+      end
+
+      def categories_for_visual(workflow_steps)
+        categories = workflow_steps.filter_map(&:category)
+        category_ids = categories.map(&:id)
+        parent_category_ids = categories.filter_map(&:parent_category_id).uniq
+
+        if parent_category_ids.present?
+          category_ids.concat(Category.where(parent_category_id: parent_category_ids).pluck(:id))
+        end
+
+        Category.where(id: category_ids.uniq).order(:position)
       end
 
       def ensure_admin

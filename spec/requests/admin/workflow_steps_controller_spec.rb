@@ -61,4 +61,135 @@ describe DiscourseWorkflow::Admin::WorkflowStepsController do
 
     expect(expanded_query_count).to be <= base_query_count + 2
   end
+
+  it "does not include every root category as a visual lane for top-level workflow steps" do
+    unrelated_root_category = Fabricate(:category)
+    child_of_workflow_category = Fabricate(:category, parent_category_id: category_1.id)
+
+    get "/admin/plugins/discourse-workflow/workflows/#{workflow.id}/workflow_steps.json"
+
+    category_ids = response.parsed_body["workflow_categories"].map { |category| category["id"] }
+
+    expect(category_ids).to contain_exactly(category_1.id, category_2.id)
+    expect(category_ids).not_to include(unrelated_root_category.id)
+    expect(category_ids).not_to include(child_of_workflow_category.id)
+  end
+
+  it "includes sibling subcategory lanes for workflow steps under a shared parent category" do
+    parent_category = Fabricate(:category)
+    subcategory_1 = Fabricate(:category, parent_category_id: parent_category.id)
+    subcategory_2 = Fabricate(:category, parent_category_id: parent_category.id)
+    unused_sibling = Fabricate(:category, parent_category_id: parent_category.id)
+
+    step_1.update!(category_id: subcategory_1.id)
+    step_2.update!(category_id: subcategory_2.id)
+
+    get "/admin/plugins/discourse-workflow/workflows/#{workflow.id}/workflow_steps.json"
+
+    category_ids = response.parsed_body["workflow_categories"].map { |category| category["id"] }
+
+    expect(category_ids).to include(subcategory_1.id, subcategory_2.id, unused_sibling.id)
+    expect(category_ids).not_to include(parent_category.id)
+  end
+
+  it "deletes incoming and outgoing step options when destroying a workflow step" do
+    category_3 = Fabricate(:category)
+    step_3 =
+      Fabricate(:workflow_step, workflow_id: workflow.id, category_id: category_3.id, position: 3)
+    incoming_step_option =
+      Fabricate(
+        :workflow_step_option,
+        workflow_step_id: step_2.id,
+        workflow_option_id: option.id,
+        target_step_id: step_1.id,
+        position: 1,
+      )
+    unrelated_step_option =
+      Fabricate(
+        :workflow_step_option,
+        workflow_step_id: step_2.id,
+        workflow_option_id: option.id,
+        target_step_id: step_3.id,
+        position: 2,
+      )
+    outgoing_step_option_id = step_option_1.id
+    incoming_step_option_id = incoming_step_option.id
+    unrelated_step_option_id = unrelated_step_option.id
+
+    delete "/admin/plugins/discourse-workflow/workflow_steps/#{step_1.id}.json"
+
+    expect(response.status).to eq(204)
+    expect(DiscourseWorkflow::WorkflowStep.exists?(step_1.id)).to eq(false)
+    expect(DiscourseWorkflow::WorkflowStepOption.exists?(outgoing_step_option_id)).to eq(false)
+    expect(DiscourseWorkflow::WorkflowStepOption.exists?(incoming_step_option_id)).to eq(false)
+    expect(DiscourseWorkflow::WorkflowStepOption.exists?(unrelated_step_option_id)).to eq(true)
+  end
+
+  it "rolls back step option deletion when workflow step destroy raises" do
+    incoming_step_option =
+      Fabricate(
+        :workflow_step_option,
+        workflow_step_id: step_2.id,
+        workflow_option_id: option.id,
+        target_step_id: step_1.id,
+        position: 2,
+      )
+
+    allow_any_instance_of(DiscourseWorkflow::WorkflowStep).to receive(
+      :destroy!,
+    ).and_wrap_original do |method, *args|
+      method.receiver.errors.add(:base, "forced failure")
+      raise ActiveRecord::RecordNotDestroyed.new("forced failure", method.receiver)
+    end
+
+    delete "/admin/plugins/discourse-workflow/workflow_steps/#{step_1.id}.json"
+
+    expect(response.status).to eq(422)
+    expect(DiscourseWorkflow::WorkflowStep.exists?(step_1.id)).to eq(true)
+    expect(DiscourseWorkflow::WorkflowStepOption.exists?(step_option_1.id)).to eq(true)
+    expect(DiscourseWorkflow::WorkflowStepOption.exists?(incoming_step_option.id)).to eq(true)
+  end
+
+  it "reorders a workflow step and displaced step atomically" do
+    put "/admin/plugins/discourse-workflow/workflow_steps/#{step_1.id}/reorder.json",
+        params: {
+          workflow_step: {
+            category_id: category_2.id,
+            position: 2,
+          },
+        }
+
+    expect(response.status).to eq(200)
+    expect(step_1.reload.category_id).to eq(category_2.id)
+    expect(step_1.position).to eq(2)
+    expect(step_2.reload.category_id).to eq(category_2.id)
+    expect(step_2.position).to eq(1)
+  end
+
+  it "rolls back displaced step position when reorder fails" do
+    allow_any_instance_of(DiscourseWorkflow::WorkflowStep).to receive(
+      :update!,
+    ).and_wrap_original do |method, *args|
+      if method.receiver.id == step_1.id
+        method.receiver.errors.add(:base, "forced failure")
+        raise ActiveRecord::RecordInvalid.new(method.receiver)
+      end
+
+      method.call(*args)
+    end
+
+    put "/admin/plugins/discourse-workflow/workflow_steps/#{step_1.id}/reorder.json",
+        params: {
+          workflow_step: {
+            category_id: category_2.id,
+            position: 2,
+          },
+        }
+
+    expect(response.status).to eq(422)
+    expect(step_1.reload.category_id).to eq(category_1.id)
+    expect(step_1.position).to eq(1)
+    expect(step_2.reload.category_id).to eq(category_2.id)
+    expect(step_2.position).to eq(2)
+  end
 end

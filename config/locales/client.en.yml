@@ -24,7 +24,7 @@ en:
       none:
         workflow: Currently, there are no viewable Workflow topics.
     workflow-name: "Workflow"
-    workflow-step-name:  "Step Name"  
+    workflow-step-name: "Step Name"
     workflow-step-position: "Step"
     workflow-overdue: "Overdue"
     filters:
@@ -164,6 +164,9 @@ en:
             category: "Category"
             ai_enabled: "AI Enabled"
             ai_prompt: "AI Prompt"
+            tabs:
+              list: "List"
+              visual: "Visual"
             overdue_days: "Step Overdue Days Override"
             overdue_days_help: "Blank uses workflow/global defaults. 0 disables overdue behavior for this step."
             title: "Steps"
@@ -186,7 +189,7 @@ en:
               target_position: "Target Position"
               actions:
                 submit: "Submit"
-                start : "Start"
+                start: "Start"
                 accept: "Accept"
                 reject: "Reject"
                 great: "Great"
@@ -201,6 +204,24 @@ en:
                 finish: "Finish"
                 close: "Close"
                 reopen: "Reopen"
+          visual:
+            add_step: "Add step"
+            add_step_title: "Create a workflow step using the selected name and category"
+            add_step_to_lane: "Add step to this swimlane"
+            change_connector_option: "Change the action used by this connector"
+            confirm_delete_connector: "Are you sure you want to permanently delete this connector?"
+            confirm_delete_step: "Are you sure you want to permanently delete this step and all related connectors?"
+            connector_handles:
+              top: "Top connector handle for %{step}"
+              right: "Right connector handle for %{step}"
+              bottom: "Bottom connector handle for %{step}"
+              left: "Left connector handle for %{step}"
+            default_step_name: "New step"
+            delete_connector: "Delete connector"
+            delete_step: "Delete step"
+            loading: "Loading workflow visual..."
+            new_step_name: "New step name"
+            unknown_category: "Unknown category"
           back: "Back"
           save: "Save"
           saved: "Workflow saved!"

@@ -4,7 +4,7 @@ export default class AdminPluginsShowDiscourseWorkflowWorkflowStepOptionsNew ext
   async model() {
     // Get the parent workflow step
     const workflowStep = this.modelFor(
-      "adminPlugins.show.discourse-workflow-workflows-steps-options"
+      "adminPlugins.show.discourse-workflow-workflows.steps.options"
     );
     // Create a new workflow step record
     const record = this.store.createRecord("workflow-step-option", {

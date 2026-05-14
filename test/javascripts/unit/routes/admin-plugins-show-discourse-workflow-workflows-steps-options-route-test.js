@@ -2,13 +2,13 @@ import { setupTest } from "ember-qunit";
 import { module, test } from "qunit";
 
 module(
-  "Unit | Route | admin-plugins-show-discourse-workflow-workflows-steps-options",
+  "Unit | Route | admin-plugins/show/discourse-workflow-workflows/steps/options",
   function (hooks) {
     setupTest(hooks);
 
     test("it resolves workflow steps from the expected parent route model", async function (assert) {
       const route = this.owner.lookup(
-        "route:admin-plugins-show-discourse-workflow-workflows-steps-options"
+        "route:admin-plugins/show/discourse-workflow-workflows/steps/options"
       );
 
       const workflowSteps = [
@@ -21,7 +21,7 @@ module(
       route.modelFor = (routeName) => {
         assert.strictEqual(
           routeName,
-          "adminPlugins.show.discourse-workflow-workflows-steps",
+          "adminPlugins.show.discourse-workflow-workflows.steps",
           "uses the canonical parent route key"
         );
         return workflowSteps;

@@ -8,17 +8,14 @@ import { later } from "@ember/runloop";
 import { service } from "@ember/service";
 import DButton from "discourse/components/d-button";
 import { popupAjaxError } from "discourse/lib/ajax-error";
+import DropdownSelectBox from "discourse/select-kit/components/dropdown-select-box";
 import I18n, { i18n } from "discourse-i18n";
-import DropdownSelectBox from "select-kit/components/dropdown-select-box";
 import WorkflowBackButton from "./workflow-back-button";
 
 export default class WorkflowStepOptionEditor extends Component {
-  @service adminPluginNavManager;
   @service router;
-  @service store;
   @service dialog;
   @service toasts;
-  @service siteSettings;
 
   @tracked isSaving = false;
   @tracked editingModel = null;
