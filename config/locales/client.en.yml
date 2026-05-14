@@ -216,7 +216,7 @@ en:
               right: "Right connector handle for %{step}"
               bottom: "Bottom connector handle for %{step}"
               left: "Left connector handle for %{step}"
-            default_step_name: "Step %{position}"
+            default_step_name: "New step"
             delete_connector: "Delete connector"
             delete_step: "Delete step"
             loading: "Loading workflow visual..."

@@ -289,6 +289,16 @@ RSpec.describe "Workflow admin visual" do
     expect(visual_page).to have_step(step, text: "QA")
   end
 
+  it "uses a position-neutral default name when adding a visual step without a name" do
+    visual_page.visit_workflow(workflow).switch_to_visual
+
+    visual_page.choose_new_step_category(review_category).add_step
+
+    step = DiscourseWorkflow::WorkflowStep.find_by!(workflow_id: workflow.id, name: "New step")
+    expect(step.position).to eq(4)
+    expect(visual_page).to have_step(step, text: "New step")
+  end
+
   it "opens the new step form from a swimlane with the category preselected" do
     visual_page.visit_workflow(workflow).switch_to_visual
 

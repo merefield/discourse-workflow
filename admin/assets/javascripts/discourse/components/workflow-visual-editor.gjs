@@ -2304,10 +2304,7 @@ export default class WorkflowVisualEditor extends Component {
             name:
               this.newStepName ||
               i18n(
-                "admin.discourse_workflow.workflows.visual.default_step_name",
-                {
-                  position: this.nextStepPosition,
-                }
+                "admin.discourse_workflow.workflows.visual.default_step_name"
               ),
             category_id: this.newStepCategoryId,
             position: this.nextStepPosition,
