@@ -216,9 +216,7 @@ export default class WorkflowVisualEditor extends Component {
   }
 
   mergeWorkflowCategories(workflowSteps, allCategories = []) {
-    const categoriesById = new Map(
-      this.workflowCategories.map((category) => [category.id, category])
-    );
+    const categoriesById = new Map();
     const allCategoriesById = new Map(
       allCategories.map((category) => [category.id, category])
     );
@@ -242,9 +240,10 @@ export default class WorkflowVisualEditor extends Component {
         id: categoryId,
         name:
           category?.name ||
-          categoriesById.get(categoryId)?.name ||
+          allCategoriesById.get(categoryId)?.name ||
           i18n("admin.discourse_workflow.workflows.visual.unknown_category"),
-        color: category?.color || categoriesById.get(categoryId)?.color,
+        color: category?.color || allCategoriesById.get(categoryId)?.color,
+        parent_category_id: category?.parent_category_id,
       });
     }
 

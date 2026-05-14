@@ -35,6 +35,10 @@ module PageObjects
         has_css?(lane_selector(category), **options)
       end
 
+      def has_no_lane?(category)
+        has_no_css?(lane_selector(category))
+      end
+
       def add_step_from_lane(category)
         within(lane_selector(category)) { find(".workflow-visual-editor__add-step-to-lane").click }
 

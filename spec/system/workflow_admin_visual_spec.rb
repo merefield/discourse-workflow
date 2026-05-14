@@ -245,6 +245,30 @@ RSpec.describe "Workflow admin visual" do
     expect(queue_step.reload.category_id).to eq(done_category.id)
   end
 
+  it "removes stale lanes while preserving server-scoped empty sibling lanes" do
+    orphan_parent_category = Fabricate(:category)
+    orphan_category = Fabricate(:category, parent_category_id: orphan_parent_category.id)
+    orphan_step =
+      Fabricate(
+        :workflow_step,
+        workflow_id: workflow.id,
+        category_id: orphan_category.id,
+        position: 4,
+        name: "Temporary lane",
+      )
+
+    visual_page.visit_workflow(workflow).switch_to_visual
+
+    expect(visual_page).to have_lane(orphan_category, text: orphan_category.name)
+
+    orphan_step.destroy!
+
+    visual_page.fill_new_step_name("QA").choose_new_step_category(review_category).add_step
+
+    expect(visual_page).to have_no_lane(orphan_category)
+    expect(visual_page).to have_lane(unused_category, text: unused_category.name)
+  end
+
   it "moves steps into explicit x-axis positions" do
     visual_page.visit_workflow(workflow).switch_to_visual
 
