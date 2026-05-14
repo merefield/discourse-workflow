@@ -282,6 +282,18 @@ export default class WorkflowVisualEditor extends Component {
     );
   }
 
+  reorderStepPosition(step, attributes) {
+    return ajax(
+      `/admin/plugins/discourse-workflow/workflow_steps/${step.id}/reorder.json`,
+      {
+        type: "PUT",
+        data: {
+          workflow_step: attributes,
+        },
+      }
+    );
+  }
+
   @action
   confirmDeleteStep(step) {
     if (this.args.disabled) {
@@ -2028,6 +2040,7 @@ export default class WorkflowVisualEditor extends Component {
   @action
   async dropStepOnLane(lane, event) {
     event.preventDefault();
+    event.stopPropagation();
 
     const step = this.workflowSteps.find(
       (workflowStep) => workflowStep.id === this.draggedStepId
@@ -2051,6 +2064,7 @@ export default class WorkflowVisualEditor extends Component {
   @action
   async dropStepOnLanePosition(lane, position, event) {
     event.preventDefault();
+    event.stopPropagation();
 
     const sourceStep = this.workflowSteps.find(
       (workflowStep) => workflowStep.id === this.draggedStepId
@@ -2064,18 +2078,8 @@ export default class WorkflowVisualEditor extends Component {
       return;
     }
 
-    const targetStep = this.workflowSteps.find((workflowStep) => {
-      return (
-        workflowStep.id !== sourceStep.id && workflowStep.position === position
-      );
-    });
-
     try {
-      if (targetStep) {
-        await this.updateStep(targetStep, { position: sourceStep.position });
-      }
-
-      await this.updateStep(sourceStep, {
+      await this.reorderStepPosition(sourceStep, {
         category_id: lane.id,
         position,
       });
@@ -2096,9 +2100,10 @@ export default class WorkflowVisualEditor extends Component {
       return;
     }
 
-    const sourcePosition = sourceStep.position;
-    await this.updateStep(targetStep, { position: sourcePosition });
-    await this.updateStep(sourceStep, { position: targetStep.position });
+    await this.reorderStepPosition(sourceStep, {
+      category_id: targetStep.category_id,
+      position: targetStep.position,
+    });
     await this.reloadGraphInPlace();
   }
 

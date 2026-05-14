@@ -6,7 +6,7 @@ module DiscourseWorkflow
       requires_plugin ::DiscourseWorkflow::PLUGIN_NAME
 
       before_action :set_workflow, only: %i[index new create]
-      before_action :set_workflow_step, only: %i[show edit update destroy]
+      before_action :set_workflow_step, only: %i[show edit update destroy reorder]
 
       def index
         @workflow_steps =
@@ -87,6 +87,27 @@ module DiscourseWorkflow
         end
       end
 
+      def reorder
+        WorkflowStep.transaction do
+          reorder_params = workflow_step_reorder_params
+          target_position = reorder_params[:position].to_i
+          target_steps =
+            WorkflowStep
+              .where(workflow_id: @workflow_step.workflow_id, position: target_position)
+              .where.not(id: @workflow_step.id)
+
+          target_steps.update_all(position: @workflow_step.position, updated_at: Time.zone.now)
+          @workflow_step.update!(reorder_params)
+        end
+
+        render json: {
+                 workflow_step: WorkflowStepSerializer.new(@workflow_step, root: false),
+               },
+               status: :ok
+      rescue ActiveRecord::RecordInvalid => err
+        render_json_error err.record
+      end
+
       def destroy
         WorkflowStep.transaction do
           WorkflowStepOption
@@ -129,6 +150,10 @@ module DiscourseWorkflow
           :ai_prompt,
           :overdue_days,
         )
+      end
+
+      def workflow_step_reorder_params
+        params.require(:workflow_step).permit(:position, :category_id)
       end
 
       def categories_for_visual(workflow_steps)

@@ -94,4 +94,47 @@ describe DiscourseWorkflow::Admin::WorkflowStepsController do
     expect(DiscourseWorkflow::WorkflowStepOption.exists?(incoming_step_option_id)).to eq(false)
     expect(DiscourseWorkflow::WorkflowStepOption.exists?(unrelated_step_option_id)).to eq(true)
   end
+
+  it "reorders a workflow step and displaced step atomically" do
+    put "/admin/plugins/discourse-workflow/workflow_steps/#{step_1.id}/reorder.json",
+        params: {
+          workflow_step: {
+            category_id: category_2.id,
+            position: 2,
+          },
+        }
+
+    expect(response.status).to eq(200)
+    expect(step_1.reload.category_id).to eq(category_2.id)
+    expect(step_1.position).to eq(2)
+    expect(step_2.reload.category_id).to eq(category_2.id)
+    expect(step_2.position).to eq(1)
+  end
+
+  it "rolls back displaced step position when reorder fails" do
+    allow_any_instance_of(DiscourseWorkflow::WorkflowStep).to receive(
+      :update!,
+    ).and_wrap_original do |method, *args|
+      if method.receiver.id == step_1.id
+        method.receiver.errors.add(:base, "forced failure")
+        raise ActiveRecord::RecordInvalid.new(method.receiver)
+      end
+
+      method.call(*args)
+    end
+
+    put "/admin/plugins/discourse-workflow/workflow_steps/#{step_1.id}/reorder.json",
+        params: {
+          workflow_step: {
+            category_id: category_2.id,
+            position: 2,
+          },
+        }
+
+    expect(response.status).to eq(422)
+    expect(step_1.reload.category_id).to eq(category_1.id)
+    expect(step_1.position).to eq(1)
+    expect(step_2.reload.category_id).to eq(category_2.id)
+    expect(step_2.position).to eq(2)
+  end
 end
