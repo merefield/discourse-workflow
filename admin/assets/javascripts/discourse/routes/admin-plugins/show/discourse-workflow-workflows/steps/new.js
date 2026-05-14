@@ -4,7 +4,7 @@ export default class AdminPluginsShowDiscourseWorkflowWorkflowStepsNew extends D
   async model() {
     // Get the parent workflow
     const workflow = this.modelFor(
-      "adminPlugins.show.discourse-workflow-workflows-steps"
+      "adminPlugins.show.discourse-workflow-workflows.steps"
     );
 
     const sortedSteps = [...workflow.workflow_steps].sort(

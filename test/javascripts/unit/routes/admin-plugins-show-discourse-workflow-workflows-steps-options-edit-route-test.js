@@ -2,13 +2,13 @@ import { setupTest } from "ember-qunit";
 import { module, test } from "qunit";
 
 module(
-  "Unit | Route | admin-plugins-show-discourse-workflow-workflows-steps-options-edit",
+  "Unit | Route | admin-plugins/show/discourse-workflow-workflows/steps/options/edit",
   function (hooks) {
     setupTest(hooks);
 
     test("it loads edit dependencies without requiring nested router state", async function (assert) {
       const route = this.owner.lookup(
-        "route:admin-plugins-show-discourse-workflow-workflows-steps-options-edit"
+        "route:admin-plugins/show/discourse-workflow-workflows/steps/options/edit"
       );
 
       let workflowStepParams;
