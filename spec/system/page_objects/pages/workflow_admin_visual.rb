@@ -907,50 +907,6 @@ module PageObjects
         JS
       end
 
-      def has_lane_header_route_score_bonus?
-        has_visual? && page.evaluate_script(<<~JS)
-          (() => {
-            const editor = document.querySelector(".workflow-visual-editor").workflowVisualEditor;
-            const route = editor.routePoints({
-              index: 0,
-              source: { x: 500, y: 180 },
-              sourceSide: "right",
-              target: { x: 100, y: 20 },
-              targetSide: "top",
-              obstacleRects: [],
-              labelObstacleRects: [],
-              routedSegments: [],
-              routedLabels: [],
-              routedArrowheads: [],
-              laneStackBounds: {
-                top: 0,
-                bottom: 220,
-                left: 0,
-                right: 600,
-                lanes: [
-                  {
-                    left: 0,
-                    right: 600,
-                    contentLeft: 0,
-                    contentRight: 600,
-                    top: 0,
-                    bottom: 220,
-                    labelTop: 80,
-                    labelBottom: 120,
-                  },
-                ],
-              },
-              allowLaneHeaderRouting: true,
-              sidePenalty: 0,
-            });
-
-            return route.segments.some((segment) => {
-              return segment.y1 === segment.y2 && Math.abs(segment.y1 - 100) <= 1;
-            });
-          })();
-        JS
-      end
-
       def has_turn_count_penalty?
         has_visual? && page.evaluate_script(<<~JS)
           (() => {
@@ -1217,27 +1173,6 @@ module PageObjects
         JS
       end
 
-      def has_no_option_dropdown_over_step_boxes?
-        has_css?(".workflow-visual-editor__option") && page.evaluate_script(<<~JS)
-          (() => {
-            const overlaps = (rect, otherRect) => {
-              return Math.max(rect.left, otherRect.left) < Math.min(rect.right, otherRect.right) &&
-                Math.max(rect.top, otherRect.top) < Math.min(rect.bottom, otherRect.bottom);
-            };
-            const optionRects = Array.from(document.querySelectorAll(".workflow-visual-editor__option")).map((option) => {
-              return option.getBoundingClientRect();
-            });
-            const stepRects = Array.from(document.querySelectorAll(".workflow-visual-editor__step")).map((step) => {
-              return step.getBoundingClientRect();
-            });
-
-            return optionRects.every((optionRect) => {
-              return stepRects.every((stepRect) => !overlaps(optionRect, stepRect));
-            });
-          })();
-        JS
-      end
-
       def has_no_option_dropdown_over_step_boxes_for?(step_option)
         has_css?(option_selector(step_option)) && page.evaluate_script(<<~JS, step_option.id)
           (() => {
@@ -1273,11 +1208,6 @@ module PageObjects
           connected_handle_selector(current_target_step),
           unconnected_handle_selector(new_target_step),
         )
-        self
-      end
-
-      def drag_step_to_lane(step, category)
-        drag(step_selector(step), lane_selector(category))
         self
       end
 
