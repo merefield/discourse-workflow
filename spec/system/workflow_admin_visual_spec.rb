@@ -154,6 +154,18 @@ RSpec.describe "Workflow admin visual" do
     expect(queue_to_done_option.reload.workflow_option_id).to eq(back_option.id)
   end
 
+  it "preserves scroll position after visual workflow changes" do
+    visual_page.visit_workflow(workflow).switch_to_visual
+    visual_page.make_page_scrollable.scroll_window_to(500)
+
+    scroll_y = visual_page.window_scroll_y
+
+    visual_page.select_option(queue_to_done_option, back_option)
+
+    expect(queue_to_done_option.reload.workflow_option_id).to eq(back_option.id)
+    expect(visual_page).to have_window_scroll_y(scroll_y)
+  end
+
   it "deletes arrows from the connector option control after confirmation" do
     visual_page.visit_workflow(workflow).switch_to_visual
 

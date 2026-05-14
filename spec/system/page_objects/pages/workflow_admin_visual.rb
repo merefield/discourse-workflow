@@ -1330,6 +1330,32 @@ module PageObjects
         self
       end
 
+      def make_page_scrollable
+        page.execute_script("document.documentElement.style.minHeight = '2400px'")
+        self
+      end
+
+      def scroll_window_to(offset)
+        page.execute_script("window.scrollTo(0, arguments[0])", offset)
+        self
+      end
+
+      def window_scroll_y
+        page.evaluate_script("window.scrollY")
+      end
+
+      def has_window_scroll_y?(offset)
+        page.document.synchronize do
+          if page.evaluate_script("Math.abs(window.scrollY - arguments[0]) <= 2", offset)
+            return true
+          end
+
+          raise Capybara::ExpectationNotMet
+        end
+      rescue Capybara::ExpectationNotMet
+        false
+      end
+
       def delete_option(step_option)
         find("#{option_selector(step_option)} .workflow-visual-editor__delete-option").click
         self

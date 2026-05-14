@@ -301,7 +301,7 @@ export default class WorkflowVisualEditor extends Component {
             `/admin/plugins/discourse-workflow/workflow_steps/${step.id}.json`,
             { type: "DELETE" }
           );
-          await this.loadGraph();
+          await this.reloadGraphInPlace();
         } catch (err) {
           popupAjaxError(err);
         }
@@ -346,7 +346,7 @@ export default class WorkflowVisualEditor extends Component {
             `/admin/plugins/discourse-workflow/workflow_step_options/${stepOption.id}.json`,
             { type: "DELETE" }
           );
-          await this.loadGraph();
+          await this.reloadGraphInPlace();
         } catch (err) {
           popupAjaxError(err);
         }
@@ -387,6 +387,37 @@ export default class WorkflowVisualEditor extends Component {
     } finally {
       this.isLoading = false;
     }
+  }
+
+  captureScrollPosition() {
+    if (typeof window === "undefined") {
+      return null;
+    }
+
+    return {
+      x: window.scrollX,
+      y: window.scrollY,
+    };
+  }
+
+  restoreScrollPosition(scrollPosition) {
+    if (!scrollPosition || typeof window === "undefined") {
+      return;
+    }
+
+    requestAnimationFrame(() => {
+      window.scrollTo(scrollPosition.x, scrollPosition.y);
+      requestAnimationFrame(() => {
+        window.scrollTo(scrollPosition.x, scrollPosition.y);
+      });
+    });
+  }
+
+  async reloadGraphInPlace() {
+    const scrollPosition = this.captureScrollPosition();
+
+    await this.loadGraph();
+    this.restoreScrollPosition(scrollPosition);
   }
 
   @action
@@ -2193,7 +2224,7 @@ export default class WorkflowVisualEditor extends Component {
 
     try {
       await this.updateStep(step, { category_id: lane.id });
-      await this.loadGraph();
+      await this.reloadGraphInPlace();
     } catch (err) {
       popupAjaxError(err);
     } finally {
@@ -2232,7 +2263,7 @@ export default class WorkflowVisualEditor extends Component {
         category_id: lane.id,
         position,
       });
-      await this.loadGraph();
+      await this.reloadGraphInPlace();
     } catch (err) {
       popupAjaxError(err);
     } finally {
@@ -2252,7 +2283,7 @@ export default class WorkflowVisualEditor extends Component {
     const sourcePosition = sourceStep.position;
     await this.updateStep(targetStep, { position: sourcePosition });
     await this.updateStep(sourceStep, { position: targetStep.position });
-    await this.loadGraph();
+    await this.reloadGraphInPlace();
   }
 
   @action
@@ -2303,7 +2334,7 @@ export default class WorkflowVisualEditor extends Component {
         },
       },
     });
-    await this.loadGraph();
+    await this.reloadGraphInPlace();
   }
 
   @action
@@ -2327,7 +2358,7 @@ export default class WorkflowVisualEditor extends Component {
     }
 
     await this.updateStepOption(stepOption, { target_step_id: targetStepId });
-    await this.loadGraph();
+    await this.reloadGraphInPlace();
   }
 
   async retargetOptionSource(sourceStepId) {
@@ -2347,7 +2378,7 @@ export default class WorkflowVisualEditor extends Component {
       workflow_step_id: sourceStepId,
       position: sourceStep ? this.stepOptions(sourceStep).length + 1 : 1,
     });
-    await this.loadGraph();
+    await this.reloadGraphInPlace();
   }
 
   @action
@@ -2356,7 +2387,7 @@ export default class WorkflowVisualEditor extends Component {
       await this.updateStepOption(stepOption, {
         workflow_option_id: parseInt(event.target.value, 10),
       });
-      await this.loadGraph();
+      await this.reloadGraphInPlace();
     } catch (err) {
       popupAjaxError(err);
     }
@@ -2406,7 +2437,7 @@ export default class WorkflowVisualEditor extends Component {
         },
       });
       this.newStepName = "";
-      await this.loadGraph();
+      await this.reloadGraphInPlace();
     } catch (err) {
       popupAjaxError(err);
     }
