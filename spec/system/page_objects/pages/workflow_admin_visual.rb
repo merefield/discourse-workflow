@@ -145,6 +145,12 @@ module PageObjects
             "workflow-connector:#{step.id}:right"
       end
 
+      def has_selected_connector_handle?(step, side)
+        has_css?(
+          "#{connector_handle_selector(step, side)}.workflow-visual-editor__connector-handle--selected[aria-pressed='true']",
+        )
+      end
+
       def has_arrow_link_for_option?(step_option)
         has_css?("#{option_selector(step_option)}") &&
           has_css?(".workflow-visual-editor__edge-path")
@@ -479,6 +485,11 @@ module PageObjects
 
       def drag_connector(source_step, target_step)
         drag(unconnected_handle_selector(source_step), unconnected_handle_selector(target_step))
+        self
+      end
+
+      def click_connector_handle(step, side)
+        find(connector_handle_selector(step, side)).click
         self
       end
 

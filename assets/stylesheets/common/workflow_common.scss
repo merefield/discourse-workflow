@@ -314,6 +314,11 @@ body.workflow-topic {
     background: var(--tertiary-low);
   }
 
+  .workflow-visual-editor__connector-handle--selected {
+    outline: 2px solid var(--tertiary);
+    outline-offset: 2px;
+  }
+
   .workflow-visual-editor__connector-handle--top {
     top: 0;
     left: 50%;

@@ -134,6 +134,23 @@ RSpec.describe "Workflow admin visual" do
     expect(step_option.reload.target_step_id).to eq(done_step.id)
   end
 
+  it "creates arrows from connector handles without dragging" do
+    visual_page.visit_workflow(workflow).switch_to_visual
+
+    visual_page.click_connector_handle(review_step, "right")
+
+    expect(visual_page).to have_selected_connector_handle(review_step, "right")
+
+    visual_page.click_connector_handle(queue_step, "left")
+
+    step_option =
+      DiscourseWorkflow::WorkflowStepOption.find_by!(
+        workflow_step_id: review_step.id,
+        target_step_id: queue_step.id,
+      )
+    expect(visual_page).to have_arrow_link_for_option(step_option)
+  end
+
   it "updates arrow option labels from the connector dropdown" do
     visual_page.visit_workflow(workflow).switch_to_visual
 

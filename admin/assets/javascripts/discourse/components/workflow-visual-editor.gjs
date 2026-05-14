@@ -183,6 +183,10 @@ export default class WorkflowVisualEditor extends Component {
       classes.push("workflow-visual-editor__connector-handle--connected");
     }
 
+    if (this.connectorHandleSelected(step, side)) {
+      classes.push("workflow-visual-editor__connector-handle--selected");
+    }
+
     return classes.join(" ");
   }
 
@@ -215,6 +219,22 @@ export default class WorkflowVisualEditor extends Component {
     return this.edgeLayouts.find((edge) => {
       return edge.source_step_id === step.id && edge.source_side === side;
     });
+  }
+
+  @bind
+  connectorHandleSelected(step, side) {
+    return (
+      this.connectorDragMode &&
+      ((this.connectorDragMode === "retarget-source" &&
+        this.connectorSourceStepId === step.id &&
+        this.connectorSourceSide === side) ||
+        (this.connectorDragMode !== "retarget-source" &&
+          this.connectorTargetStepId === step.id &&
+          this.connectorTargetSide === side) ||
+        (this.connectorDragMode === "create" &&
+          this.connectorSourceStepId === step.id &&
+          this.connectorSourceSide === side))
+    );
   }
 
   mergeWorkflowCategories(workflowSteps, allCategories = []) {
@@ -1944,7 +1964,11 @@ export default class WorkflowVisualEditor extends Component {
   dragConnectorHandleStart(step, side, event) {
     event.stopPropagation();
     this.setDragPayload(event, `workflow-connector:${step.id}:${side}`);
+    this.startConnectorHandleInteraction(step, side);
+    this.updateConnectorPreview(this.boardPointForEvent(event));
+  }
 
+  startConnectorHandleInteraction(step, side) {
     const targetEdge = this.edgeForTargetHandle(step, side);
     const sourceEdge = this.edgeForSourceHandle(step, side);
 
@@ -1968,8 +1992,23 @@ export default class WorkflowVisualEditor extends Component {
       this.connectorSourceStepId = step.id;
       this.connectorSourceSide = side;
     }
+  }
 
-    this.updateConnectorPreview(this.boardPointForEvent(event));
+  @action
+  async activateConnectorHandle(step, side, event) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    if (this.args.disabled) {
+      return;
+    }
+
+    if (!this.connectorDragMode) {
+      this.startConnectorHandleInteraction(step, side);
+      return;
+    }
+
+    await this.dropConnectorHandle(step, side, event);
   }
 
   @action
@@ -2452,9 +2491,18 @@ export default class WorkflowVisualEditor extends Component {
                               type="button"
                               class={{this.connectorHandleClass step side}}
                               aria-label={{this.connectorHandleLabel step side}}
+                              aria-pressed={{if
+                                (this.connectorHandleSelected step side)
+                                "true"
+                                "false"
+                              }}
                               title={{this.connectorHandleLabel step side}}
                               data-workflow-connector-side={{side}}
                               draggable={{if @disabled false true}}
+                              {{on
+                                "click"
+                                (fn this.activateConnectorHandle step side)
+                              }}
                               {{on
                                 "dragstart"
                                 (fn this.dragConnectorHandleStart step side)
