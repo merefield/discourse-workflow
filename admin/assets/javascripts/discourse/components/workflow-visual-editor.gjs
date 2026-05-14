@@ -166,7 +166,9 @@ export default class WorkflowVisualEditor extends Component {
 
   @bind
   laneStyle(lane) {
-    const color = this.hexColor(lane.color);
+    const color = this.safeHexColor(lane.color);
+
+    // Keep this helper hex-only because the result is interpolated into trustHTML.
     return color ? trustHTML(`border-color: ${color};`) : null;
   }
 
@@ -1777,7 +1779,7 @@ export default class WorkflowVisualEditor extends Component {
     return trustHTML(`left: ${x}px; top: ${y}px;`);
   }
 
-  hexColor(rawColor) {
+  safeHexColor(rawColor) {
     if (!rawColor) {
       return null;
     }
