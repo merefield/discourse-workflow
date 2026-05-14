@@ -370,11 +370,6 @@ export default class WorkflowVisualEditor extends Component {
   }
 
   @action
-  registerTestInterface(element) {
-    element.workflowVisualEditor = this;
-  }
-
-  @action
   async loadGraph() {
     if (!this.args.workflow?.id) {
       return;
@@ -2268,11 +2263,7 @@ export default class WorkflowVisualEditor extends Component {
   }
 
   <template>
-    <section
-      class="workflow-visual-editor"
-      {{didInsert this.registerTestInterface}}
-      {{didInsert this.loadGraph}}
-    >
+    <section class="workflow-visual-editor" {{didInsert this.loadGraph}}>
       <div class="workflow-visual-editor__add-step">
         <Input
           class="workflow-visual-editor__new-step-name"

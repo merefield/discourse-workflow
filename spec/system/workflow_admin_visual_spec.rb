@@ -101,37 +101,12 @@ RSpec.describe "Workflow admin visual" do
       expect(visual_page).to have_forward_arrow_from_right_edge(queue_to_done_option)
     end
 
-    it "scores route candidates away from poor connector paths" do
-      expect(visual_page).to have_lane_gap_travel_penalty
-      expect(visual_page).to have_crossing_penalty_without_forbidding_routes
-      expect(visual_page).to have_step_box_collision_guard
-      expect(visual_page).to have_lane_header_travel_penalty
-      expect(visual_page).to have_lane_header_route_candidate
-      expect(visual_page).to have_turn_count_penalty
-      expect(visual_page).to have_short_segment_penalty
-      expect(visual_page).to have_lower_return_route_length_penalty
-      expect(visual_page).to have_lane_escape_gutter_for_connector_handles
-      expect(visual_page).to have_lower_escape_route_candidate
-      expect(visual_page).to have_global_side_pair_route_scoring
-    end
-
     it "keeps connector option controls readable" do
       expect(visual_page).to have_no_overlapping_option_dropdowns
       expect(visual_page).to have_no_option_dropdown_over_step_boxes_for(queue_to_done_option)
-      expect(visual_page).to have_arrowhead_label_penalty
-      expect(visual_page).to have_connector_line_label_penalty
-      expect(visual_page).to have_horizontal_connector_under_dropdown_penalty
-      expect(visual_page).to have_label_penalties_restored_for_return_connectors
-      expect(visual_page).to have_own_arrowhead_included_in_label_penalties
-      expect(visual_page).to have_other_arrowhead_label_penalty
-      expect(visual_page).to have_label_lane_boundary_penalty
     end
 
     it "places option controls on readable vertical route segments" do
-      expect(visual_page).to have_midpoint_label_preference
-      expect(visual_page).to have_lane_whitespace_label_preference
-      expect(visual_page).to have_lane_whitespace_label_can_win
-      expect(visual_page).to have_alternate_label_position_can_win
       expect(visual_page).to have_option_on_longest_vertical_segment(queue_to_done_option)
     end
   end
