@@ -13,7 +13,7 @@ import DToggleSwitch from "discourse/components/d-toggle-switch";
 import categoryLink from "discourse/helpers/category-link";
 import concatClass from "discourse/helpers/concat-class";
 import { popupAjaxError } from "discourse/lib/ajax-error";
-import { bind } from "discourse-common/utils/decorators";
+import { bind } from "discourse/lib/decorators";
 import { i18n } from "discourse-i18n";
 import WorkflowLinkButton from "./workflow-link-button";
 import WorkflowStepEditor from "./workflow-step-editor";
@@ -21,9 +21,13 @@ import WorkflowStepEditor from "./workflow-step-editor";
 export default class WorkflowStepsListEditor extends Component {
   @service adminPluginNavManager;
   @service store;
-  @tracked currentWorkflowStep = this.args.currentWorkflowStep;
+
   @tracked workflowSteps = [];
   @tracked workflowStepsPresent = false;
+
+  get currentWorkflowStep() {
+    return this.args.currentWorkflowStep;
+  }
 
   get newStep() {
     return this.store.createRecord("workflow-step", {

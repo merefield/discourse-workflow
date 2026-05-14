@@ -166,7 +166,7 @@ en:
             ai_prompt: "AI Prompt"
             tabs:
               list: "List"
-              overview: "Overview"
+              visual: "Visual"
             overdue_days: "Step Overdue Days Override"
             overdue_days_help: "Blank uses workflow/global defaults. 0 disables overdue behavior for this step."
             title: "Steps"
@@ -204,7 +204,7 @@ en:
                 finish: "Finish"
                 close: "Close"
                 reopen: "Reopen"
-          overview:
+          visual:
             add_step: "Add step"
             confirm_delete_connector: "Are you sure you want to permanently delete this connector?"
             confirm_delete_step: "Are you sure you want to permanently delete this step and all related connectors?"
@@ -212,7 +212,7 @@ en:
             default_step_name: "Step %{position}"
             delete_connector: "Delete connector"
             delete_step: "Delete step"
-            loading: "Loading workflow overview..."
+            loading: "Loading workflow visual..."
             new_step_name: "New step name"
             unknown_category: "Unknown category"
           back: "Back"

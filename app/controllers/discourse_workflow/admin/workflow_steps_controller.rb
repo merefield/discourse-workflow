@@ -19,7 +19,7 @@ module DiscourseWorkflow
           records: @workflow_steps,
           associations: [:category, { workflow_step_options: :workflow_option }],
         ).call
-        workflow_categories = categories_for_overview(@workflow_steps)
+        workflow_categories = categories_for_visual(@workflow_steps)
         render_json_dump(
           {
             workflow_steps:
@@ -131,7 +131,7 @@ module DiscourseWorkflow
         )
       end
 
-      def categories_for_overview(workflow_steps)
+      def categories_for_visual(workflow_steps)
         categories = workflow_steps.filter_map(&:category)
         parent_category_ids =
           categories.map { |category| category.parent_category_id || category.id }

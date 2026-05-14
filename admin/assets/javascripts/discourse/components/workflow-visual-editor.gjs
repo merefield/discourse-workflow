@@ -7,6 +7,7 @@ import { action } from "@ember/object";
 import didInsert from "@ember/render-modifiers/modifiers/did-insert";
 import didUpdate from "@ember/render-modifiers/modifiers/did-update";
 import { service } from "@ember/service";
+import { trustHTML } from "@ember/template";
 import DButton from "discourse/components/d-button";
 import { ajax } from "discourse/lib/ajax";
 import { popupAjaxError } from "discourse/lib/ajax-error";
@@ -14,7 +15,7 @@ import { bind } from "discourse/lib/decorators";
 import CategoryChooser from "discourse/select-kit/components/category-chooser";
 import { i18n } from "discourse-i18n";
 
-export default class WorkflowOverviewEditor extends Component {
+export default class WorkflowVisualEditor extends Component {
   @service dialog;
 
   @tracked workflowSteps = [];
@@ -69,9 +70,7 @@ export default class WorkflowOverviewEditor extends Component {
           id: categoryId,
           name:
             category?.name ||
-            i18n(
-              "admin.discourse_workflow.workflows.overview.unknown_category"
-            ),
+            i18n("admin.discourse_workflow.workflows.visual.unknown_category"),
           color: category?.color,
           steps: [],
         });
@@ -166,18 +165,19 @@ export default class WorkflowOverviewEditor extends Component {
 
   @bind
   laneStyle(lane) {
-    return lane.color ? `border-color: #${lane.color}` : null;
+    const color = this.hexColor(lane.color);
+    return color ? trustHTML(`border-color: ${color};`) : null;
   }
 
   @bind
   connectorHandleClass(step, side) {
     const classes = [
-      "workflow-overview-editor__connector-handle",
-      `workflow-overview-editor__connector-handle--${side}`,
+      "workflow-visual-editor__connector-handle",
+      `workflow-visual-editor__connector-handle--${side}`,
     ];
 
     if (this.edgeForHandle(step, side)) {
-      classes.push("workflow-overview-editor__connector-handle--connected");
+      classes.push("workflow-visual-editor__connector-handle--connected");
     }
 
     return classes.join(" ");
@@ -185,13 +185,10 @@ export default class WorkflowOverviewEditor extends Component {
 
   @bind
   connectorHandleLabel(step, side) {
-    return i18n(
-      "admin.discourse_workflow.workflows.overview.connector_handle",
-      {
-        step: step.name,
-        side,
-      }
-    );
+    return i18n("admin.discourse_workflow.workflows.visual.connector_handle", {
+      step: step.name,
+      side,
+    });
   }
 
   edgeForHandle(step, side) {
@@ -243,7 +240,7 @@ export default class WorkflowOverviewEditor extends Component {
         name:
           category?.name ||
           categoriesById.get(categoryId)?.name ||
-          i18n("admin.discourse_workflow.workflows.overview.unknown_category"),
+          i18n("admin.discourse_workflow.workflows.visual.unknown_category"),
         color: category?.color || categoriesById.get(categoryId)?.color,
       });
     }
@@ -292,11 +289,11 @@ export default class WorkflowOverviewEditor extends Component {
 
     return this.dialog.confirm({
       message: i18n(
-        "admin.discourse_workflow.workflows.overview.confirm_delete_step"
+        "admin.discourse_workflow.workflows.visual.confirm_delete_step"
       ),
       confirmButtonClass: "btn-danger",
       confirmButtonLabel:
-        "admin.discourse_workflow.workflows.overview.delete_step",
+        "admin.discourse_workflow.workflows.visual.delete_step",
       didConfirm: async () => {
         try {
           await ajax(
@@ -337,11 +334,11 @@ export default class WorkflowOverviewEditor extends Component {
 
     return this.dialog.confirm({
       message: i18n(
-        "admin.discourse_workflow.workflows.overview.confirm_delete_connector"
+        "admin.discourse_workflow.workflows.visual.confirm_delete_connector"
       ),
       confirmButtonClass: "btn-danger",
       confirmButtonLabel:
-        "admin.discourse_workflow.workflows.overview.delete_connector",
+        "admin.discourse_workflow.workflows.visual.delete_connector",
       didConfirm: async () => {
         try {
           await ajax(
@@ -354,6 +351,11 @@ export default class WorkflowOverviewEditor extends Component {
         }
       },
     });
+  }
+
+  @action
+  registerTestInterface(element) {
+    element.workflowVisualEditor = this;
   }
 
   @action
@@ -399,7 +401,7 @@ export default class WorkflowOverviewEditor extends Component {
 
   laneStackBounds(boardRect) {
     const laneElements = this.boardElement.querySelectorAll(
-      ".workflow-overview-editor__lane"
+      ".workflow-visual-editor__lane"
     );
 
     if (!laneElements.length) {
@@ -409,10 +411,10 @@ export default class WorkflowOverviewEditor extends Component {
     const bounds = Array.from(laneElements).map((lane) => {
       const rect = lane.getBoundingClientRect();
       const headerRect = lane
-        .querySelector(".workflow-overview-editor__lane-header")
+        .querySelector(".workflow-visual-editor__lane-header")
         ?.getBoundingClientRect();
       const contentRect = lane
-        .querySelector(".workflow-overview-editor__lane-steps")
+        .querySelector(".workflow-visual-editor__lane-steps")
         ?.getBoundingClientRect();
 
       return {
@@ -428,6 +430,8 @@ export default class WorkflowOverviewEditor extends Component {
     });
 
     return {
+      left: Math.min(...bounds.map((bound) => bound.left)),
+      right: Math.max(...bounds.map((bound) => bound.right)),
       top: Math.min(...bounds.map((bound) => bound.top)),
       bottom: Math.max(...bounds.map((bound) => bound.bottom)),
       lanes: bounds,
@@ -949,6 +953,7 @@ export default class WorkflowOverviewEditor extends Component {
       this.laneBorderTravelPenalty(segments, laneStackBounds) +
       this.laneGapTravelPenalty(segments, laneStackBounds) +
       this.laneEscapePenalty(segments, laneStackBounds) +
+      this.labelLaneEscapePenalty(labelPoint, laneStackBounds) +
       sidePenalty
     );
   }
@@ -1055,6 +1060,15 @@ export default class WorkflowOverviewEditor extends Component {
     const connectorGutter = 12;
     const upperLimit = laneStackBounds.top - connectorGutter;
     const lowerLimit = laneStackBounds.bottom + connectorGutter;
+    const hasHorizontalLimits =
+      Number.isFinite(laneStackBounds.left) &&
+      Number.isFinite(laneStackBounds.right);
+    const leftLimit = hasHorizontalLimits
+      ? laneStackBounds.left - connectorGutter
+      : null;
+    const rightLimit = hasHorizontalLimits
+      ? laneStackBounds.right + connectorGutter
+      : null;
 
     return segments.reduce((penalty, segment) => {
       const escapedAbove =
@@ -1063,8 +1077,19 @@ export default class WorkflowOverviewEditor extends Component {
       const escapedBelow =
         Math.max(0, segment.y1 - lowerLimit) +
         Math.max(0, segment.y2 - lowerLimit);
+      const escapedLeft = hasHorizontalLimits
+        ? Math.max(0, leftLimit - segment.x1) +
+          Math.max(0, leftLimit - segment.x2)
+        : 0;
+      const escapedRight = hasHorizontalLimits
+        ? Math.max(0, segment.x1 - rightLimit) +
+          Math.max(0, segment.x2 - rightLimit)
+        : 0;
 
-      return penalty + (escapedAbove + escapedBelow) * 960;
+      return (
+        penalty +
+        (escapedAbove + escapedBelow + escapedLeft + escapedRight) * 1440
+      );
     }, 0);
   }
 
@@ -1077,6 +1102,31 @@ export default class WorkflowOverviewEditor extends Component {
       top: labelPoint.y - 20,
       bottom: labelPoint.y + 20,
     };
+  }
+
+  labelLaneEscapePenalty(labelPoint, laneStackBounds) {
+    if (!laneStackBounds) {
+      return 0;
+    }
+
+    const labelRect = this.optionLabelRect(labelPoint);
+    const escapedAbove = Math.max(0, laneStackBounds.top - labelRect.top);
+    const escapedBelow = Math.max(0, labelRect.bottom - laneStackBounds.bottom);
+    const lanes = laneStackBounds.lanes || [];
+    const leftLimit =
+      laneStackBounds.left ??
+      (lanes.length ? Math.min(...lanes.map((lane) => lane.left)) : null);
+    const rightLimit =
+      laneStackBounds.right ??
+      (lanes.length ? Math.max(...lanes.map((lane) => lane.right)) : null);
+    const escapedLeft = Number.isFinite(leftLimit)
+      ? Math.max(0, leftLimit - labelRect.left)
+      : 0;
+    const escapedRight = Number.isFinite(rightLimit)
+      ? Math.max(0, labelRect.right - rightLimit)
+      : 0;
+
+    return (escapedAbove + escapedBelow + escapedLeft + escapedRight) * 1440;
   }
 
   labelCollisionPenalty(labelPoint, routedLabels) {
@@ -1651,7 +1701,27 @@ export default class WorkflowOverviewEditor extends Component {
 
   @bind
   edgeOptionStyle(edge) {
-    return `left: ${edge.label_x}px; top: ${edge.label_y}px;`;
+    const x = Number(edge.label_x);
+    const y = Number(edge.label_y);
+
+    if (!Number.isFinite(x) || !Number.isFinite(y)) {
+      return null;
+    }
+
+    return trustHTML(`left: ${x}px; top: ${y}px;`);
+  }
+
+  hexColor(rawColor) {
+    if (!rawColor) {
+      return null;
+    }
+
+    const normalized = String(rawColor).trim().replace(/^#/, "");
+    if (!normalized.match(/^[0-9A-Fa-f]{3}$|^[0-9A-Fa-f]{6}$/)) {
+      return null;
+    }
+
+    return `#${normalized}`;
   }
 
   @action
@@ -2105,7 +2175,7 @@ export default class WorkflowOverviewEditor extends Component {
             name:
               this.newStepName ||
               i18n(
-                "admin.discourse_workflow.workflows.overview.default_step_name",
+                "admin.discourse_workflow.workflows.visual.default_step_name",
                 {
                   position: this.nextStepPosition,
                 }
@@ -2123,13 +2193,17 @@ export default class WorkflowOverviewEditor extends Component {
   }
 
   <template>
-    <section class="workflow-overview-editor" {{didInsert this.loadGraph}}>
-      <div class="workflow-overview-editor__add-step">
+    <section
+      class="workflow-visual-editor"
+      {{didInsert this.registerTestInterface}}
+      {{didInsert this.loadGraph}}
+    >
+      <div class="workflow-visual-editor__add-step">
         <Input
-          class="workflow-overview-editor__new-step-name"
+          class="workflow-visual-editor__new-step-name"
           @value={{this.newStepName}}
           placeholder={{i18n
-            "admin.discourse_workflow.workflows.overview.new_step_name"
+            "admin.discourse_workflow.workflows.visual.new_step_name"
           }}
         />
         <CategoryChooser
@@ -2137,18 +2211,18 @@ export default class WorkflowOverviewEditor extends Component {
           @onChangeCategory={{this.updateNewStepCategory}}
         />
         <DButton
-          class="btn-primary workflow-overview-editor__add-step-button"
+          class="btn-primary workflow-visual-editor__add-step-button"
           @action={{this.addStep}}
-          @label="admin.discourse_workflow.workflows.overview.add_step"
+          @label="admin.discourse_workflow.workflows.visual.add_step"
           @disabled={{@disabled}}
         />
       </div>
 
       {{#if this.isLoading}}
-        <p>{{i18n "admin.discourse_workflow.workflows.overview.loading"}}</p>
+        <p>{{i18n "admin.discourse_workflow.workflows.visual.loading"}}</p>
       {{else if this.hasSteps}}
         <div
-          class="workflow-overview-editor__board"
+          class="workflow-visual-editor__board"
           {{didInsert this.captureBoard}}
           {{didUpdate
             this.scheduleEdgeLayout
@@ -2157,10 +2231,10 @@ export default class WorkflowOverviewEditor extends Component {
           }}
           {{on "dragover" this.dragConnectorOverBoard}}
         >
-          <svg class="workflow-overview-editor__edge-layer" aria-hidden="true">
+          <svg class="workflow-visual-editor__edge-layer" aria-hidden="true">
             <defs>
               <marker
-                id="workflow-overview-editor-arrowhead"
+                id="workflow-visual-editor-arrowhead"
                 markerHeight="8"
                 markerWidth="10"
                 orient="auto"
@@ -2173,7 +2247,7 @@ export default class WorkflowOverviewEditor extends Component {
             </defs>
             {{#each this.edgeLayouts as |edge|}}
               <path
-                class="workflow-overview-editor__edge-path"
+                class="workflow-visual-editor__edge-path"
                 data-workflow-step-option-id={{edge.step_option.id}}
                 data-workflow-source-step-id={{edge.source_step_id}}
                 data-workflow-target-step-id={{edge.target_step_id}}
@@ -2184,23 +2258,23 @@ export default class WorkflowOverviewEditor extends Component {
             {{/each}}
             {{#if this.previewPath}}
               <path
-                class="workflow-overview-editor__edge-path workflow-overview-editor__edge-path--preview"
+                class="workflow-visual-editor__edge-path workflow-visual-editor__edge-path--preview"
                 d={{this.previewPath}}
               ></path>
             {{/if}}
           </svg>
 
-          <div class="workflow-overview-editor__edge-controls">
+          <div class="workflow-visual-editor__edge-controls">
             {{#each this.edgeLayouts as |edge|}}
               <div
-                class="workflow-overview-editor__option"
+                class="workflow-visual-editor__option"
                 data-workflow-step-option-id={{edge.step_option.id}}
                 style={{this.edgeOptionStyle edge}}
               >
                 <DButton
-                  class="btn-danger btn-small workflow-overview-editor__delete-option"
+                  class="btn-danger btn-small workflow-visual-editor__delete-option"
                   @icon="xmark"
-                  @title="admin.discourse_workflow.workflows.overview.delete_connector"
+                  @title="admin.discourse_workflow.workflows.visual.delete_connector"
                   @action={{fn this.confirmDeleteStepOption edge.step_option}}
                   @disabled={{@disabled}}
                 />
@@ -2228,23 +2302,23 @@ export default class WorkflowOverviewEditor extends Component {
             {{/each}}
           </div>
 
-          <div class="workflow-overview-editor__lanes">
+          <div class="workflow-visual-editor__lanes">
             {{#each this.lanes as |lane|}}
               <section
-                class="workflow-overview-editor__lane"
+                class="workflow-visual-editor__lane"
                 data-workflow-category-id={{lane.id}}
                 style={{this.laneStyle lane}}
                 {{on "dragover" this.allowDrop}}
                 {{on "drop" (fn this.dropStepOnLane lane)}}
               >
-                <header class="workflow-overview-editor__lane-header">
+                <header class="workflow-visual-editor__lane-header">
                   {{lane.name}}
                 </header>
 
-                <div class="workflow-overview-editor__lane-steps">
+                <div class="workflow-visual-editor__lane-steps">
                   {{#each this.positionSlots as |position|}}
                     <div
-                      class="workflow-overview-editor__position-slot"
+                      class="workflow-visual-editor__position-slot"
                       data-workflow-category-id={{lane.id}}
                       data-workflow-position={{position}}
                       {{on "dragover" this.allowDrop}}
@@ -2258,7 +2332,7 @@ export default class WorkflowOverviewEditor extends Component {
                         as |step|
                       }}
                         <article
-                          class="workflow-overview-editor__step"
+                          class="workflow-visual-editor__step"
                           data-workflow-step-id={{step.id}}
                           draggable={{if @disabled false true}}
                           {{on "dragstart" (fn this.dragStepStart step)}}
@@ -2267,9 +2341,9 @@ export default class WorkflowOverviewEditor extends Component {
                           {{on "drop" (fn this.dropOnStep step)}}
                         >
                           <DButton
-                            class="btn-danger btn-small workflow-overview-editor__delete-step"
+                            class="btn-danger btn-small workflow-visual-editor__delete-step"
                             @icon="xmark"
-                            @title="admin.discourse_workflow.workflows.overview.delete_step"
+                            @title="admin.discourse_workflow.workflows.visual.delete_step"
                             @action={{fn this.confirmDeleteStep step}}
                             @disabled={{@disabled}}
                           />
@@ -2297,9 +2371,13 @@ export default class WorkflowOverviewEditor extends Component {
                             ></button>
                           {{/each}}
 
-                          <div class="workflow-overview-editor__step-title">
-                            <span>{{step.position}}.</span>
-                            <strong>{{step.name}}</strong>
+                          <div class="workflow-visual-editor__step-title">
+                            <span class="workflow-visual-editor__step-number">
+                              {{step.position}}.
+                            </span>
+                            <strong class="workflow-visual-editor__step-label">
+                              {{step.name}}
+                            </strong>
                           </div>
                         </article>
                       {{/each}}
@@ -2312,10 +2390,10 @@ export default class WorkflowOverviewEditor extends Component {
         </div>
       {{else}}
         <div
-          class="workflow-overview-editor__board"
+          class="workflow-visual-editor__board"
           {{didInsert this.captureBoard}}
         >
-          <p class="workflow-overview-editor__empty">
+          <p class="workflow-visual-editor__empty">
             {{i18n "admin.discourse_workflow.workflows.steps.none"}}
           </p>
         </div>

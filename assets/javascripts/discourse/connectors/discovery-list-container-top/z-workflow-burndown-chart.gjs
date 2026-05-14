@@ -4,6 +4,7 @@ import { action } from "@ember/object";
 import didInsert from "@ember/render-modifiers/modifiers/did-insert";
 import didUpdate from "@ember/render-modifiers/modifiers/did-update";
 import { service } from "@ember/service";
+import { trustHTML } from "@ember/template";
 import { ajax } from "discourse/lib/ajax";
 import { extractError } from "discourse/lib/ajax-error";
 import loadChartJS from "discourse/lib/load-chart-js";
@@ -121,7 +122,7 @@ export default class WorkflowBurndownChartConnector extends Component {
       const color = this.asHexColor(series.color);
       return {
         ...series,
-        color_style: color ? `background-color: ${color};` : null,
+        color_style: color ? trustHTML(`background-color: ${color};`) : null,
       };
     });
   }

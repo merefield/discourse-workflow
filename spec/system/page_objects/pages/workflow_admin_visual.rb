@@ -2,14 +2,14 @@
 
 module PageObjects
   module Pages
-    class WorkflowAdminOverview < PageObjects::Pages::Base
+    class WorkflowAdminVisual < PageObjects::Pages::Base
       def visit_workflow(workflow)
         page.visit "/admin/plugins/discourse-workflow/workflows/#{workflow.id}/edit"
         self
       end
 
-      def switch_to_overview
-        click_button "Overview"
+      def switch_to_visual
+        click_button "Visual"
         self
       end
 
@@ -17,8 +17,8 @@ module PageObjects
         has_css?(".workflow-editor__steps-tab", text: label)
       end
 
-      def has_overview?
-        has_css?(".workflow-overview-editor")
+      def has_visual?
+        has_css?(".workflow-visual-editor")
       end
 
       def has_step?(step, text: nil)
@@ -43,21 +43,72 @@ module PageObjects
         has_css?("#{position_selector(category, position)} #{step_selector(step)}")
       end
 
+      def has_step_width_ratio?(step, ratio)
+        has_css?(step_selector(step)) && page.evaluate_script(<<~JS, step.id, ratio)
+          (() => {
+            const stepId = arguments[0];
+            const expectedRatio = arguments[1];
+            const step = document.querySelector(`.workflow-visual-editor__step[data-workflow-step-id="${stepId}"]`);
+            const slot = step.closest(".workflow-visual-editor__position-slot");
+            const stepRect = step.getBoundingClientRect();
+            const slotRect = slot.getBoundingClientRect();
+            const actualRatio = stepRect.width / slotRect.width;
+
+            return Math.abs(actualRatio - expectedRatio) < 0.05;
+          })();
+        JS
+      end
+
+      def has_centered_step_label?(step)
+        has_css?(step_selector(step)) && page.evaluate_script(<<~JS, step.id)
+          (() => {
+            const stepId = arguments[0];
+            const step = document.querySelector(`.workflow-visual-editor__step[data-workflow-step-id="${stepId}"]`);
+            const number = step.querySelector(".workflow-visual-editor__step-number");
+            const label = step.querySelector(".workflow-visual-editor__step-label");
+            const stepRect = step.getBoundingClientRect();
+            const labelRect = label.getBoundingClientRect();
+            const stepCenter = stepRect.left + stepRect.width / 2;
+            const labelCenter = labelRect.left + labelRect.width / 2;
+
+            return number && label && Math.abs(stepCenter - labelCenter) <= 2;
+          })();
+        JS
+      end
+
+      def has_step_centered_in_lane_content?(step)
+        has_css?(step_selector(step)) && page.evaluate_script(<<~JS, step.id)
+          (() => {
+            const stepId = arguments[0];
+            const step = document.querySelector(`.workflow-visual-editor__step[data-workflow-step-id="${stepId}"]`);
+            const laneContent = step.closest(".workflow-visual-editor__lane-steps");
+            const stepRect = step.getBoundingClientRect();
+            const laneContentRect = laneContent.getBoundingClientRect();
+            const stepCenter = stepRect.top + stepRect.height / 2;
+            const laneContentCenter = laneContentRect.top + laneContentRect.height / 2;
+            const laneContentStyle = window.getComputedStyle(laneContent);
+
+            return Math.abs(stepCenter - laneContentCenter) <= 2 &&
+              laneContentStyle.paddingTop === "0px";
+          })();
+        JS
+      end
+
       def has_option?(step_option, text: nil)
         options = text ? { text: text } : {}
         has_css?(option_selector(step_option), **options)
       end
 
       def has_any_option?(text:)
-        has_css?(".workflow-overview-editor__option", text: text)
+        has_css?(".workflow-visual-editor__option", text: text)
       end
 
       def has_any_option_control?
-        has_css?(".workflow-overview-editor__option")
+        has_css?(".workflow-visual-editor__option")
       end
 
       def has_no_new_arrow_option_control?
-        has_no_css?(".workflow-overview-editor__link-option") && has_no_content?("New arrow option")
+        has_no_css?(".workflow-visual-editor__link-option") && has_no_content?("New arrow option")
       end
 
       def has_connector_handles?(step)
@@ -66,25 +117,25 @@ module PageObjects
 
       def has_arrow_link_for_option?(step_option)
         has_css?("#{option_selector(step_option)}") &&
-          has_css?(".workflow-overview-editor__edge-path")
+          has_css?(".workflow-visual-editor__edge-path")
       end
 
       def has_only_orthogonal_arrow_paths?
-        has_css?(".workflow-overview-editor__edge-path") &&
-          all(".workflow-overview-editor__edge-path").all? do |path|
+        has_css?(".workflow-visual-editor__edge-path") &&
+          all(".workflow-visual-editor__edge-path").all? do |path|
             path["d"].exclude?("C") && path["d"].exclude?("Q")
           end
       end
 
       def has_forward_arrow_path?
-        has_css?(".workflow-overview-editor__edge-path") &&
-          all(".workflow-overview-editor__edge-path").any? do |path|
+        has_css?(".workflow-visual-editor__edge-path") &&
+          all(".workflow-visual-editor__edge-path").any? do |path|
             path["d"].include?(" H") && path["d"].include?(" V")
           end
       end
 
       def has_no_arrow_crossing_step_boxes?
-        has_css?(".workflow-overview-editor__edge-path") && page.evaluate_script(<<~JS)
+        has_css?(".workflow-visual-editor__edge-path") && page.evaluate_script(<<~JS)
             (() => {
             const parsePathSegments = (path) => {
               const tokens = path.getAttribute("d").match(/[MLHV]|-?\\d+(?:\\.\\d+)?/g) || [];
@@ -141,8 +192,8 @@ module PageObjects
 
               return false;
             };
-            const boardRect = document.querySelector(".workflow-overview-editor__board").getBoundingClientRect();
-            const stepRects = Array.from(document.querySelectorAll(".workflow-overview-editor__step")).map((step) => {
+            const boardRect = document.querySelector(".workflow-visual-editor__board").getBoundingClientRect();
+            const stepRects = Array.from(document.querySelectorAll(".workflow-visual-editor__step")).map((step) => {
               const rect = step.getBoundingClientRect();
               return {
                 id: step.dataset.workflowStepId,
@@ -153,7 +204,7 @@ module PageObjects
               };
             });
 
-            return Array.from(document.querySelectorAll(".workflow-overview-editor__edge-path")).every((path) => {
+            return Array.from(document.querySelectorAll(".workflow-visual-editor__edge-path")).every((path) => {
               const endpointStepIds = [path.dataset.workflowSourceStepId, path.dataset.workflowTargetStepId];
 
               return parsePathSegments(path).every((segment) => {
@@ -165,7 +216,7 @@ module PageObjects
       end
 
       def has_no_overlapping_arrow_segments?
-        has_css?(".workflow-overview-editor__edge-path") && page.evaluate_script(<<~JS)
+        has_css?(".workflow-visual-editor__edge-path") && page.evaluate_script(<<~JS)
           (() => {
             #{path_geometry_helpers}
 
@@ -188,7 +239,7 @@ module PageObjects
 
               return false;
             };
-            const segments = Array.from(document.querySelectorAll(".workflow-overview-editor__edge-path")).flatMap((path, pathIndex) => {
+            const segments = Array.from(document.querySelectorAll(".workflow-visual-editor__edge-path")).flatMap((path, pathIndex) => {
               return parsePathSegments(path).map((segment) => ({ ...segment, pathIndex }));
             });
 
@@ -202,7 +253,7 @@ module PageObjects
       end
 
       def has_no_double_back_arrow_paths?
-        has_css?(".workflow-overview-editor__edge-path") && page.evaluate_script(<<~JS)
+        has_css?(".workflow-visual-editor__edge-path") && page.evaluate_script(<<~JS)
           (() => {
             #{path_geometry_helpers}
 
@@ -224,7 +275,7 @@ module PageObjects
               });
             };
 
-            return Array.from(document.querySelectorAll(".workflow-overview-editor__edge-path")).every((path) => {
+            return Array.from(document.querySelectorAll(".workflow-visual-editor__edge-path")).every((path) => {
               return !doublesBack(parsePathSegments(path));
             });
           })();
@@ -232,12 +283,12 @@ module PageObjects
       end
 
       def has_arrow_paths_within_lane_stack?
-        has_css?(".workflow-overview-editor__edge-path") && page.evaluate_script(<<~JS)
+        has_css?(".workflow-visual-editor__edge-path") && page.evaluate_script(<<~JS)
           (() => {
             #{path_geometry_helpers}
 
-            const boardRect = document.querySelector(".workflow-overview-editor__board").getBoundingClientRect();
-            const laneBounds = Array.from(document.querySelectorAll(".workflow-overview-editor__lane")).map((lane) => {
+            const boardRect = document.querySelector(".workflow-visual-editor__board").getBoundingClientRect();
+            const laneBounds = Array.from(document.querySelectorAll(".workflow-visual-editor__lane")).map((lane) => {
               const rect = lane.getBoundingClientRect();
               return {
                 top: rect.top - boardRect.top,
@@ -247,7 +298,7 @@ module PageObjects
             const top = Math.min(...laneBounds.map((bound) => bound.top));
             const bottom = Math.max(...laneBounds.map((bound) => bound.bottom));
 
-            return Array.from(document.querySelectorAll(".workflow-overview-editor__edge-path")).every((path) => {
+            return Array.from(document.querySelectorAll(".workflow-visual-editor__edge-path")).every((path) => {
               return parsePathSegments(path).every((segment) => {
                 return segment.y1 >= top && segment.y1 <= bottom && segment.y2 >= top && segment.y2 <= bottom;
               });
@@ -257,12 +308,12 @@ module PageObjects
       end
 
       def has_no_arrow_travelling_along_lane_borders?
-        has_css?(".workflow-overview-editor__edge-path") && page.evaluate_script(<<~JS)
+        has_css?(".workflow-visual-editor__edge-path") && page.evaluate_script(<<~JS)
           (() => {
             #{path_geometry_helpers}
 
-            const boardRect = document.querySelector(".workflow-overview-editor__board").getBoundingClientRect();
-            const laneBounds = Array.from(document.querySelectorAll(".workflow-overview-editor__lane")).map((lane) => {
+            const boardRect = document.querySelector(".workflow-visual-editor__board").getBoundingClientRect();
+            const laneBounds = Array.from(document.querySelectorAll(".workflow-visual-editor__lane")).map((lane) => {
               const rect = lane.getBoundingClientRect();
               return {
                 left: rect.left - boardRect.left,
@@ -284,7 +335,7 @@ module PageObjects
               return Math.min(segmentRight, lane.right) > Math.max(segmentLeft, lane.left);
             };
 
-            return Array.from(document.querySelectorAll(".workflow-overview-editor__edge-path")).every((path) => {
+            return Array.from(document.querySelectorAll(".workflow-visual-editor__edge-path")).every((path) => {
               return parsePathSegments(path).every((segment) => {
                 return laneBounds.every((lane) => !overlaps(segment, lane));
               });
@@ -294,11 +345,9 @@ module PageObjects
       end
 
       def has_crossing_penalty_without_forbidding_routes?
-        has_overview? && page.evaluate_script(<<~JS)
+        has_visual? && page.evaluate_script(<<~JS)
           (() => {
-            const moduleName = "discourse/plugins/discourse-workflow/discourse/admin/components/workflow-overview-editor";
-            const WorkflowOverviewEditor = window.requirejs(moduleName).default;
-            const editor = Object.create(WorkflowOverviewEditor.prototype);
+            const editor = document.querySelector(".workflow-visual-editor").workflowVisualEditor;
             const crossingSegments = [{ x1: 0, y1: 10, x2: 20, y2: 10 }];
             const routedSegments = [{ x1: 10, y1: 0, x2: 10, y2: 20 }];
             const scoreFor = (segments, existingSegments, arrowheadPoints = []) => {
@@ -329,11 +378,9 @@ module PageObjects
       end
 
       def has_arrowhead_label_penalty?
-        has_overview? && page.evaluate_script(<<~JS)
+        has_visual? && page.evaluate_script(<<~JS)
           (() => {
-            const moduleName = "discourse/plugins/discourse-workflow/discourse/admin/components/workflow-overview-editor";
-            const WorkflowOverviewEditor = window.requirejs(moduleName).default;
-            const editor = Object.create(WorkflowOverviewEditor.prototype);
+            const editor = document.querySelector(".workflow-visual-editor").workflowVisualEditor;
             const segments = [{ x1: 0, y1: 10, x2: 20, y2: 10 }];
             const scoreFor = (arrowheadPoints) => {
               return editor.routeCandidateScore({
@@ -358,11 +405,9 @@ module PageObjects
       end
 
       def has_connector_line_label_penalty?
-        has_overview? && page.evaluate_script(<<~JS)
+        has_visual? && page.evaluate_script(<<~JS)
           (() => {
-            const moduleName = "discourse/plugins/discourse-workflow/discourse/admin/components/workflow-overview-editor";
-            const WorkflowOverviewEditor = window.requirejs(moduleName).default;
-            const editor = Object.create(WorkflowOverviewEditor.prototype);
+            const editor = document.querySelector(".workflow-visual-editor").workflowVisualEditor;
             const segments = [{ x1: 0, y1: 10, x2: 20, y2: 10 }];
             const scoreFor = (routedSegments) => {
               return editor.routeCandidateScore({
@@ -387,11 +432,9 @@ module PageObjects
       end
 
       def has_horizontal_connector_under_dropdown_penalty?
-        has_overview? && page.evaluate_script(<<~JS)
+        has_visual? && page.evaluate_script(<<~JS)
           (() => {
-            const moduleName = "discourse/plugins/discourse-workflow/discourse/admin/components/workflow-overview-editor";
-            const WorkflowOverviewEditor = window.requirejs(moduleName).default;
-            const editor = Object.create(WorkflowOverviewEditor.prototype);
+            const editor = document.querySelector(".workflow-visual-editor").workflowVisualEditor;
             const scoreFor = (routedLabels) => {
               return editor.routeCandidateScore({
                 segments: [{ x1: 0, y1: 20, x2: 100, y2: 20 }],
@@ -415,11 +458,9 @@ module PageObjects
       end
 
       def has_label_penalties_restored_for_return_connectors?
-        has_overview? && page.evaluate_script(<<~JS)
+        has_visual? && page.evaluate_script(<<~JS)
           (() => {
-            const moduleName = "discourse/plugins/discourse-workflow/discourse/admin/components/workflow-overview-editor";
-            const WorkflowOverviewEditor = window.requirejs(moduleName).default;
-            const editor = Object.create(WorkflowOverviewEditor.prototype);
+            const editor = document.querySelector(".workflow-visual-editor").workflowVisualEditor;
             const scoreWithLabelPenalties = editor.routeCandidateScore({
               segments: [{ x1: 0, y1: 10, x2: 20, y2: 10 }],
               labelPoint: { x: 20, y: 20 },
@@ -450,11 +491,9 @@ module PageObjects
       end
 
       def has_own_arrowhead_included_in_label_penalties?
-        has_overview? && page.evaluate_script(<<~JS)
+        has_visual? && page.evaluate_script(<<~JS)
           (() => {
-            const moduleName = "discourse/plugins/discourse-workflow/discourse/admin/components/workflow-overview-editor";
-            const WorkflowOverviewEditor = window.requirejs(moduleName).default;
-            const editor = Object.create(WorkflowOverviewEditor.prototype);
+            const editor = document.querySelector(".workflow-visual-editor").workflowVisualEditor;
             const originalRouteCandidateScore = editor.routeCandidateScore.bind(editor);
             let ownArrowheadIncluded = false;
 
@@ -487,11 +526,9 @@ module PageObjects
       end
 
       def has_other_arrowhead_label_penalty?
-        has_overview? && page.evaluate_script(<<~JS)
+        has_visual? && page.evaluate_script(<<~JS)
           (() => {
-            const moduleName = "discourse/plugins/discourse-workflow/discourse/admin/components/workflow-overview-editor";
-            const WorkflowOverviewEditor = window.requirejs(moduleName).default;
-            const editor = Object.create(WorkflowOverviewEditor.prototype);
+            const editor = document.querySelector(".workflow-visual-editor").workflowVisualEditor;
             const scoreFor = (arrowheadPoints) => {
               return editor.routeCandidateScore({
                 segments: [{ x1: 0, y1: 10, x2: 20, y2: 10 }],
@@ -515,11 +552,9 @@ module PageObjects
       end
 
       def has_midpoint_label_preference?
-        has_overview? && page.evaluate_script(<<~JS)
+        has_visual? && page.evaluate_script(<<~JS)
           (() => {
-            const moduleName = "discourse/plugins/discourse-workflow/discourse/admin/components/workflow-overview-editor";
-            const WorkflowOverviewEditor = window.requirejs(moduleName).default;
-            const editor = Object.create(WorkflowOverviewEditor.prototype);
+            const editor = document.querySelector(".workflow-visual-editor").workflowVisualEditor;
             const candidates = editor.labelCandidatesForSegments([
               { x1: 20, y1: 0, x2: 20, y2: 90 },
             ]);
@@ -547,11 +582,9 @@ module PageObjects
       end
 
       def has_alternate_label_position_can_win?
-        has_overview? && page.evaluate_script(<<~JS)
+        has_visual? && page.evaluate_script(<<~JS)
           (() => {
-            const moduleName = "discourse/plugins/discourse-workflow/discourse/admin/components/workflow-overview-editor";
-            const WorkflowOverviewEditor = window.requirejs(moduleName).default;
-            const editor = Object.create(WorkflowOverviewEditor.prototype);
+            const editor = document.querySelector(".workflow-visual-editor").workflowVisualEditor;
             const route = editor.routePoints({
               index: 0,
               source: { x: 0, y: 0 },
@@ -573,11 +606,9 @@ module PageObjects
       end
 
       def has_label_lane_boundary_penalty?
-        has_overview? && page.evaluate_script(<<~JS)
+        has_visual? && page.evaluate_script(<<~JS)
           (() => {
-            const moduleName = "discourse/plugins/discourse-workflow/discourse/admin/components/workflow-overview-editor";
-            const WorkflowOverviewEditor = window.requirejs(moduleName).default;
-            const editor = Object.create(WorkflowOverviewEditor.prototype);
+            const editor = document.querySelector(".workflow-visual-editor").workflowVisualEditor;
             const scoreFor = (labelPoint) => {
               return editor.routeCandidateScore({
                 segments: [{ x1: 0, y1: 50, x2: 100, y2: 50 }],
@@ -616,11 +647,9 @@ module PageObjects
       end
 
       def has_lane_gap_travel_penalty?
-        has_overview? && page.evaluate_script(<<~JS)
+        has_visual? && page.evaluate_script(<<~JS)
           (() => {
-            const moduleName = "discourse/plugins/discourse-workflow/discourse/admin/components/workflow-overview-editor";
-            const WorkflowOverviewEditor = window.requirejs(moduleName).default;
-            const editor = Object.create(WorkflowOverviewEditor.prototype);
+            const editor = document.querySelector(".workflow-visual-editor").workflowVisualEditor;
             const laneStackBounds = {
               top: 0,
               bottom: 220,
@@ -650,11 +679,9 @@ module PageObjects
       end
 
       def has_turn_count_penalty?
-        has_overview? && page.evaluate_script(<<~JS)
+        has_visual? && page.evaluate_script(<<~JS)
           (() => {
-            const moduleName = "discourse/plugins/discourse-workflow/discourse/admin/components/workflow-overview-editor";
-            const WorkflowOverviewEditor = window.requirejs(moduleName).default;
-            const editor = Object.create(WorkflowOverviewEditor.prototype);
+            const editor = document.querySelector(".workflow-visual-editor").workflowVisualEditor;
             const scoreFor = (segments) => {
               return editor.routeCandidateScore({
                 segments,
@@ -683,11 +710,9 @@ module PageObjects
       end
 
       def has_short_segment_penalty?
-        has_overview? && page.evaluate_script(<<~JS)
+        has_visual? && page.evaluate_script(<<~JS)
           (() => {
-            const moduleName = "discourse/plugins/discourse-workflow/discourse/admin/components/workflow-overview-editor";
-            const WorkflowOverviewEditor = window.requirejs(moduleName).default;
-            const editor = Object.create(WorkflowOverviewEditor.prototype);
+            const editor = document.querySelector(".workflow-visual-editor").workflowVisualEditor;
             const scoreFor = (segments) => {
               return editor.routeCandidateScore({
                 segments,
@@ -713,11 +738,9 @@ module PageObjects
       end
 
       def has_lower_return_route_length_penalty?
-        has_overview? && page.evaluate_script(<<~JS)
+        has_visual? && page.evaluate_script(<<~JS)
           (() => {
-            const moduleName = "discourse/plugins/discourse-workflow/discourse/admin/components/workflow-overview-editor";
-            const WorkflowOverviewEditor = window.requirejs(moduleName).default;
-            const editor = Object.create(WorkflowOverviewEditor.prototype);
+            const editor = document.querySelector(".workflow-visual-editor").workflowVisualEditor;
             const segments = [{ x1: 0, y1: 0, x2: 100, y2: 0 }];
             const scoreFor = (sourcePosition, targetPosition) => {
               return editor.routeCandidateScore({
@@ -747,31 +770,52 @@ module PageObjects
       end
 
       def has_lane_escape_gutter_for_connector_handles?
-        has_overview? && page.evaluate_script(<<~JS)
+        has_visual? && page.evaluate_script(<<~JS)
           (() => {
-            const moduleName = "discourse/plugins/discourse-workflow/discourse/admin/components/workflow-overview-editor";
-            const WorkflowOverviewEditor = window.requirejs(moduleName).default;
-            const editor = Object.create(WorkflowOverviewEditor.prototype);
-            const laneStackBounds = { top: 0, bottom: 100 };
+            const editor = document.querySelector(".workflow-visual-editor").workflowVisualEditor;
+            const verticalLaneStackBounds = { top: 0, bottom: 100 };
+            const horizontalLaneStackBounds = { top: 0, bottom: 100, left: 0, right: 100 };
             const insideConnectorGutter = [
               { x1: 0, y1: 108, x2: 100, y2: 108 },
             ];
             const beyondConnectorGutter = [
               { x1: 0, y1: 118, x2: 100, y2: 118 },
             ];
+            const insideHorizontalGutter = [
+              { x1: 108, y1: 0, x2: 108, y2: 100 },
+            ];
+            const beyondHorizontalGutter = [
+              { x1: 118, y1: 0, x2: 118, y2: 100 },
+            ];
 
-            return editor.laneEscapePenalty(insideConnectorGutter, laneStackBounds) === 0 &&
-              editor.laneEscapePenalty(beyondConnectorGutter, laneStackBounds) > 0;
+            return editor.laneEscapePenalty(insideConnectorGutter, verticalLaneStackBounds) === 0 &&
+              editor.laneEscapePenalty(beyondConnectorGutter, verticalLaneStackBounds) > 0 &&
+              editor.laneEscapePenalty(insideHorizontalGutter, horizontalLaneStackBounds) === 0 &&
+              editor.laneEscapePenalty(beyondHorizontalGutter, horizontalLaneStackBounds) > 0;
+          })();
+        JS
+      end
+
+      def has_label_lane_escape_penalty?
+        has_visual? && page.evaluate_script(<<~JS)
+          (() => {
+            const editor = document.querySelector(".workflow-visual-editor").workflowVisualEditor;
+            const laneStackBounds = { top: 0, bottom: 100, left: 0, right: 200 };
+            const inside = editor.labelLaneEscapePenalty({ x: 100, y: 50 }, laneStackBounds);
+            const above = editor.labelLaneEscapePenalty({ x: 100, y: 0 }, laneStackBounds);
+            const below = editor.labelLaneEscapePenalty({ x: 100, y: 100 }, laneStackBounds);
+            const left = editor.labelLaneEscapePenalty({ x: 0, y: 50 }, laneStackBounds);
+            const right = editor.labelLaneEscapePenalty({ x: 200, y: 50 }, laneStackBounds);
+
+            return inside === 0 && above > 0 && below > 0 && left > 0 && right > 0;
           })();
         JS
       end
 
       def has_lower_escape_route_candidate?
-        has_overview? && page.evaluate_script(<<~JS)
+        has_visual? && page.evaluate_script(<<~JS)
           (() => {
-            const moduleName = "discourse/plugins/discourse-workflow/discourse/admin/components/workflow-overview-editor";
-            const WorkflowOverviewEditor = window.requirejs(moduleName).default;
-            const editor = Object.create(WorkflowOverviewEditor.prototype);
+            const editor = document.querySelector(".workflow-visual-editor").workflowVisualEditor;
             const route = editor.routePoints({
               index: 0,
               source: { x: 500, y: 100 },
@@ -797,11 +841,9 @@ module PageObjects
       end
 
       def has_global_side_pair_route_scoring?
-        has_overview? && page.evaluate_script(<<~JS)
+        has_visual? && page.evaluate_script(<<~JS)
           (() => {
-            const moduleName = "discourse/plugins/discourse-workflow/discourse/admin/components/workflow-overview-editor";
-            const WorkflowOverviewEditor = window.requirejs(moduleName).default;
-            const editor = Object.create(WorkflowOverviewEditor.prototype);
+            const editor = document.querySelector(".workflow-visual-editor").workflowVisualEditor;
 
             editor.routeBetweenHandles = ({ sourceSide, targetSide }) => {
               return {
@@ -846,9 +888,9 @@ module PageObjects
             #{path_geometry_helpers}
 
             const stepOptionId = arguments[0];
-            const path = document.querySelector(`.workflow-overview-editor__edge-path[data-workflow-step-option-id="${stepOptionId}"]`);
-            const option = document.querySelector(`.workflow-overview-editor__option[data-workflow-step-option-id="${stepOptionId}"]`);
-            const boardRect = document.querySelector(".workflow-overview-editor__board").getBoundingClientRect();
+            const path = document.querySelector(`.workflow-visual-editor__edge-path[data-workflow-step-option-id="${stepOptionId}"]`);
+            const option = document.querySelector(`.workflow-visual-editor__option[data-workflow-step-option-id="${stepOptionId}"]`);
+            const boardRect = document.querySelector(".workflow-visual-editor__board").getBoundingClientRect();
             const optionRect = option.getBoundingClientRect();
             const optionCenter = {
               x: optionRect.left - boardRect.left + optionRect.width / 2,
@@ -865,20 +907,21 @@ module PageObjects
               const segmentLength = Math.abs(segment.y2 - segment.y1);
               return segmentLength > currentLength ? segment : current;
             }, verticalSegments[0]);
-            const expected = {
-              x: longest.x1,
-              y: (longest.y1 + longest.y2) / 2,
-            };
+            const startY = Math.min(longest.y1, longest.y2);
+            const endY = Math.max(longest.y1, longest.y2);
+            const length = endY - startY;
+            const candidateRatios = [0.5, 1 / 3, 2 / 3, 0.25, 0.75, 0.2, 0.8, 0.1, 0.9];
 
-            return Math.abs(optionCenter.x - expected.x) <= 3 && Math.abs(optionCenter.y - expected.y) <= 3;
+            return Math.abs(optionCenter.x - longest.x1) <= 3 &&
+              candidateRatios.some((ratio) => Math.abs(optionCenter.y - (startY + length * ratio)) <= 3);
           })();
         JS
       end
 
       def has_no_overlapping_option_dropdowns?
-        has_css?(".workflow-overview-editor__option") && page.evaluate_script(<<~JS)
+        has_css?(".workflow-visual-editor__option") && page.evaluate_script(<<~JS)
           (() => {
-            const rects = Array.from(document.querySelectorAll(".workflow-overview-editor__option")).map((option) => {
+            const rects = Array.from(document.querySelectorAll(".workflow-visual-editor__option")).map((option) => {
               const rect = option.getBoundingClientRect();
               return {
                 left: rect.left,
@@ -900,16 +943,16 @@ module PageObjects
       end
 
       def has_no_option_dropdown_over_step_boxes?
-        has_css?(".workflow-overview-editor__option") && page.evaluate_script(<<~JS)
+        has_css?(".workflow-visual-editor__option") && page.evaluate_script(<<~JS)
           (() => {
             const overlaps = (rect, otherRect) => {
               return Math.max(rect.left, otherRect.left) < Math.min(rect.right, otherRect.right) &&
                 Math.max(rect.top, otherRect.top) < Math.min(rect.bottom, otherRect.bottom);
             };
-            const optionRects = Array.from(document.querySelectorAll(".workflow-overview-editor__option")).map((option) => {
+            const optionRects = Array.from(document.querySelectorAll(".workflow-visual-editor__option")).map((option) => {
               return option.getBoundingClientRect();
             });
-            const stepRects = Array.from(document.querySelectorAll(".workflow-overview-editor__step")).map((step) => {
+            const stepRects = Array.from(document.querySelectorAll(".workflow-visual-editor__step")).map((step) => {
               return step.getBoundingClientRect();
             });
 
@@ -928,9 +971,9 @@ module PageObjects
               return Math.max(rect.left, otherRect.left) < Math.min(rect.right, otherRect.right) &&
                 Math.max(rect.top, otherRect.top) < Math.min(rect.bottom, otherRect.bottom);
             };
-            const option = document.querySelector(`.workflow-overview-editor__option[data-workflow-step-option-id="${stepOptionId}"]`);
+            const option = document.querySelector(`.workflow-visual-editor__option[data-workflow-step-option-id="${stepOptionId}"]`);
             const optionRect = option.getBoundingClientRect();
-            const stepRects = Array.from(document.querySelectorAll(".workflow-overview-editor__step")).map((step) => {
+            const stepRects = Array.from(document.querySelectorAll(".workflow-visual-editor__step")).map((step) => {
               return step.getBoundingClientRect();
             });
 
@@ -941,7 +984,7 @@ module PageObjects
 
       def has_forward_arrow_from_right_edge?(step_option)
         has_css?(
-          ".workflow-overview-editor__edge-path[data-workflow-step-option-id='#{step_option.id}'][data-workflow-source-side='right']",
+          ".workflow-visual-editor__edge-path[data-workflow-step-option-id='#{step_option.id}'][data-workflow-source-side='right']",
         )
       end
 
@@ -969,13 +1012,13 @@ module PageObjects
       end
 
       def fill_new_step_name(name)
-        find(".workflow-overview-editor__new-step-name").fill_in(with: name)
+        find(".workflow-visual-editor__new-step-name").fill_in(with: name)
         self
       end
 
       def choose_new_step_category(category)
         PageObjects::Components::SelectKit.new(
-          ".workflow-overview-editor__add-step .category-chooser",
+          ".workflow-visual-editor__add-step .category-chooser",
         ).select_row_by_value(category.id)
         self
       end
@@ -993,12 +1036,12 @@ module PageObjects
       end
 
       def delete_option(step_option)
-        find("#{option_selector(step_option)} .workflow-overview-editor__delete-option").click
+        find("#{option_selector(step_option)} .workflow-visual-editor__delete-option").click
         self
       end
 
       def delete_step(step)
-        find("#{step_selector(step)} .workflow-overview-editor__delete-step").click
+        find("#{step_selector(step)} .workflow-visual-editor__delete-step").click
         self
       end
 
@@ -1029,31 +1072,31 @@ module PageObjects
       private
 
       def step_selector(step)
-        ".workflow-overview-editor__step[data-workflow-step-id='#{step.id}']"
+        ".workflow-visual-editor__step[data-workflow-step-id='#{step.id}']"
       end
 
       def lane_selector(category)
-        ".workflow-overview-editor__lane[data-workflow-category-id='#{category.id}']"
+        ".workflow-visual-editor__lane[data-workflow-category-id='#{category.id}']"
       end
 
       def position_selector(category, position)
-        ".workflow-overview-editor__position-slot[data-workflow-category-id='#{category.id}'][data-workflow-position='#{position}']"
+        ".workflow-visual-editor__position-slot[data-workflow-category-id='#{category.id}'][data-workflow-position='#{position}']"
       end
 
       def option_selector(step_option)
-        ".workflow-overview-editor__option[data-workflow-step-option-id='#{step_option.id}']"
+        ".workflow-visual-editor__option[data-workflow-step-option-id='#{step_option.id}']"
       end
 
       def connector_handle_selector(step, side)
-        "#{step_selector(step)} .workflow-overview-editor__connector-handle--#{side}"
+        "#{step_selector(step)} .workflow-visual-editor__connector-handle--#{side}"
       end
 
       def connected_handle_selector(step)
-        "#{step_selector(step)} .workflow-overview-editor__connector-handle--connected"
+        "#{step_selector(step)} .workflow-visual-editor__connector-handle--connected"
       end
 
       def unconnected_handle_selector(step)
-        "#{step_selector(step)} .workflow-overview-editor__connector-handle:not(.workflow-overview-editor__connector-handle--connected)"
+        "#{step_selector(step)} .workflow-visual-editor__connector-handle:not(.workflow-visual-editor__connector-handle--connected)"
       end
 
       def path_geometry_helpers

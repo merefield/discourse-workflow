@@ -136,40 +136,40 @@ body.workflow-topic {
     margin-bottom: 1rem;
   }
 
-  .workflow-overview-editor {
+  .workflow-visual-editor {
     display: flex;
     flex-direction: column;
     gap: 1rem;
   }
 
-  .workflow-overview-editor__add-step {
+  .workflow-visual-editor__add-step {
     display: flex;
     align-items: center;
     flex-wrap: wrap;
     gap: 0.75rem;
   }
 
-  .workflow-overview-editor__new-step-name {
+  .workflow-visual-editor__new-step-name {
     margin-bottom: 0;
   }
 
-  .workflow-overview-editor__lanes {
+  .workflow-visual-editor__lanes {
     display: grid;
     gap: 1rem;
   }
 
-  .workflow-overview-editor__board {
+  .workflow-visual-editor__board {
     position: relative;
   }
 
-  .workflow-overview-editor__edge-layer,
-  .workflow-overview-editor__edge-controls {
+  .workflow-visual-editor__edge-layer,
+  .workflow-visual-editor__edge-controls {
     position: absolute;
     inset: 0;
     pointer-events: none;
   }
 
-  .workflow-overview-editor__edge-layer {
+  .workflow-visual-editor__edge-layer {
     z-index: 4;
     overflow: visible;
 
@@ -178,25 +178,27 @@ body.workflow-topic {
     }
   }
 
-  .workflow-overview-editor__edge-path {
+  .workflow-visual-editor__edge-path {
     fill: none;
     stroke: var(--primary-medium);
     stroke-width: 2;
-    marker-end: url("#workflow-overview-editor-arrowhead");
+    marker-end: url("#workflow-visual-editor-arrowhead");
   }
 
-  .workflow-overview-editor__edge-path--preview {
+  .workflow-visual-editor__edge-path--preview {
     stroke: var(--tertiary);
     stroke-dasharray: 5 4;
   }
 
-  .workflow-overview-editor__edge-controls {
+  .workflow-visual-editor__edge-controls {
     z-index: 5;
   }
 
-  .workflow-overview-editor__lane {
+  .workflow-visual-editor__lane {
     position: relative;
     z-index: 1;
+    display: flex;
+    flex-direction: column;
     border: 2px solid var(--primary-low);
     border-radius: var(--d-border-radius);
     background: var(--secondary);
@@ -204,23 +206,29 @@ body.workflow-topic {
     overflow: hidden;
   }
 
-  .workflow-overview-editor__lane-header {
+  .workflow-visual-editor__lane-header {
     background: var(--primary-very-low);
     border-bottom: 1px solid var(--primary-low);
     font-weight: 700;
     padding: 0.6rem 0.75rem;
   }
 
-  .workflow-overview-editor__lane-steps {
+  .workflow-visual-editor__lane-steps {
     display: grid;
+    flex: 1;
     grid-auto-columns: minmax(220px, 1fr);
     grid-auto-flow: column;
     gap: 0.75rem;
-    padding: 0.75rem 0.75rem 0.75rem 2.5rem;
+    padding: 0 0.75rem;
   }
 
-  .workflow-overview-editor__position-slot {
+  .workflow-visual-editor__position-slot {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    justify-content: center;
     border-left: 1px dashed var(--primary-low);
+    gap: 0.75rem;
     min-height: 7rem;
     padding-left: 0.75rem;
 
@@ -230,8 +238,9 @@ body.workflow-topic {
     }
   }
 
-  .workflow-overview-editor__step {
+  .workflow-visual-editor__step {
     position: relative;
+    box-sizing: border-box;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -240,11 +249,12 @@ body.workflow-topic {
     border-radius: var(--d-border-radius);
     box-shadow: 0 1px 3px color-mix(in srgb, var(--primary) 12%, transparent);
     cursor: grab;
-    min-width: 220px;
+    min-width: 132px;
     padding: 0.75rem;
+    width: 60%;
   }
 
-  .workflow-overview-editor__delete-step {
+  .workflow-visual-editor__delete-step {
     position: absolute;
     top: 0;
     right: 0;
@@ -255,14 +265,27 @@ body.workflow-topic {
     z-index: 7;
   }
 
-  .workflow-overview-editor__step-title {
-    display: flex;
-    gap: 0.35rem;
+  .workflow-visual-editor__step-title {
+    position: relative;
+    display: block;
     margin: 0;
+    width: 100%;
+  }
+
+  .workflow-visual-editor__step-number {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
+  .workflow-visual-editor__step-label {
+    display: block;
+    padding: 0 1.25rem;
     text-align: center;
   }
 
-  .workflow-overview-editor__connector-handle {
+  .workflow-visual-editor__connector-handle {
     position: absolute;
     z-index: 6;
     width: 0.75rem;
@@ -274,36 +297,36 @@ body.workflow-topic {
     padding: 0;
   }
 
-  .workflow-overview-editor__connector-handle--connected {
+  .workflow-visual-editor__connector-handle--connected {
     border-style: solid;
     background: var(--tertiary-low);
   }
 
-  .workflow-overview-editor__connector-handle--top {
+  .workflow-visual-editor__connector-handle--top {
     top: 0;
     left: 50%;
     transform: translate(-50%, -50%);
   }
 
-  .workflow-overview-editor__connector-handle--right {
+  .workflow-visual-editor__connector-handle--right {
     top: 50%;
     right: 0;
     transform: translate(50%, -50%);
   }
 
-  .workflow-overview-editor__connector-handle--bottom {
+  .workflow-visual-editor__connector-handle--bottom {
     bottom: 0;
     left: 50%;
     transform: translate(-50%, 50%);
   }
 
-  .workflow-overview-editor__connector-handle--left {
+  .workflow-visual-editor__connector-handle--left {
     top: 50%;
     left: 0;
     transform: translate(-50%, -50%);
   }
 
-  .workflow-overview-editor__options {
+  .workflow-visual-editor__options {
     display: flex;
     flex-direction: column;
     gap: 0.4rem;
@@ -311,7 +334,7 @@ body.workflow-topic {
     margin: 0;
   }
 
-  .workflow-overview-editor__option {
+  .workflow-visual-editor__option {
     position: absolute;
     display: flex;
     align-items: center;
@@ -325,7 +348,7 @@ body.workflow-topic {
     transform: translate(-50%, -50%);
   }
 
-  .workflow-overview-editor__delete-option {
+  .workflow-visual-editor__delete-option {
     align-self: stretch;
     border-radius: calc(var(--d-border-radius) - 1px) 0 0
       calc(var(--d-border-radius) - 1px);
@@ -335,7 +358,7 @@ body.workflow-topic {
     padding: 0.25rem 0.4rem;
   }
 
-  .workflow-overview-editor__option select {
+  .workflow-visual-editor__option select {
     margin-bottom: 0;
     width: 8rem;
   }

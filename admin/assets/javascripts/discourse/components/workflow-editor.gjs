@@ -14,8 +14,8 @@ import Textarea from "discourse/components/d-textarea";
 import DToggleSwitch from "discourse/components/d-toggle-switch";
 import { popupAjaxError } from "discourse/lib/ajax-error";
 import I18n, { i18n } from "discourse-i18n";
-import WorkflowOverviewEditor from "./workflow-overview-editor";
 import WorkflowStepListEditor from "./workflow-step-list-editor";
+import WorkflowVisualEditor from "./workflow-visual-editor";
 
 export default class WorkflowEditor extends Component {
   @service adminPluginNavManager;
@@ -33,8 +33,8 @@ export default class WorkflowEditor extends Component {
     return this.stepsView === "list";
   }
 
-  get showingStepsOverview() {
-    return this.stepsView === "overview";
+  get showingStepsVisual() {
+    return this.stepsView === "visual";
   }
 
   @action
@@ -43,8 +43,8 @@ export default class WorkflowEditor extends Component {
   }
 
   @action
-  showStepsOverview() {
-    this.stepsView = "overview";
+  showStepsVisual() {
+    this.stepsView = "visual";
   }
 
   @action
@@ -302,13 +302,13 @@ export default class WorkflowEditor extends Component {
             <button
               type="button"
               class={{if
-                this.showingStepsOverview
+                this.showingStepsVisual
                 "btn btn-primary workflow-editor__steps-tab"
                 "btn btn-default workflow-editor__steps-tab"
               }}
-              {{on "click" this.showStepsOverview}}
+              {{on "click" this.showStepsVisual}}
             >
-              {{i18n "admin.discourse_workflow.workflows.steps.tabs.overview"}}
+              {{i18n "admin.discourse_workflow.workflows.steps.tabs.visual"}}
             </button>
           </div>
 
@@ -320,7 +320,7 @@ export default class WorkflowEditor extends Component {
               @onChange={{this.stepsChanged}}
             />
           {{else}}
-            <WorkflowOverviewEditor
+            <WorkflowVisualEditor
               @workflow={{@workflow}}
               @disabled={{this.editingModel.system}}
             />
