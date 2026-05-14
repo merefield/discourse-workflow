@@ -117,7 +117,6 @@ RSpec.describe "Workflow admin visual" do
     expect(visual_page).to have_short_segment_penalty
     expect(visual_page).to have_lower_return_route_length_penalty
     expect(visual_page).to have_lane_escape_gutter_for_connector_handles
-    expect(visual_page).to have_label_lane_escape_penalty
     expect(visual_page).to have_lower_escape_route_candidate
     expect(visual_page).to have_global_side_pair_route_scoring
     expect(visual_page).to have_option_on_longest_vertical_segment(queue_to_done_option)

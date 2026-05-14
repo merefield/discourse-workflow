@@ -810,35 +810,33 @@ export default class WorkflowVisualEditor extends Component {
       40 +
       index * 18;
     const candidates = [
-      ...this.routingCandidates(baseMidX, 48).map((midX) => ({
-        points: this.compactPoints([
+      ...this.routingCandidates(baseMidX, 48).map((midX) =>
+        this.compactPoints([
           source,
           sourceEscape,
           { x: midX, y: sourceEscape.y },
           { x: midX, y: targetEscape.y },
           targetEscape,
           target,
-        ]),
-        penalty: 0,
-      })),
-      ...this.routingCandidates(baseMidY, 36).map((midY) => ({
-        points: this.compactPoints([
+        ])
+      ),
+      ...this.routingCandidates(baseMidY, 36).map((midY) =>
+        this.compactPoints([
           source,
           sourceEscape,
           { x: sourceEscape.x, y: midY },
           { x: targetEscape.x, y: midY },
           targetEscape,
           target,
-        ]),
-        penalty: 0,
-      })),
+        ])
+      ),
       ...(allowLaneHeaderRouting
         ? this.laneHeaderRoutingCandidates(
             laneStackBounds,
             sourceEscape,
             targetEscape
-          ).map((midY) => ({
-            points: this.headerRoutePoints({
+          ).map((midY) =>
+            this.headerRoutePoints({
               source,
               sourceSide,
               sourceEscape,
@@ -847,47 +845,36 @@ export default class WorkflowVisualEditor extends Component {
               targetEscape,
               midY,
               index,
-            }),
-            penalty: 0,
-          }))
+            })
+          )
         : []),
-      {
-        points: this.compactPoints([
-          source,
-          sourceEscape,
-          { x: outsideX, y: sourceEscape.y },
-          { x: outsideX, y: targetEscape.y },
-          targetEscape,
-          target,
-        ]),
-        penalty: 0,
-      },
-      {
-        points: this.compactPoints([
-          source,
-          sourceEscape,
-          { x: sourceEscape.x, y: outsideY },
-          { x: targetEscape.x, y: outsideY },
-          targetEscape,
-          target,
-        ]),
-        penalty: 0,
-      },
-      {
-        points: this.compactPoints([
-          source,
-          sourceEscape,
-          { x: sourceEscape.x, y: outsideBottomY },
-          { x: targetEscape.x, y: outsideBottomY },
-          targetEscape,
-          target,
-        ]),
-        penalty: 0,
-      },
+      this.compactPoints([
+        source,
+        sourceEscape,
+        { x: outsideX, y: sourceEscape.y },
+        { x: outsideX, y: targetEscape.y },
+        targetEscape,
+        target,
+      ]),
+      this.compactPoints([
+        source,
+        sourceEscape,
+        { x: sourceEscape.x, y: outsideY },
+        { x: targetEscape.x, y: outsideY },
+        targetEscape,
+        target,
+      ]),
+      this.compactPoints([
+        source,
+        sourceEscape,
+        { x: sourceEscape.x, y: outsideBottomY },
+        { x: targetEscape.x, y: outsideBottomY },
+        targetEscape,
+        target,
+      ]),
     ];
     const scoredCandidates = candidates
-      .flatMap((candidate) => {
-        const points = candidate.points;
+      .flatMap((points) => {
         const segments = this.pointsToSegments(points);
 
         return this.labelCandidatesForSegments(segments, laneStackBounds).map(
@@ -908,19 +895,17 @@ export default class WorkflowVisualEditor extends Component {
                 laneStackBounds,
                 routeLengthMultiplier,
                 sidePenalty,
-              }) +
-              labelCandidate.penalty +
-              candidate.penalty,
+              }) + labelCandidate.penalty,
           })
         );
       })
       .filter((candidate) => candidate.score !== Infinity)
       .sort((a, b) => a.score - b.score);
     const selectedCandidate = scoredCandidates[0] || {
-      points: candidates[0].points,
-      segments: this.pointsToSegments(candidates[0].points),
+      points: candidates[0],
+      segments: this.pointsToSegments(candidates[0]),
       labelPoint: this.labelCandidatesForSegments(
-        this.pointsToSegments(candidates[0].points),
+        this.pointsToSegments(candidates[0]),
         laneStackBounds
       )[0].point,
       score: Infinity,
@@ -1226,33 +1211,6 @@ export default class WorkflowVisualEditor extends Component {
       top: labelPoint.y - 20,
       bottom: labelPoint.y + 20,
     };
-  }
-
-  labelLaneEscapePenalty(labelPoint, laneStackBounds) {
-    if (!laneStackBounds) {
-      return 0;
-    }
-
-    const labelRect = this.optionLabelRect(labelPoint);
-    const escapedAbove = Math.max(0, laneStackBounds.top - labelRect.top);
-    const escapedBelow = Math.max(0, labelRect.bottom - laneStackBounds.bottom);
-    const lanes = laneStackBounds.lanes || [];
-    const leftLimit =
-      laneStackBounds.left ??
-      (lanes.length ? Math.min(...lanes.map((lane) => lane.left)) : null);
-    const rightLimit =
-      laneStackBounds.right ??
-      (lanes.length ? Math.max(...lanes.map((lane) => lane.right)) : null);
-    const escapedLeft = Number.isFinite(leftLimit)
-      ? Math.max(0, leftLimit - labelRect.left)
-      : 0;
-    const escapedRight = Number.isFinite(rightLimit)
-      ? Math.max(0, labelRect.right - rightLimit)
-      : 0;
-
-    return escapedAbove + escapedBelow + escapedLeft + escapedRight > 0
-      ? Infinity
-      : 0;
   }
 
   labelCollisionPenalty(labelPoint, routedLabels) {
@@ -1612,27 +1570,25 @@ export default class WorkflowVisualEditor extends Component {
     }, candidateSegments[0]);
 
     const ratioCandidates = [
-      { ratio: 1 / 2, penalty: 0 },
-      { ratio: 1 / 3, penalty: 0 },
-      { ratio: 2 / 3, penalty: 0 },
-      { ratio: 1 / 4, penalty: 0 },
-      { ratio: 3 / 4, penalty: 0 },
-      { ratio: 1 / 5, penalty: 0 },
-      { ratio: 4 / 5, penalty: 0 },
-      { ratio: 1 / 10, penalty: 0 },
-      { ratio: 9 / 10, penalty: 0 },
-      { ratio: 1 / 20, penalty: 0 },
-    ].map((candidate) => {
+      1 / 2,
+      1 / 3,
+      2 / 3,
+      1 / 4,
+      3 / 4,
+      1 / 5,
+      4 / 5,
+      1 / 10,
+      9 / 10,
+      1 / 20,
+    ].map((ratio) => {
       return {
         point: {
           x:
-            longestSegment.x1 +
-            (longestSegment.x2 - longestSegment.x1) * candidate.ratio,
+            longestSegment.x1 + (longestSegment.x2 - longestSegment.x1) * ratio,
           y:
-            longestSegment.y1 +
-            (longestSegment.y2 - longestSegment.y1) * candidate.ratio,
+            longestSegment.y1 + (longestSegment.y2 - longestSegment.y1) * ratio,
         },
-        penalty: candidate.penalty,
+        penalty: 0,
       };
     });
 
@@ -1724,146 +1680,6 @@ export default class WorkflowVisualEditor extends Component {
           (edge.target_step_id === stepId && edge.target_side === side))
       );
     });
-  }
-
-  legacyEdgeRoute({
-    allRects,
-    index,
-    sourceRect,
-    targetRect,
-    sourceStep,
-    targetStep,
-  }) {
-    const sourcePosition = sourceStep.position || 0;
-    const targetPosition = targetStep.position || 0;
-    const obstacleRects = this.obstacleRects(
-      allRects,
-      sourceStep.id,
-      targetStep.id
-    );
-
-    if (targetPosition > sourcePosition) {
-      return this.forwardEdgeRoute(
-        index,
-        sourceRect,
-        targetRect,
-        obstacleRects
-      );
-    }
-
-    if (targetPosition < sourcePosition) {
-      return this.returnEdgeRoute(index, sourceRect, targetRect, obstacleRects);
-    }
-
-    return this.sameColumnEdgeRoute(
-      index,
-      sourceRect,
-      targetRect,
-      obstacleRects
-    );
-  }
-
-  forwardEdgeRoute(index, sourceRect, targetRect, obstacleRects) {
-    const source = {
-      x: sourceRect.right,
-      y: sourceRect.centerY,
-    };
-    const target = {
-      x: targetRect.left,
-      y: targetRect.centerY,
-    };
-    const baseMidX = (source.x + target.x) / 2 + this.routeOffset(index, 12);
-    const candidates = this.routingCandidates(baseMidX, 48);
-    const midX =
-      candidates.find((candidate) => {
-        return !this.pathCollides(
-          [
-            { x1: source.x, y1: source.y, x2: candidate, y2: source.y },
-            { x1: candidate, y1: source.y, x2: candidate, y2: target.y },
-            { x1: candidate, y1: target.y, x2: target.x, y2: target.y },
-          ],
-          obstacleRects
-        );
-      }) || baseMidX;
-
-    return {
-      path: `M${source.x},${source.y} H${midX} V${target.y} H${target.x}`,
-      label_x: midX,
-      label_y: (source.y + target.y) / 2,
-    };
-  }
-
-  returnEdgeRoute(index, sourceRect, targetRect, obstacleRects) {
-    const source = {
-      x: sourceRect.centerX,
-      y: sourceRect.top,
-    };
-    const target = {
-      x: targetRect.centerX,
-      y: targetRect.top,
-    };
-    const baseReturnY =
-      Math.min(sourceRect.top, targetRect.top) -
-      24 -
-      this.routeOffset(index, 18);
-    const candidates = Array.from({ length: 8 }, (_, offset) => {
-      return baseReturnY - offset * 18;
-    });
-    const returnY =
-      candidates.find((candidate) => {
-        return !this.pathCollides(
-          [
-            { x1: source.x, y1: source.y, x2: source.x, y2: candidate },
-            { x1: source.x, y1: candidate, x2: target.x, y2: candidate },
-            { x1: target.x, y1: candidate, x2: target.x, y2: target.y },
-          ],
-          obstacleRects
-        );
-      }) || baseReturnY;
-
-    return {
-      path: `M${source.x},${source.y} V${returnY} H${target.x} V${target.y}`,
-      label_x: (source.x + target.x) / 2,
-      label_y: returnY,
-    };
-  }
-
-  sameColumnEdgeRoute(index, sourceRect, targetRect, obstacleRects) {
-    const sourceAboveTarget = sourceRect.centerY <= targetRect.centerY;
-    const source = {
-      x: sourceRect.centerX,
-      y: sourceAboveTarget ? sourceRect.bottom : sourceRect.top,
-    };
-    const target = {
-      x: targetRect.centerX,
-      y: sourceAboveTarget ? targetRect.top : targetRect.bottom,
-    };
-    const baseSideX =
-      Math.max(sourceRect.right, targetRect.right) +
-      24 +
-      this.routeOffset(index, 12);
-    const midY = (source.y + target.y) / 2;
-    const candidates = Array.from({ length: 8 }, (_, offset) => {
-      return baseSideX + offset * 18;
-    });
-    const sideX =
-      candidates.find((candidate) => {
-        return !this.pathCollides(
-          [
-            { x1: source.x, y1: source.y, x2: source.x, y2: midY },
-            { x1: source.x, y1: midY, x2: candidate, y2: midY },
-            { x1: candidate, y1: midY, x2: candidate, y2: target.y },
-            { x1: candidate, y1: target.y, x2: target.x, y2: target.y },
-          ],
-          obstacleRects
-        );
-      }) || baseSideX;
-
-    return {
-      path: `M${source.x},${source.y} V${midY} H${sideX} V${target.y} H${target.x}`,
-      label_x: sideX,
-      label_y: midY,
-    };
   }
 
   obstacleRects(allRects, sourceStepId, targetStepId) {

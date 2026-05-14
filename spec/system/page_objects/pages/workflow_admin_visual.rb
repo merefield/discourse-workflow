@@ -1069,26 +1069,6 @@ module PageObjects
         JS
       end
 
-      def has_label_lane_escape_penalty?
-        has_visual? && page.evaluate_script(<<~JS)
-          (() => {
-            const editor = document.querySelector(".workflow-visual-editor").workflowVisualEditor;
-            const laneStackBounds = { top: 0, bottom: 100, left: 0, right: 200 };
-            const inside = editor.labelLaneEscapePenalty({ x: 100, y: 50 }, laneStackBounds);
-            const above = editor.labelLaneEscapePenalty({ x: 100, y: 0 }, laneStackBounds);
-            const below = editor.labelLaneEscapePenalty({ x: 100, y: 100 }, laneStackBounds);
-            const left = editor.labelLaneEscapePenalty({ x: 0, y: 50 }, laneStackBounds);
-            const right = editor.labelLaneEscapePenalty({ x: 200, y: 50 }, laneStackBounds);
-
-            return inside === 0 &&
-              above === Infinity &&
-              below === Infinity &&
-              left === Infinity &&
-              right === Infinity;
-          })();
-        JS
-      end
-
       def has_lower_escape_route_candidate?
         has_visual? && page.evaluate_script(<<~JS)
           (() => {
