@@ -370,7 +370,7 @@ export default class WorkflowVisualEditor extends Component {
   }
 
   @action
-  async loadGraph() {
+  async loadGraph(options = {}) {
     if (!this.args.workflow?.id) {
       return;
     }
@@ -378,15 +378,23 @@ export default class WorkflowVisualEditor extends Component {
     this.isLoading = true;
 
     try {
+      const shouldLoadOptions =
+        options.reloadOptions === true || this.workflowOptions.length === 0;
+      const workflowStepsRequest = ajax(
+        `/admin/plugins/discourse-workflow/workflows/${this.args.workflow.id}/workflow_steps.json`
+      );
+      const workflowOptionsRequest = shouldLoadOptions
+        ? ajax("/admin/plugins/discourse-workflow/workflow_options.json")
+        : Promise.resolve(null);
       const [workflowStepsResult, workflowOptionsResult] = await Promise.all([
-        ajax(
-          `/admin/plugins/discourse-workflow/workflows/${this.args.workflow.id}/workflow_steps.json`
-        ),
-        ajax("/admin/plugins/discourse-workflow/workflow_options.json"),
+        workflowStepsRequest,
+        workflowOptionsRequest,
       ]);
 
       this.workflowSteps = workflowStepsResult.workflow_steps || [];
-      this.workflowOptions = workflowOptionsResult.workflow_options || [];
+      if (workflowOptionsResult) {
+        this.workflowOptions = workflowOptionsResult.workflow_options || [];
+      }
       this.mergeWorkflowCategories(
         this.workflowSteps,
         workflowStepsResult.workflow_categories || []

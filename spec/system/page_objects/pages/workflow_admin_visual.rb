@@ -512,6 +512,45 @@ module PageObjects
         self
       end
 
+      def track_requests
+        page.execute_script(<<~JS)
+          window.__workflowRequestUrls = [];
+
+          if (!window.__workflowRequestTrackingInstalled) {
+            const originalFetch = window.fetch;
+            if (originalFetch) {
+              window.fetch = function(input, ...args) {
+                const url = input?.url || input;
+                window.__workflowRequestUrls.push(String(url));
+                return originalFetch.call(this, input, ...args);
+              };
+            }
+
+            const originalOpen = window.XMLHttpRequest.prototype.open;
+            window.XMLHttpRequest.prototype.open = function(method, url, ...args) {
+              window.__workflowRequestUrls.push(String(url));
+              return originalOpen.call(this, method, url, ...args);
+            };
+
+            window.__workflowRequestTrackingInstalled = true;
+          }
+        JS
+
+        self
+      end
+
+      def has_tracked_request?(url_fragment)
+        page.evaluate_script(<<~JS, url_fragment)
+          (window.__workflowRequestUrls || []).some((url) => url.includes(arguments[0]))
+        JS
+      end
+
+      def tracked_request_count(url_fragment)
+        page.evaluate_script(<<~JS, url_fragment)
+          (window.__workflowRequestUrls || []).filter((url) => url.includes(arguments[0])).length
+        JS
+      end
+
       def make_page_scrollable
         page.execute_script("document.documentElement.style.minHeight = '2400px'")
         self

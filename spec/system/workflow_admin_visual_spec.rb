@@ -136,9 +136,14 @@ RSpec.describe "Workflow admin visual" do
   it "updates arrow option labels from the connector dropdown" do
     visual_page.visit_workflow(workflow).switch_to_visual
 
+    expect(visual_page).to have_option(queue_to_done_option)
+
+    visual_page.track_requests
     visual_page.select_option(queue_to_done_option, back_option)
 
     expect(queue_to_done_option.reload.workflow_option_id).to eq(back_option.id)
+    expect(visual_page).to have_tracked_request("/workflow_steps.json")
+    expect(visual_page.tracked_request_count("/workflow_options.json")).to eq(0)
   end
 
   it "preserves scroll position after visual workflow changes" do
