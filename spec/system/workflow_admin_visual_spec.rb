@@ -99,6 +99,7 @@ RSpec.describe "Workflow admin visual" do
     expect(visual_page).to have_no_overlapping_option_dropdowns
     expect(visual_page).to have_no_option_dropdown_over_step_boxes_for(queue_to_done_option)
     expect(visual_page).to have_crossing_penalty_without_forbidding_routes
+    expect(visual_page).to have_step_box_collision_guard
     expect(visual_page).to have_arrowhead_label_penalty
     expect(visual_page).to have_connector_line_label_penalty
     expect(visual_page).to have_horizontal_connector_under_dropdown_penalty
@@ -106,8 +107,12 @@ RSpec.describe "Workflow admin visual" do
     expect(visual_page).to have_own_arrowhead_included_in_label_penalties
     expect(visual_page).to have_other_arrowhead_label_penalty
     expect(visual_page).to have_midpoint_label_preference
+    expect(visual_page).to have_lane_whitespace_label_preference
+    expect(visual_page).to have_lane_whitespace_label_can_win
     expect(visual_page).to have_alternate_label_position_can_win
     expect(visual_page).to have_label_lane_boundary_penalty
+    expect(visual_page).to have_lane_header_travel_penalty
+    expect(visual_page).to have_lane_header_route_candidate
     expect(visual_page).to have_turn_count_penalty
     expect(visual_page).to have_short_segment_penalty
     expect(visual_page).to have_lower_return_route_length_penalty
@@ -236,5 +241,14 @@ RSpec.describe "Workflow admin visual" do
     expect(step.category_id).to eq(review_category.id)
     expect(step.position).to eq(4)
     expect(visual_page).to have_step(step, text: "QA")
+  end
+
+  it "opens the new step form from a swimlane with the category preselected" do
+    visual_page.visit_workflow(workflow).switch_to_visual
+
+    visual_page.add_step_from_lane(done_category)
+
+    expect(visual_page).to have_new_step_editor
+    expect(visual_page).to have_new_step_category(done_category)
   end
 end

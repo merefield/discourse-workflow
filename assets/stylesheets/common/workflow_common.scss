@@ -207,10 +207,22 @@ body.workflow-topic {
   }
 
   .workflow-visual-editor__lane-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
     background: var(--primary-very-low);
     border-bottom: 1px solid var(--primary-low);
     font-weight: 700;
     padding: 0.6rem 0.75rem;
+  }
+
+  .workflow-visual-editor__lane-title {
+    min-width: 0;
+  }
+
+  .workflow-visual-editor__add-step-to-lane {
+    margin-left: auto;
   }
 
   .workflow-visual-editor__lane-steps {

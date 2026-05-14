@@ -35,6 +35,21 @@ module PageObjects
         has_css?(lane_selector(category), **options)
       end
 
+      def add_step_from_lane(category)
+        within(lane_selector(category)) { find(".workflow-visual-editor__add-step-to-lane").click }
+
+        self
+      end
+
+      def has_new_step_editor?
+        has_css?(".workflow-step-editor")
+      end
+
+      def has_new_step_category?(category)
+        has_current_path?(/category_id=#{category.id}/) &&
+          has_css?(".workflow-step-editor", text: category.name)
+      end
+
       def has_step_in_lane?(step, category)
         has_css?("#{lane_selector(category)} #{step_selector(step)}")
       end
@@ -377,6 +392,87 @@ module PageObjects
         JS
       end
 
+      def has_step_box_collision_guard?
+        has_visual? && page.evaluate_script(<<~JS)
+          (() => {
+            const editor = document.querySelector(".workflow-visual-editor").workflowVisualEditor;
+            const obstacle = { left: 100, right: 180, top: 100, bottom: 160 };
+            const horizontalThroughBox = [{ x1: 40, y1: 130, x2: 220, y2: 130 }];
+            const verticalThroughBox = [{ x1: 140, y1: 60, x2: 140, y2: 200 }];
+            const nearBoxWithinClearance = [
+              {
+                x1: 40,
+                y1: obstacle.top - editor.routeObstaclePadding + 1,
+                x2: 220,
+                y2: obstacle.top - editor.routeObstaclePadding + 1,
+              },
+            ];
+            const outsideClearance = [
+              {
+                x1: 40,
+                y1: obstacle.top - editor.routeObstaclePadding - 1,
+                x2: 220,
+                y2: obstacle.top - editor.routeObstaclePadding - 1,
+              },
+            ];
+            const endpointSegments = [
+              { x1: 180, y1: 130, x2: 208, y2: 130 },
+              { x1: 208, y1: 130, x2: 208, y2: 190 },
+              { x1: 208, y1: 190, x2: 140, y2: 190 },
+              { x1: 140, y1: 190, x2: 140, y2: 160 },
+            ];
+            const endpointThroughBox = [
+              { x1: 180, y1: 130, x2: 208, y2: 130 },
+              { x1: 140, y1: 60, x2: 140, y2: 200 },
+              { x1: 140, y1: 190, x2: 140, y2: 160 },
+            ];
+
+            return editor.pathCollides(horizontalThroughBox, [obstacle]) &&
+              editor.pathCollides(verticalThroughBox, [obstacle]) &&
+              editor.pathCollides(nearBoxWithinClearance, [obstacle]) &&
+              !editor.pathCollides(outsideClearance, [obstacle]) &&
+              editor.routeCandidateScore({
+                segments: horizontalThroughBox,
+                labelPoint: { x: 20, y: 20 },
+                obstacleRects: [obstacle],
+                endpointObstacleRects: [],
+                labelObstacleRects: [],
+                routedSegments: [],
+                routedLabels: [],
+                arrowheadPoints: [],
+                laneStackBounds: null,
+                sidePenalty: 0,
+              }) === Infinity &&
+              Number.isFinite(
+                editor.routeCandidateScore({
+                  segments: endpointSegments,
+                  labelPoint: { x: 220, y: 180 },
+                  obstacleRects: [],
+                  endpointObstacleRects: [obstacle],
+                  labelObstacleRects: [],
+                  routedSegments: [],
+                  routedLabels: [],
+                  arrowheadPoints: [],
+                  laneStackBounds: null,
+                  sidePenalty: 0,
+                })
+              ) &&
+              editor.routeCandidateScore({
+                segments: endpointThroughBox,
+                labelPoint: { x: 220, y: 180 },
+                obstacleRects: [],
+                endpointObstacleRects: [obstacle],
+                labelObstacleRects: [],
+                routedSegments: [],
+                routedLabels: [],
+                arrowheadPoints: [],
+                laneStackBounds: null,
+                sidePenalty: 0,
+              }) === Infinity;
+          })();
+        JS
+      end
+
       def has_arrowhead_label_penalty?
         has_visual? && page.evaluate_script(<<~JS)
           (() => {
@@ -398,8 +494,8 @@ module PageObjects
             const scoreWithoutArrowheadCover = scoreFor([{ x: 300, y: 300 }]);
             const scoreWithArrowheadCover = scoreFor([{ x: 20, y: 20 }]);
 
-            return Number.isFinite(scoreWithArrowheadCover) &&
-              scoreWithArrowheadCover > scoreWithoutArrowheadCover;
+            return Number.isFinite(scoreWithoutArrowheadCover) &&
+              scoreWithArrowheadCover === Infinity;
           })();
         JS
       end
@@ -423,10 +519,12 @@ module PageObjects
               });
             };
             const scoreWithoutLineCover = scoreFor([{ x1: 300, y1: 300, x2: 320, y2: 300 }]);
-            const scoreWithLineCover = scoreFor([{ x1: 10, y1: 20, x2: 30, y2: 20 }]);
+            const scoreWithHorizontalLineCover = scoreFor([{ x1: 10, y1: 20, x2: 30, y2: 20 }]);
+            const scoreWithVerticalLineCover = scoreFor([{ x1: 20, y1: 0, x2: 20, y2: 40 }]);
 
-            return Number.isFinite(scoreWithLineCover) &&
-              scoreWithLineCover > scoreWithoutLineCover;
+            return Number.isFinite(scoreWithoutLineCover) &&
+              scoreWithHorizontalLineCover === Infinity &&
+              Number.isFinite(scoreWithVerticalLineCover);
           })();
         JS
       end
@@ -451,8 +549,8 @@ module PageObjects
             const scoreWithoutDropdownCover = scoreFor([{ x: 300, y: 300 }]);
             const scoreWithDropdownCover = scoreFor([{ x: 50, y: 20 }]);
 
-            return Number.isFinite(scoreWithDropdownCover) &&
-              scoreWithDropdownCover > scoreWithoutDropdownCover;
+            return Number.isFinite(scoreWithoutDropdownCover) &&
+              scoreWithDropdownCover === Infinity;
           })();
         JS
       end
@@ -484,8 +582,8 @@ module PageObjects
               sidePenalty: 0,
             });
 
-            return Number.isFinite(scoreWithLabelPenalties) &&
-              scoreWithLabelPenalties > scoreWithoutLabelPenalties;
+            return Number.isFinite(scoreWithoutLabelPenalties) &&
+              scoreWithLabelPenalties === Infinity;
           })();
         JS
       end
@@ -545,8 +643,8 @@ module PageObjects
             const scoreWithoutArrowheadCover = scoreFor([{ x: 300, y: 300 }]);
             const scoreWithArrowheadCover = scoreFor([{ x: 20, y: 20 }]);
 
-            return Number.isFinite(scoreWithArrowheadCover) &&
-              scoreWithArrowheadCover > scoreWithoutArrowheadCover;
+            return Number.isFinite(scoreWithoutArrowheadCover) &&
+              scoreWithArrowheadCover === Infinity;
           })();
         JS
       end
@@ -562,21 +660,92 @@ module PageObjects
             return candidates[0].point.y === 45 &&
               candidates[0].penalty === 0 &&
               candidates[1].point.y === 30 &&
-              candidates[1].penalty > 0 &&
+              candidates[1].penalty === 0 &&
               candidates[2].point.y === 60 &&
-              candidates[2].penalty > 0 &&
+              candidates[2].penalty === 0 &&
               candidates[3].point.y === 22.5 &&
-              candidates[3].penalty > candidates[1].penalty &&
+              candidates[3].penalty === 0 &&
               candidates[4].point.y === 67.5 &&
-              candidates[4].penalty > candidates[2].penalty &&
+              candidates[4].penalty === 0 &&
               candidates[5].point.y === 18 &&
-              candidates[5].penalty > candidates[3].penalty &&
+              candidates[5].penalty === 0 &&
               candidates[6].point.y === 72 &&
-              candidates[6].penalty > candidates[4].penalty &&
+              candidates[6].penalty === 0 &&
               candidates[7].point.y === 9 &&
-              candidates[7].penalty > candidates[5].penalty &&
+              candidates[7].penalty === 0 &&
               candidates[8].point.y === 81 &&
-              candidates[8].penalty > candidates[6].penalty;
+              candidates[8].penalty === 0 &&
+              candidates[9].point.y === 4.5 &&
+              candidates[9].penalty === 0;
+          })();
+        JS
+      end
+
+      def has_lane_whitespace_label_preference?
+        has_visual? && page.evaluate_script(<<~JS)
+          (() => {
+            const editor = document.querySelector(".workflow-visual-editor").workflowVisualEditor;
+            const candidates = editor.labelCandidatesForSegments(
+              [{ x1: 50, y1: 40, x2: 50, y2: 160 }],
+              {
+                lanes: [
+                  {
+                    left: 0,
+                    right: 100,
+                    contentLeft: 0,
+                    contentRight: 100,
+                    top: 0,
+                    bottom: 180,
+                    labelBottom: 60,
+                  },
+                ],
+              }
+            );
+
+            return candidates[0].point.x === 50 &&
+              candidates[0].point.y === 120 &&
+              candidates[0].penalty < 0;
+          })();
+        JS
+      end
+
+      def has_lane_whitespace_label_can_win?
+        has_visual? && page.evaluate_script(<<~JS)
+          (() => {
+            const editor = document.querySelector(".workflow-visual-editor").workflowVisualEditor;
+            const route = editor.routePoints({
+              index: 0,
+              source: { x: 0, y: 40 },
+              sourceSide: "right",
+              target: { x: 100, y: 160 },
+              targetSide: "left",
+              obstacleRects: [],
+              labelObstacleRects: [],
+              routedSegments: [],
+              routedLabels: [],
+              routedArrowheads: [],
+              laneStackBounds: {
+                top: 0,
+                bottom: 180,
+                left: 0,
+                right: 140,
+                lanes: [
+                  {
+                    left: 0,
+                    right: 140,
+                    contentLeft: 0,
+                    contentRight: 140,
+                    top: 0,
+                    bottom: 180,
+                    labelBottom: 60,
+                  },
+                ],
+              },
+              allowLaneHeaderRouting: true,
+              sidePenalty: 0,
+            });
+
+            return Math.abs(route.label_y - 120) <= 1;
           })();
         JS
       end
@@ -639,9 +808,9 @@ module PageObjects
             const scoreWithBoundaryOverlap = scoreFor({ x: 100, y: 180 });
             const scoreWithLaneLabelOverlap = scoreFor({ x: 100, y: 52 });
 
-            return Number.isFinite(scoreWithBoundaryOverlap) &&
-              scoreWithBoundaryOverlap > scoreWithoutBoundaryOverlap &&
-              scoreWithLaneLabelOverlap > scoreWithBoundaryOverlap;
+            return Number.isFinite(scoreWithoutBoundaryOverlap) &&
+              scoreWithBoundaryOverlap === Infinity &&
+              scoreWithLaneLabelOverlap === Infinity;
           })();
         JS
       end
@@ -674,6 +843,110 @@ module PageObjects
             return penaltyInLane === 0 &&
               penaltyBetweenLanes > 0 &&
               penaltyCrossingGap === 0;
+          })();
+        JS
+      end
+
+      def has_lane_header_travel_penalty?
+        has_visual? && page.evaluate_script(<<~JS)
+          (() => {
+            const editor = document.querySelector(".workflow-visual-editor").workflowVisualEditor;
+            const laneStackBounds = {
+              top: 0,
+              bottom: 180,
+              lanes: [
+                {
+                  left: 0,
+                  right: 200,
+                  contentLeft: 0,
+                  contentRight: 200,
+                  top: 0,
+                  bottom: 180,
+                  labelTop: 0,
+                  labelBottom: 40,
+                },
+              ],
+            };
+            const whitePathPenalty = editor.laneHeaderTravelPenalty(
+              [{ x1: 0, y1: 90, x2: 160, y2: 90 }],
+              laneStackBounds
+            );
+            const greyHeaderPenalty = editor.laneHeaderTravelPenalty(
+              [{ x1: 0, y1: 20, x2: 160, y2: 20 }],
+              laneStackBounds
+            );
+            const verticalCrossingPenalty = editor.laneHeaderTravelPenalty(
+              [{ x1: 80, y1: 20, x2: 80, y2: 90 }],
+              laneStackBounds
+            );
+
+            return whitePathPenalty === 0 &&
+              greyHeaderPenalty > 0 &&
+              verticalCrossingPenalty === 0;
+          })();
+        JS
+      end
+
+      def has_lane_header_route_candidate?
+        has_visual? && page.evaluate_script(<<~JS)
+          (() => {
+            const editor = document.querySelector(".workflow-visual-editor").workflowVisualEditor;
+            const candidates = editor.laneHeaderRoutingCandidates(
+              {
+                lanes: [
+                  { labelTop: 40, labelBottom: 60 },
+                  { labelTop: 120, labelBottom: 140 },
+                ],
+              },
+              { x: 500, y: 180 },
+              { x: 100, y: 20 }
+            );
+
+            return candidates.includes(50) && candidates.includes(130);
+          })();
+        JS
+      end
+
+      def has_lane_header_route_score_bonus?
+        has_visual? && page.evaluate_script(<<~JS)
+          (() => {
+            const editor = document.querySelector(".workflow-visual-editor").workflowVisualEditor;
+            const route = editor.routePoints({
+              index: 0,
+              source: { x: 500, y: 180 },
+              sourceSide: "right",
+              target: { x: 100, y: 20 },
+              targetSide: "top",
+              obstacleRects: [],
+              labelObstacleRects: [],
+              routedSegments: [],
+              routedLabels: [],
+              routedArrowheads: [],
+              laneStackBounds: {
+                top: 0,
+                bottom: 220,
+                left: 0,
+                right: 600,
+                lanes: [
+                  {
+                    left: 0,
+                    right: 600,
+                    contentLeft: 0,
+                    contentRight: 600,
+                    top: 0,
+                    bottom: 220,
+                    labelTop: 80,
+                    labelBottom: 120,
+                  },
+                ],
+              },
+              allowLaneHeaderRouting: true,
+              sidePenalty: 0,
+            });
+
+            return route.segments.some((segment) => {
+              return segment.y1 === segment.y2 && Math.abs(segment.y1 - 100) <= 1;
+            });
           })();
         JS
       end
@@ -764,7 +1037,7 @@ module PageObjects
 
             return Number.isFinite(returnScore) &&
               returnScore > 0 &&
-              returnScore < forwardScore;
+              returnScore < forwardScore / 4;
           })();
         JS
       end
@@ -807,7 +1080,11 @@ module PageObjects
             const left = editor.labelLaneEscapePenalty({ x: 0, y: 50 }, laneStackBounds);
             const right = editor.labelLaneEscapePenalty({ x: 200, y: 50 }, laneStackBounds);
 
-            return inside === 0 && above > 0 && below > 0 && left > 0 && right > 0;
+            return inside === 0 &&
+              above === Infinity &&
+              below === Infinity &&
+              left === Infinity &&
+              right === Infinity;
           })();
         JS
       end
@@ -897,23 +1174,41 @@ module PageObjects
               y: optionRect.top - boardRect.top + optionRect.height / 2,
             };
             const verticalSegments = parsePathSegments(path).filter((segment) => segment.x1 === segment.x2);
+            const laneCenters = Array.from(document.querySelectorAll(".workflow-visual-editor__lane")).map((lane) => {
+              const laneRect = lane.getBoundingClientRect();
+              const headerRect = lane.querySelector(".workflow-visual-editor__lane-header")?.getBoundingClientRect();
+
+              return {
+                xLeft: laneRect.left - boardRect.left,
+                xRight: laneRect.right - boardRect.left,
+                y: ((headerRect || laneRect).bottom + laneRect.bottom) / 2 - boardRect.top,
+              };
+            });
 
             if (!verticalSegments.length) {
               return true;
             }
 
-            const longest = verticalSegments.reduce((current, segment) => {
-              const currentLength = Math.abs(current.y2 - current.y1);
-              const segmentLength = Math.abs(segment.y2 - segment.y1);
-              return segmentLength > currentLength ? segment : current;
-            }, verticalSegments[0]);
-            const startY = Math.min(longest.y1, longest.y2);
-            const endY = Math.max(longest.y1, longest.y2);
-            const length = endY - startY;
-            const candidateRatios = [0.5, 1 / 3, 2 / 3, 0.25, 0.75, 0.2, 0.8, 0.1, 0.9];
+            const candidateRatios = [0.5, 1 / 3, 2 / 3, 0.25, 0.75, 0.2, 0.8, 0.1, 0.9, 0.05];
 
-            return Math.abs(optionCenter.x - longest.x1) <= 3 &&
-              candidateRatios.some((ratio) => Math.abs(optionCenter.y - (startY + length * ratio)) <= 3);
+            return verticalSegments.some((segment) => {
+              const startY = Math.min(segment.y1, segment.y2);
+              const endY = Math.max(segment.y1, segment.y2);
+              const length = endY - startY;
+              const onSegmentX = Math.abs(optionCenter.x - segment.x1) <= 3;
+              const onRatioCandidate = candidateRatios.some((ratio) => {
+                return Math.abs(optionCenter.y - (startY + length * ratio)) <= 3;
+              });
+              const onLaneCenterCandidate = laneCenters.some((laneCenter) => {
+                return segment.x1 >= laneCenter.xLeft &&
+                  segment.x1 <= laneCenter.xRight &&
+                  laneCenter.y >= startY &&
+                  laneCenter.y <= endY &&
+                  Math.abs(optionCenter.y - laneCenter.y) <= 3;
+              });
+
+              return onSegmentX && (onRatioCandidate || onLaneCenterCandidate);
+            });
           })();
         JS
       end

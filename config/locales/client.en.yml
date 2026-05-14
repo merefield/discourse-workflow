@@ -206,6 +206,9 @@ en:
                 reopen: "Reopen"
           visual:
             add_step: "Add step"
+            add_step_title: "Create a workflow step using the selected name and category"
+            add_step_to_lane: "Add step to this swimlane"
+            change_connector_option: "Change the action used by this connector"
             confirm_delete_connector: "Are you sure you want to permanently delete this connector?"
             confirm_delete_step: "Are you sure you want to permanently delete this step and all related connectors?"
             connector_handle: "%{step} %{side} connector"

@@ -17,6 +17,7 @@ import { i18n } from "discourse-i18n";
 
 export default class WorkflowVisualEditor extends Component {
   @service dialog;
+  @service router;
 
   @tracked workflowSteps = [];
   @tracked workflowOptions = [];
@@ -564,6 +565,7 @@ export default class WorkflowVisualEditor extends Component {
         targetRect,
         targetSide,
         obstacleRects,
+        endpointObstacleRects: [sourceRect, targetRect],
         labelObstacleRects,
         routedSegments,
         routedLabels,
@@ -573,6 +575,8 @@ export default class WorkflowVisualEditor extends Component {
           sourceStep,
           targetStep
         ),
+        allowLaneHeaderRouting:
+          (targetStep.position || 0) < (sourceStep.position || 0),
         sidePenalty: this.edgeSidePairPenalty(
           sourceStep,
           targetStep,
@@ -630,6 +634,7 @@ export default class WorkflowVisualEditor extends Component {
       targetRect,
       targetSide: "left",
       obstacleRects,
+      endpointObstacleRects: [sourceRect, targetRect],
       labelObstacleRects,
       routedSegments,
       routedLabels,
@@ -687,7 +692,7 @@ export default class WorkflowVisualEditor extends Component {
 
   routeLengthMultiplier(sourceStep, targetStep) {
     if ((targetStep.position || 0) < (sourceStep.position || 0)) {
-      return 0.35;
+      return 0.15;
     }
 
     return 1;
@@ -700,12 +705,14 @@ export default class WorkflowVisualEditor extends Component {
     targetRect,
     targetSide,
     obstacleRects,
+    endpointObstacleRects = [],
     labelObstacleRects = obstacleRects,
     routedSegments = [],
     routedLabels = [],
     routedArrowheads = [],
     laneStackBounds = null,
     routeLengthMultiplier = 1,
+    allowLaneHeaderRouting = false,
     sidePenalty = 0,
   }) {
     const source = this.connectorPoint(sourceRect, sourceSide);
@@ -717,12 +724,14 @@ export default class WorkflowVisualEditor extends Component {
       target,
       targetSide,
       obstacleRects,
+      endpointObstacleRects,
       labelObstacleRects,
       routedSegments,
       routedLabels,
       routedArrowheads,
       laneStackBounds,
       routeLengthMultiplier,
+      allowLaneHeaderRouting,
       sidePenalty,
     });
 
@@ -740,12 +749,14 @@ export default class WorkflowVisualEditor extends Component {
     target,
     targetSide,
     obstacleRects,
+    endpointObstacleRects = [],
     labelObstacleRects = obstacleRects,
     routedSegments = [],
     routedLabels = [],
     routedArrowheads = [],
     laneStackBounds = null,
     routeLengthMultiplier = 1,
+    allowLaneHeaderRouting = false,
     sidePenalty = 0,
   }) {
     const escapeDistance = 26 + this.routeOffset(index, 8);
@@ -768,56 +779,87 @@ export default class WorkflowVisualEditor extends Component {
       40 +
       index * 18;
     const candidates = [
-      ...this.routingCandidates(baseMidX, 48).map((midX) =>
-        this.compactPoints([
+      ...this.routingCandidates(baseMidX, 48).map((midX) => ({
+        points: this.compactPoints([
           source,
           sourceEscape,
           { x: midX, y: sourceEscape.y },
           { x: midX, y: targetEscape.y },
           targetEscape,
           target,
-        ])
-      ),
-      ...this.routingCandidates(baseMidY, 36).map((midY) =>
-        this.compactPoints([
+        ]),
+        penalty: 0,
+      })),
+      ...this.routingCandidates(baseMidY, 36).map((midY) => ({
+        points: this.compactPoints([
           source,
           sourceEscape,
           { x: sourceEscape.x, y: midY },
           { x: targetEscape.x, y: midY },
           targetEscape,
           target,
-        ])
-      ),
-      this.compactPoints([
-        source,
-        sourceEscape,
-        { x: outsideX, y: sourceEscape.y },
-        { x: outsideX, y: targetEscape.y },
-        targetEscape,
-        target,
-      ]),
-      this.compactPoints([
-        source,
-        sourceEscape,
-        { x: sourceEscape.x, y: outsideY },
-        { x: targetEscape.x, y: outsideY },
-        targetEscape,
-        target,
-      ]),
-      this.compactPoints([
-        source,
-        sourceEscape,
-        { x: sourceEscape.x, y: outsideBottomY },
-        { x: targetEscape.x, y: outsideBottomY },
-        targetEscape,
-        target,
-      ]),
+        ]),
+        penalty: 0,
+      })),
+      ...(allowLaneHeaderRouting
+        ? this.laneHeaderRoutingCandidates(
+            laneStackBounds,
+            sourceEscape,
+            targetEscape
+          ).map((midY) => ({
+            points: this.headerRoutePoints({
+              source,
+              sourceSide,
+              sourceEscape,
+              target,
+              targetSide,
+              targetEscape,
+              midY,
+              index,
+            }),
+            penalty: 0,
+          }))
+        : []),
+      {
+        points: this.compactPoints([
+          source,
+          sourceEscape,
+          { x: outsideX, y: sourceEscape.y },
+          { x: outsideX, y: targetEscape.y },
+          targetEscape,
+          target,
+        ]),
+        penalty: 0,
+      },
+      {
+        points: this.compactPoints([
+          source,
+          sourceEscape,
+          { x: sourceEscape.x, y: outsideY },
+          { x: targetEscape.x, y: outsideY },
+          targetEscape,
+          target,
+        ]),
+        penalty: 0,
+      },
+      {
+        points: this.compactPoints([
+          source,
+          sourceEscape,
+          { x: sourceEscape.x, y: outsideBottomY },
+          { x: targetEscape.x, y: outsideBottomY },
+          targetEscape,
+          target,
+        ]),
+        penalty: 0,
+      },
     ];
     const scoredCandidates = candidates
-      .flatMap((points) => {
+      .flatMap((candidate) => {
+        const points = candidate.points;
         const segments = this.pointsToSegments(points);
 
-        return this.labelCandidatesForSegments(segments).map(
+        return this.labelCandidatesForSegments(segments, laneStackBounds).map(
           (labelCandidate) => ({
             points,
             segments,
@@ -827,6 +869,7 @@ export default class WorkflowVisualEditor extends Component {
                 segments,
                 labelPoint: labelCandidate.point,
                 obstacleRects,
+                endpointObstacleRects,
                 labelObstacleRects,
                 routedSegments,
                 routedLabels,
@@ -834,17 +877,20 @@ export default class WorkflowVisualEditor extends Component {
                 laneStackBounds,
                 routeLengthMultiplier,
                 sidePenalty,
-              }) + labelCandidate.penalty,
+              }) +
+              labelCandidate.penalty +
+              candidate.penalty,
           })
         );
       })
       .filter((candidate) => candidate.score !== Infinity)
       .sort((a, b) => a.score - b.score);
     const selectedCandidate = scoredCandidates[0] || {
-      points: candidates[0],
-      segments: this.pointsToSegments(candidates[0]),
+      points: candidates[0].points,
+      segments: this.pointsToSegments(candidates[0].points),
       labelPoint: this.labelCandidatesForSegments(
-        this.pointsToSegments(candidates[0])
+        this.pointsToSegments(candidates[0].points),
+        laneStackBounds
       )[0].point,
       score: Infinity,
     };
@@ -914,6 +960,7 @@ export default class WorkflowVisualEditor extends Component {
     segments,
     labelPoint,
     obstacleRects,
+    endpointObstacleRects = [],
     labelObstacleRects,
     routedSegments,
     routedLabels,
@@ -930,6 +977,16 @@ export default class WorkflowVisualEditor extends Component {
       return Infinity;
     }
 
+    if (
+      this.pathCollides(
+        this.nonEndpointSegments(segments),
+        endpointObstacleRects,
+        0
+      )
+    ) {
+      return Infinity;
+    }
+
     const overlapCount = this.segmentOverlapCount(segments, routedSegments);
 
     if (overlapCount > 0) {
@@ -942,6 +999,7 @@ export default class WorkflowVisualEditor extends Component {
       this.routeTurnCount(segments) * 90 +
       this.segmentCrossingCount(segments, routedSegments) * 2000 +
       this.horizontalSegmentLabelPenalty(segments, routedLabels) +
+      this.laneHeaderTravelPenalty(segments, laneStackBounds) +
       this.labelPenalty({
         labelPoint,
         routedLabels,
@@ -953,7 +1011,6 @@ export default class WorkflowVisualEditor extends Component {
       this.laneBorderTravelPenalty(segments, laneStackBounds) +
       this.laneGapTravelPenalty(segments, laneStackBounds) +
       this.laneEscapePenalty(segments, laneStackBounds) +
-      this.labelLaneEscapePenalty(labelPoint, laneStackBounds) +
       sidePenalty
     );
   }
@@ -1052,6 +1109,42 @@ export default class WorkflowVisualEditor extends Component {
     }, 0);
   }
 
+  laneHeaderTravelPenalty(segments, laneStackBounds) {
+    if (!laneStackBounds?.lanes?.length) {
+      return 0;
+    }
+
+    return segments.reduce((penalty, segment) => {
+      if (segment.y1 !== segment.y2) {
+        return penalty;
+      }
+
+      const segmentLeft = Math.min(segment.x1, segment.x2);
+      const segmentRight = Math.max(segment.x1, segment.x2);
+
+      return (
+        penalty +
+        laneStackBounds.lanes.reduce((lanePenalty, lane) => {
+          if (
+            !Number.isFinite(lane.labelTop) ||
+            !Number.isFinite(lane.labelBottom) ||
+            segment.y1 < lane.labelTop ||
+            segment.y1 > lane.labelBottom
+          ) {
+            return lanePenalty;
+          }
+
+          const laneLeft = lane.contentLeft ?? lane.left;
+          const laneRight = lane.contentRight ?? lane.right;
+          const overlap =
+            Math.min(segmentRight, laneRight) - Math.max(segmentLeft, laneLeft);
+
+          return overlap > 0 ? lanePenalty + overlap * 45 : lanePenalty;
+        }, 0)
+      );
+    }, 0);
+  }
+
   laneEscapePenalty(segments, laneStackBounds) {
     if (!laneStackBounds) {
       return 0;
@@ -1088,7 +1181,7 @@ export default class WorkflowVisualEditor extends Component {
 
       return (
         penalty +
-        (escapedAbove + escapedBelow + escapedLeft + escapedRight) * 1440
+        (escapedAbove + escapedBelow + escapedLeft + escapedRight) * 2880
       );
     }, 0);
   }
@@ -1126,7 +1219,9 @@ export default class WorkflowVisualEditor extends Component {
       ? Math.max(0, labelRect.right - rightLimit)
       : 0;
 
-    return (escapedAbove + escapedBelow + escapedLeft + escapedRight) * 1440;
+    return escapedAbove + escapedBelow + escapedLeft + escapedRight > 0
+      ? Infinity
+      : 0;
   }
 
   labelCollisionPenalty(labelPoint, routedLabels) {
@@ -1137,10 +1232,6 @@ export default class WorkflowVisualEditor extends Component {
 
       if (likelyHorizontalOverlap && verticalDistance < 40) {
         return Infinity;
-      }
-
-      if (likelyHorizontalOverlap && verticalDistance < 72) {
-        return penalty + (72 - verticalDistance) * 20;
       }
 
       return penalty;
@@ -1157,7 +1248,7 @@ export default class WorkflowVisualEditor extends Component {
         Math.max(labelRect.top, rect.top) <
           Math.min(labelRect.bottom, rect.bottom);
 
-      return overlaps ? penalty + 10_000 : penalty;
+      return overlaps ? Infinity : penalty;
     }, 0);
   }
 
@@ -1171,7 +1262,7 @@ export default class WorkflowVisualEditor extends Component {
         arrowheadPoint.y >= labelRect.top &&
         arrowheadPoint.y <= labelRect.bottom;
 
-      return covered ? penalty + 10_000 : penalty;
+      return covered ? Infinity : penalty;
     }, 0);
   }
 
@@ -1183,7 +1274,9 @@ export default class WorkflowVisualEditor extends Component {
         this.horizontalSegmentIntersectsRect(segment, labelRect) ||
         this.verticalSegmentIntersectsRect(segment, labelRect);
 
-      return segmentIntersectsLabel ? penalty + 10_000 : penalty;
+      return segmentIntersectsLabel && segment.y1 === segment.y2
+        ? Infinity
+        : penalty;
     }, 0);
   }
 
@@ -1211,11 +1304,9 @@ export default class WorkflowVisualEditor extends Component {
         labelRect.right >= lane.left &&
         labelRect.left <= lane.right;
 
-      return (
-        penalty +
-        (overlapsTop || overlapsBottom ? 10_000 : 0) +
-        (overlapsLaneLabel ? 30_000 : 0)
-      );
+      return overlapsTop || overlapsBottom || overlapsLaneLabel
+        ? Infinity
+        : penalty;
     }, 0);
   }
 
@@ -1231,7 +1322,7 @@ export default class WorkflowVisualEditor extends Component {
           const labelRect = this.optionLabelRect(routedLabel);
 
           return this.horizontalSegmentIntersectsRect(segment, labelRect)
-            ? labelPenalty + 10_000
+            ? Infinity
             : labelPenalty;
         }, 0)
       );
@@ -1413,7 +1504,70 @@ export default class WorkflowVisualEditor extends Component {
     return value > Math.min(start, end) && value < Math.max(start, end);
   }
 
-  labelCandidatesForSegments(segments) {
+  laneHeaderRoutingCandidates(laneStackBounds, sourceEscape, targetEscape) {
+    if (!laneStackBounds?.lanes?.length) {
+      return [];
+    }
+
+    const routeTop = Math.min(sourceEscape.y, targetEscape.y);
+    const routeBottom = Math.max(sourceEscape.y, targetEscape.y);
+
+    return laneStackBounds.lanes
+      .map((lane) => {
+        if (
+          !Number.isFinite(lane.labelTop) ||
+          !Number.isFinite(lane.labelBottom)
+        ) {
+          return null;
+        }
+
+        const labelCenter = (lane.labelTop + lane.labelBottom) / 2;
+        return labelCenter >= routeTop && labelCenter <= routeBottom
+          ? labelCenter
+          : null;
+      })
+      .filter((candidate) => candidate !== null);
+  }
+
+  headerRoutePoints({
+    source,
+    sourceSide,
+    sourceEscape,
+    target,
+    targetSide,
+    targetEscape,
+    midY,
+    index,
+  }) {
+    const approachOffset = 34 + index * 8;
+    const direction = targetEscape.x >= sourceEscape.x ? 1 : -1;
+    const points = [source, sourceEscape];
+    let headerStartX = sourceEscape.x;
+
+    if (sourceSide === "top" || sourceSide === "bottom") {
+      headerStartX = sourceEscape.x + direction * approachOffset;
+      points.push({ x: headerStartX, y: sourceEscape.y });
+    }
+
+    points.push({ x: headerStartX, y: midY });
+
+    if (targetSide === "top" || targetSide === "bottom") {
+      const targetApproachX = targetEscape.x - direction * approachOffset;
+
+      points.push(
+        { x: targetApproachX, y: midY },
+        { x: targetApproachX, y: targetEscape.y },
+        targetEscape,
+        target
+      );
+    } else {
+      points.push({ x: targetEscape.x, y: midY }, targetEscape, target);
+    }
+
+    return this.compactPoints(points);
+  }
+
+  labelCandidatesForSegments(segments, laneStackBounds = null) {
     const verticalSegments = segments.filter(
       (segment) => segment.x1 === segment.x2
     );
@@ -1426,16 +1580,17 @@ export default class WorkflowVisualEditor extends Component {
         : longest;
     }, candidateSegments[0]);
 
-    return [
+    const ratioCandidates = [
       { ratio: 1 / 2, penalty: 0 },
-      { ratio: 1 / 3, penalty: 18 },
-      { ratio: 2 / 3, penalty: 18 },
-      { ratio: 1 / 4, penalty: 36 },
-      { ratio: 3 / 4, penalty: 36 },
-      { ratio: 1 / 5, penalty: 54 },
-      { ratio: 4 / 5, penalty: 54 },
-      { ratio: 1 / 10, penalty: 72 },
-      { ratio: 9 / 10, penalty: 72 },
+      { ratio: 1 / 3, penalty: 0 },
+      { ratio: 2 / 3, penalty: 0 },
+      { ratio: 1 / 4, penalty: 0 },
+      { ratio: 3 / 4, penalty: 0 },
+      { ratio: 1 / 5, penalty: 0 },
+      { ratio: 4 / 5, penalty: 0 },
+      { ratio: 1 / 10, penalty: 0 },
+      { ratio: 9 / 10, penalty: 0 },
+      { ratio: 1 / 20, penalty: 0 },
     ].map((candidate) => {
       return {
         point: {
@@ -1449,6 +1604,48 @@ export default class WorkflowVisualEditor extends Component {
         penalty: candidate.penalty,
       };
     });
+
+    return [
+      ...this.laneWhitespaceLabelCandidatesForSegment(
+        longestSegment,
+        laneStackBounds
+      ),
+      ...ratioCandidates,
+    ];
+  }
+
+  laneWhitespaceLabelCandidatesForSegment(segment, laneStackBounds) {
+    if (!laneStackBounds?.lanes?.length || segment.x1 !== segment.x2) {
+      return [];
+    }
+
+    const segmentTop = Math.min(segment.y1, segment.y2);
+    const segmentBottom = Math.max(segment.y1, segment.y2);
+
+    return laneStackBounds.lanes
+      .map((lane) => {
+        const contentTop = lane.labelBottom ?? lane.top;
+        const contentBottom = lane.bottom;
+        const contentCenter = (contentTop + contentBottom) / 2;
+
+        if (
+          segment.x1 < (lane.contentLeft ?? lane.left) ||
+          segment.x1 > (lane.contentRight ?? lane.right) ||
+          contentCenter < segmentTop ||
+          contentCenter > segmentBottom
+        ) {
+          return null;
+        }
+
+        return {
+          point: {
+            x: segment.x1,
+            y: contentCenter,
+          },
+          penalty: -30,
+        };
+      })
+      .filter(Boolean);
   }
 
   segmentLength(segment) {
@@ -1658,10 +1855,20 @@ export default class WorkflowVisualEditor extends Component {
     });
   }
 
-  pathCollides(segments, rects) {
+  pathCollides(segments, rects, padding = this.routeObstaclePadding) {
     return segments.some((segment) => {
-      return rects.some((rect) => this.segmentIntersectsRect(segment, rect, 8));
+      return rects.some((rect) => {
+        return this.segmentIntersectsRect(segment, rect, padding);
+      });
     });
+  }
+
+  nonEndpointSegments(segments) {
+    return segments.slice(1, -1);
+  }
+
+  get routeObstaclePadding() {
+    return 36;
   }
 
   segmentIntersectsRect(segment, rect, padding) {
@@ -2161,6 +2368,19 @@ export default class WorkflowVisualEditor extends Component {
   }
 
   @action
+  addStepToLane(lane) {
+    this.router.transitionTo(
+      "adminPlugins.show.discourse-workflow-workflows.steps.new",
+      this.args.workflow,
+      {
+        queryParams: {
+          category_id: lane.id,
+        },
+      }
+    );
+  }
+
+  @action
   async addStep() {
     if (!this.newStepCategoryId) {
       return;
@@ -2214,6 +2434,7 @@ export default class WorkflowVisualEditor extends Component {
           class="btn-primary workflow-visual-editor__add-step-button"
           @action={{this.addStep}}
           @label="admin.discourse_workflow.workflows.visual.add_step"
+          @title="admin.discourse_workflow.workflows.visual.add_step_title"
           @disabled={{@disabled}}
         />
       </div>
@@ -2280,6 +2501,9 @@ export default class WorkflowVisualEditor extends Component {
                 />
                 <select
                   data-workflow-step-option-id={{edge.step_option.id}}
+                  title={{i18n
+                    "admin.discourse_workflow.workflows.visual.change_connector_option"
+                  }}
                   value={{edge.step_option.workflow_option_id}}
                   {{on
                     "change"
@@ -2312,7 +2536,16 @@ export default class WorkflowVisualEditor extends Component {
                 {{on "drop" (fn this.dropStepOnLane lane)}}
               >
                 <header class="workflow-visual-editor__lane-header">
-                  {{lane.name}}
+                  <span class="workflow-visual-editor__lane-title">
+                    {{lane.name}}
+                  </span>
+                  <DButton
+                    class="btn-small btn-default workflow-visual-editor__add-step-to-lane"
+                    @icon="plus"
+                    @title="admin.discourse_workflow.workflows.visual.add_step_to_lane"
+                    @action={{fn this.addStepToLane lane}}
+                    @disabled={{@disabled}}
+                  />
                 </header>
 
                 <div class="workflow-visual-editor__lane-steps">
@@ -2353,6 +2586,7 @@ export default class WorkflowVisualEditor extends Component {
                               type="button"
                               class={{this.connectorHandleClass step side}}
                               aria-label={{this.connectorHandleLabel step side}}
+                              title={{this.connectorHandleLabel step side}}
                               data-workflow-connector-side={{side}}
                               draggable={{if @disabled false true}}
                               {{on
