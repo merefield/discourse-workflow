@@ -115,13 +115,12 @@ module DiscourseWorkflow
             .or(WorkflowStepOption.where(target_step_id: @workflow_step.id))
             .destroy_all
 
-          if @workflow_step.destroy
-            head :no_content
-          else
-            render_json_error @workflow_step
-            raise ActiveRecord::Rollback
-          end
+          @workflow_step.destroy!
         end
+
+        head :no_content
+      rescue ActiveRecord::RecordNotDestroyed => err
+        render_json_error err.record || @workflow_step
       end
 
       private

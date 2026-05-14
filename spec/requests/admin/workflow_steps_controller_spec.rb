@@ -125,6 +125,31 @@ describe DiscourseWorkflow::Admin::WorkflowStepsController do
     expect(DiscourseWorkflow::WorkflowStepOption.exists?(unrelated_step_option_id)).to eq(true)
   end
 
+  it "rolls back step option deletion when workflow step destroy raises" do
+    incoming_step_option =
+      Fabricate(
+        :workflow_step_option,
+        workflow_step_id: step_2.id,
+        workflow_option_id: option.id,
+        target_step_id: step_1.id,
+        position: 2,
+      )
+
+    allow_any_instance_of(DiscourseWorkflow::WorkflowStep).to receive(
+      :destroy!,
+    ).and_wrap_original do |method, *args|
+      method.receiver.errors.add(:base, "forced failure")
+      raise ActiveRecord::RecordNotDestroyed.new("forced failure", method.receiver)
+    end
+
+    delete "/admin/plugins/discourse-workflow/workflow_steps/#{step_1.id}.json"
+
+    expect(response.status).to eq(422)
+    expect(DiscourseWorkflow::WorkflowStep.exists?(step_1.id)).to eq(true)
+    expect(DiscourseWorkflow::WorkflowStepOption.exists?(step_option_1.id)).to eq(true)
+    expect(DiscourseWorkflow::WorkflowStepOption.exists?(incoming_step_option.id)).to eq(true)
+  end
+
   it "reorders a workflow step and displaced step atomically" do
     put "/admin/plugins/discourse-workflow/workflow_steps/#{step_1.id}/reorder.json",
         params: {
