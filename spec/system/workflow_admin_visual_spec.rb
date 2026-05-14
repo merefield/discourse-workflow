@@ -67,6 +67,7 @@ RSpec.describe "Workflow admin visual" do
     expect(visual_page).to have_centered_step_label(queue_step)
     expect(visual_page).to have_step_centered_in_lane_content(queue_step)
     expect(visual_page).to have_connector_handles(queue_step)
+    expect(visual_page).to have_native_drag_payloads_for(queue_step)
     expect(visual_page).to have_lane(done_category, text: done_category.name)
     expect(visual_page).to have_lane(unused_category, text: unused_category.name)
   end

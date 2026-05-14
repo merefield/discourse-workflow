@@ -138,6 +138,13 @@ module PageObjects
         end
       end
 
+      def has_native_drag_payloads_for?(step)
+        has_css?(step_selector(step)) &&
+          drag_start_payload(step_selector(step)) == "workflow-step:#{step.id}" &&
+          drag_start_payload(connector_handle_selector(step, "right")) ==
+            "workflow-connector:#{step.id}:right"
+      end
+
       def has_arrow_link_for_option?(step_option)
         has_css?("#{option_selector(step_option)}") &&
           has_css?(".workflow-visual-editor__edge-path")
@@ -725,6 +732,36 @@ module PageObjects
               dataTransfer,
             })
           );
+        JS
+      end
+
+      def drag_start_payload(selector)
+        page.evaluate_script(<<~JS, selector)
+          (() => {
+            const source = document.querySelector(arguments[0]);
+            const dataTransfer = new DataTransfer();
+            const sourceRect = source.getBoundingClientRect();
+
+            source.dispatchEvent(
+              new DragEvent("dragstart", {
+                bubbles: true,
+                cancelable: true,
+                dataTransfer,
+                clientX: sourceRect.left + sourceRect.width / 2,
+                clientY: sourceRect.top + sourceRect.height / 2,
+              })
+            );
+
+            source.dispatchEvent(
+              new DragEvent("dragend", {
+                bubbles: true,
+                cancelable: true,
+                dataTransfer,
+              })
+            );
+
+            return dataTransfer.getData("text/plain");
+          })();
         JS
       end
     end

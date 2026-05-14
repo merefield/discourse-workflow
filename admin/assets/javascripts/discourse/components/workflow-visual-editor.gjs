@@ -1771,6 +1771,15 @@ export default class WorkflowVisualEditor extends Component {
     return (index % 3) * size;
   }
 
+  setDragPayload(event, payload) {
+    if (!event.dataTransfer) {
+      return;
+    }
+
+    event.dataTransfer.effectAllowed = "move";
+    event.dataTransfer.setData("text/plain", payload);
+  }
+
   @bind
   edgeOptionStyle(edge) {
     const x = Number(edge.label_x);
@@ -1797,7 +1806,8 @@ export default class WorkflowVisualEditor extends Component {
   }
 
   @action
-  dragStepStart(step) {
+  dragStepStart(step, event) {
+    this.setDragPayload(event, `workflow-step:${step.id}`);
     this.draggedStepId = step.id;
   }
 
@@ -1933,6 +1943,7 @@ export default class WorkflowVisualEditor extends Component {
   @action
   dragConnectorHandleStart(step, side, event) {
     event.stopPropagation();
+    this.setDragPayload(event, `workflow-connector:${step.id}:${side}`);
 
     const targetEdge = this.edgeForTargetHandle(step, side);
     const sourceEdge = this.edgeForSourceHandle(step, side);
@@ -2167,6 +2178,7 @@ export default class WorkflowVisualEditor extends Component {
   @action
   dragOptionStart(stepOption, event) {
     event.stopPropagation();
+    this.setDragPayload(event, `workflow-step-option:${stepOption.id}`);
     this.draggedOptionId = stepOption.id;
   }
 
